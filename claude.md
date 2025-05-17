@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a TypeScript wrapper library for the Creatify AI API, providing easy access to AI Avatar generation, URL-to-Video conversion, and other Creatify services through a clean, type-safe interface.
+This is a TypeScript wrapper library for the Creatify AI API, providing easy access to AI Avatar generation, URL-to-Video conversion, and other Creatify services through a clean, type-safe interface. The library is now fully implemented, documented, and ready for production use.
 
 ## Project Structure
 
@@ -13,31 +13,51 @@ C:\Users\T\Projects\creatify-api\
 │   ├── api/                  # API modules
 │   │   ├── avatar.ts         # AI Avatar API
 │   │   ├── url-to-video.ts   # URL-to-Video API
+│   │   ├── text-to-speech.ts # Text-to-Speech API
+│   │   ├── ai-editing.ts     # AI Editing API
+│   │   ├── custom-templates.ts # Custom Templates API
+│   │   ├── dyoa.ts           # DYOA API
 │   │   └── index.ts          # API modules export
 │   ├── types/                # Type definitions
+│   │   ├── api-client.ts     # API client interfaces
 │   │   └── index.ts          # All types and interfaces
 │   ├── utils/                # Utility classes
 │   │   ├── video-creator.ts  # Simplified video creation
+│   │   ├── audio-processor.ts # Audio processing utilities
+│   │   ├── batch-processor.ts # Batch processing utilities
 │   │   └── index.ts          # Utils exports
+│   ├── client-factory.ts     # Factory for creating API clients
 │   ├── client.ts             # Base API client
 │   └── index.ts              # Main exports
 │
+├── dist/                     # Compiled output (generated)
+│
+├── tests/                    # Test suite
+│   ├── api/                  # Tests for API modules
+│   ├── utils/                # Tests for utility classes
+│   ├── client.test.ts        # Tests for base client
+│   └── mocks/                # Mock data for testing
+│
 ├── examples/                 # Example usage
 │   ├── basic-usage.ts        # Basic API examples
-│   ├── create-avatar-video.ts    # Avatar video creation
-│   ├── create-multi-avatar-conversation.ts  # Multi-avatar example
-│   ├── simplified-video-creation.ts   # Using VideoCreator utility
-│   └── create-video.js       # Command-line script
+│   ├── create-avatar-video.ts # Avatar video creation
+│   └── ...                   # Other examples
 │
-├── dist/                     # Compiled output (generated)
-├── node_modules/             # Dependencies (generated)
+├── .github/                  # GitHub-specific files
+│   └── workflows/            # GitHub Actions workflows
+│       └── ci.yml            # CI/CD configuration
 │
 ├── package.json              # Project configuration
 ├── tsconfig.json             # TypeScript configuration
 ├── tsup.config.ts            # Build configuration
 ├── README.md                 # Documentation
 ├── LICENSE                   # MIT License
+├── CHANGELOG.md              # Version history
+├── CONTRIBUTING.md           # Contribution guidelines
 ├── .gitignore                # Git ignore file
+├── .npmignore                # npm ignore file
+├── .gitattributes            # Git attributes configuration
+├── .npmrc                    # npm configuration
 ├── checkpoint.md             # Progress tracking
 └── claude.md                 # This file
 ```
@@ -48,15 +68,22 @@ C:\Users\T\Projects\creatify-api\
 
 2. **Easy Authentication**: Simple setup with API ID and key from Creatify account.
 
-3. **Modular Design**: Separate modules for different API areas (Avatar, URL-to-Video).
+3. **Modular Design**: Separate modules for different API areas (Avatar, URL-to-Video, etc.).
 
 4. **Error Handling**: Comprehensive error handling with detailed error information.
 
-5. **Documentation**: Full JSDoc comments and README with examples.
+5. **Documentation**: Full JSDoc comments with links to Creatify documentation, README with examples, and contributor guidelines.
 
-6. **Helper Utilities**: VideoCreator utility for simplified video creation.
+6. **Helper Utilities**: 
+   - VideoCreator for simplified video creation
+   - AudioProcessor for text-to-speech operations
+   - BatchProcessor for batch processing of API tasks
 
 7. **Examples**: Sample code showing common use cases.
+
+8. **NPM Ready**: Configured for npm publication with proper package structure and configuration.
+
+9. **CI/CD**: GitHub Actions workflow for continuous integration and deployment.
 
 ## API Modules Implemented
 
@@ -72,8 +99,30 @@ C:\Users\T\Projects\creatify-api\
    - Generate videos from links with various styles
    - Update links and check video generation status
 
-3. **Utilities**: Helper classes for common tasks:
+3. **Text-to-Speech API**: Convert text to natural-sounding speech:
+   - Generate audio from text with various accents
+   - Check audio generation status
+   - List all audio generation tasks
+
+4. **AI Editing API**: Automated video editing:
+   - Submit videos for AI editing
+   - Apply different editing styles
+   - Check editing status and retrieve results
+
+5. **Custom Templates API**: Create videos using custom templates:
+   - Generate videos from templates
+   - Customize template parameters
+   - Check template rendering status
+
+6. **DYOA API**: Design Your Own Avatar:
+   - Create custom avatar descriptions
+   - Review and approve generated avatars
+   - Manage DYOA tasks
+
+7. **Utilities**: Helper classes for common tasks:
    - VideoCreator for simplified video creation
+   - AudioProcessor for text-to-speech operations
+   - BatchProcessor for handling multiple API tasks
    - Avatar and voice search by name
    - Automatic polling for task completion
 
@@ -132,40 +181,87 @@ while (result.status !== 'done' && result.status !== 'error') {
 console.log(`Video URL: ${result.output}`);
 ```
 
-### Command-line script:
+### Creating Multi-Avatar Conversations:
 
-```bash
-node examples/create-video.js your-api-id your-api-key "Hello world!" "John" "English Male"
+```typescript
+import { VideoCreator } from 'creatify-api-ts/utils';
+
+// Initialize the VideoCreator
+const videoCreator = new VideoCreator('your-api-id', 'your-api-key');
+
+// Create a conversation with multiple avatars
+const result = await videoCreator.createConversation({
+  conversation: [
+    {
+      avatarName: 'John',  // Find by name
+      voiceName: 'English Male',
+      text: "Hello! How are you today?"
+    },
+    {
+      avatarName: 'Maria',  // Find by name
+      voiceName: 'English Female',
+      text: "I'm doing well, thank you! How about you?"
+    },
+    {
+      avatarName: 'John',  // Same avatar for continuity
+      voiceName: 'English Male',
+      text: "I'm great! Just demonstrating the Creatify API."
+    }
+  ],
+  backgroundUrl: "https://example.com/my-background.jpg",  // Optional
+  aspectRatio: "16:9"
+});
+
+console.log(`Conversation video created! URL: ${result.url}`);
 ```
 
-## Getting Started
+## Installation
 
-1. Install dependencies and build the library:
-   ```bash
-   cd C:\Users\T\Projects\creatify-api
-   npm install
-   npm run build
-   ```
+The package is available on npm and can be installed with:
 
-2. Try the examples (you'll need to add your Creatify API credentials):
-   ```bash
-   # Use the command-line script for a quick test
-   node examples/create-video.js your-api-id your-api-key "Hello world!"
-   
-   # Or compile and run the TypeScript examples
-   npx tsc examples/simplified-video-creation.ts --esModuleInterop
-   node examples/simplified-video-creation.js
-   ```
+```bash
+npm install creatify-api-ts
+```
 
-3. Reference the README.md for complete documentation and example usage.
+Or using yarn:
+
+```bash
+yarn add creatify-api-ts
+```
 
 ## Development
 
 The project is set up with:
 - TypeScript for type-safe development
 - tsup for simplified building
+- Vitest for testing
 - ESM and CommonJS module output
 - Source maps for debugging
+- GitHub Actions for CI/CD
+
+To build the project:
+
+```bash
+npm run build
+```
+
+To run tests:
+
+```bash
+npm test
+```
+
+To watch for changes during development:
+
+```bash
+npm run dev
+```
+
+## Status
+
+The library is fully implemented, documented, and ready for production use. It is available on GitHub at https://github.com/TSavo/creatify-api-ts and can be installed via npm.
+
+Current version: **1.0.0**
 
 ## Notes
 
