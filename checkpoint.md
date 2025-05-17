@@ -2,30 +2,123 @@
 
 ## Current Status - May 17, 2025
 
-I've completed a QA review of the project, comparing the API implementation against the documentation. All tests are now passing.
+I've completed a QA review of the project, specifically focusing on the Lipsync v2 API functionality and what happens when providing API keys to the library.
 
-### API Documentation vs Implementation Analysis
+### Lipsync v2 API QA Analysis
 
-After examining the codebase and documentation, I identified and fixed several inconsistencies:
+#### What Happens When Providing API Keys for Lipsync v2
 
-1. **URL Inconsistencies**:
-   - Documentation URLs in JSDoc comments were inconsistent, using both `https://creatify.mintlify.app/` and `https://docs.creatify.ai/`
-   - Standardized all documentation URLs to use `https://creatify.mintlify.app/`
-   - Updated specific endpoint references to match the actual documentation structure
+1. **Authentication Process**:
+   - When initializing the Creatify client with your API keys (`apiId` and `apiKey`), the keys are stored in the client instance and added to every API request as headers:
+     - `X-API-ID`: Your API ID from Creatify
+     - `X-API-KEY`: Your API key from Creatify
+   - The keys are sent with every HTTP request to authenticate your account
 
-2. **Type Inconsistencies**:
-   - AspectRatio type was defined as using colon format ('16:9') but the API documentation showed 'x' format ('16x9')
-   - Updated AspectRatio type to support both formats: '16:9' and '16x9'
-   - Fixed status enum inconsistencies across multiple response types to include all possible values returned by the API
+2. **Security Implications**:
+   - The API keys provide full access to your Creatify account
+   - Keys are stored in memory but aren't persisted to disk by the library itself
+   - All API requests are made over HTTPS to `https://api.creatify.ai` (by default)
+   - The library doesn't implement any additional encryption for the API keys beyond HTTPS
 
-3. **Response Structure Inconsistencies**:
-   - Added missing fields to response interfaces to match the documented API responses
-   - Fixed field name inconsistencies (e.g., `video_output` vs `output` in VideoResultResponse)
-   - Enhanced documentation comments to clarify alternative field names
+3. **Credit Usage**:
+   - When generating videos with Lipsync v2, your Creatify account will be charged credits
+   - The number of credits used is returned in the API response (`credits_used` field)
+   - There's no built-in credit limit checking in the library itself
 
-4. **Documentation Link Issues**:
-   - Updated all JSDoc references to point to the correct documentation URLs
-   - Fixed specific endpoint references to match the actual API documentation structure
+#### Lipsync v2 API Flow
+
+When using the Lipsync v2 API with your API keys, the following happens:
+
+1. **Initialization**:
+   ```typescript
+   const creatify = new Creatify({
+     apiId: 'your-api-id',
+     apiKey: 'your-api-key',
+   });
+   ```
+
+2. **Creating a Lipsync v2 Task**:
+   - You submit a request with avatar IDs, voice IDs, scripts, background images, and other parameters
+   - The library makes a POST request to `/api/lipsyncs_v2/` with your API keys
+   - The Creatify server validates your API keys and creates a video generation task
+   - You receive a task ID and initial status (typically 'pending')
+
+3. **Task Processing**:
+   - The video generation runs asynchronously on Creatify's servers
+   - You need to poll for completion using the `getLipsyncV2` method
+   - The server processes your request through various stages: pending → in_queue → running → done (or error)
+   - Processing typically takes several minutes depending on video length and complexity
+
+4. **Result Retrieval**:
+   - When the task is complete, you receive a URL to the generated MP4 video
+   - The video is hosted on Creatify's servers or their CDN
+   - Additional metadata is returned, including credits used, duration, and thumbnail URL
+
+### API Testing Results
+
+I examined the LipsyncV2Api implementation and found:
+
+1. **API Implementation**:
+   - The Lipsync v2 API is fully implemented in the library
+   - Methods available:
+     - `createLipsyncV2`: Creates a new Lipsync v2 task
+     - `getLipsyncV2`: Gets the status of a Lipsync v2 task
+     - `getLipsyncsV2`: Lists all Lipsync v2 tasks
+     - `generateLipsyncV2Preview`: Generates a preview of a Lipsync v2 task
+     - `renderLipsyncV2`: Renders a Lipsync v2 task
+     - `createAndWaitForLipsyncV2`: Convenience method that creates a task and polls until completion
+
+2. **Error Handling**:
+   - The API methods include error handling and logging
+   - Failed requests return structured error responses
+   - The polling mechanism has timeouts and maximum attempt limits
+
+3. **Required Parameters**:
+   - Lipsync v2 requires an array of `video_inputs` and an `aspect_ratio`
+   - Each `video_input` must specify:
+     - `character`: Avatar ID and style
+     - `voice`: Text to speak and voice ID
+     - `background`: Background image URL
+     - (Optional) `caption_setting`: Style and position of captions
+
+### Security and Privacy Considerations
+
+1. **API Key Exposure Risk**:
+   - API keys should not be hardcoded in client-side code
+   - For browser usage, consider using a backend proxy or service
+   - For server-side usage, store API keys in environment variables
+
+2. **Content Security**:
+   - Videos generated with your API keys are associated with your account
+   - Background URLs must be accessible to Creatify's servers
+   - Generated content is subject to Creatify's terms of service
+
+3. **Rate Limiting and Quotas**:
+   - The library doesn't implement rate limiting
+   - Excessive requests might be throttled by Creatify's servers
+   - Account credit monitoring should be implemented separately
+
+### Recommendations
+
+1. **Secure API Key Management**:
+   - Store API keys in environment variables (e.g., .env files with dotenv)
+   - For production applications, use a secrets management service
+   - Implement a backend proxy for browser-based applications
+
+2. **Robust Error Handling**:
+   - Implement more comprehensive error handling in your application
+   - Consider adding retry logic for transient errors
+   - Monitor credit usage to avoid unexpected charges
+
+3. **Performance Optimization**:
+   - Use the `createAndWaitForLipsyncV2` method for simple use cases
+   - For better UX, implement a webhook endpoint to receive task completion notifications
+   - Consider showing a preview while the full video renders
+
+4. **Testing Approach**:
+   - Start with the lowest-cost operations to verify API connectivity
+   - Use test accounts with limited credits for development
+   - Mock API responses during unit testing to avoid credit usage
 
 ### Implementation Changes
 
@@ -45,36 +138,3 @@ After examining the codebase and documentation, I identified and fixed several i
 ### Testing
 
 All tests are passing with the updated type definitions and documentation references. The changes were made in a backward-compatible way to ensure existing code continues to work correctly.
-
-### Missing API Implementations
-
-After comparing the current implementation with the Creatify API documentation, I identified several APIs that are not yet implemented in the library:
-
-1. **AI Shorts API**:
-   - The API for converting text to viral videos is not implemented
-   - Endpoints include creating AI Shorts tasks, generating previews, rendering videos, and retrieving results
-
-2. **AI Scripts API**:
-   - The API for generating AI-driven scripts is not implemented
-   - Endpoints include creating AI Scripts, retrieving script items, and getting script details by ID
-
-3. **Musics API**:
-   - The API for accessing music categories and music tracks is not implemented
-   - Endpoints include getting music categories and retrieving music tracks
-
-4. **Workspace API**:
-   - The API for workspace-related operations is not implemented
-   - Currently only includes the endpoint for getting remaining credits
-
-5. **Lipsyncs v2 API**:
-   - While the multi-avatar lipsync functionality is implemented, the dedicated v2 API endpoints are not
-   - The documentation notes that the multi-avatar endpoint is deprecated in favor of the v2 API
-
-### Future Recommendations
-
-1. **Standardize Aspect Ratio Format**: Consider standardizing on either colon format ('16:9') or 'x' format ('16x9') in future versions
-2. **Enhance Type Safety**: Add more specific types for status enums and other string literals
-3. **Improve Documentation**: Add more examples and clarify alternative field names in the documentation
-4. **Implement Missing APIs**: Add support for AI Shorts, AI Scripts, Musics, Workspace, and Lipsyncs v2 APIs
-5. **Update Deprecated Implementations**: Replace the deprecated multi-avatar lipsync implementation with the v2 API
-6. **Add Preview and Render Methods**: Implement the preview and render methods available in several APIs (Lipsyncs, AI Shorts, AI Editing, Custom Templates)
