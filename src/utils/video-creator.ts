@@ -46,7 +46,7 @@ export class VideoCreator {
     const avatars = await this.creatify.avatar.getAvatars();
     
     for (const avatar of avatars) {
-      this.avatarCache[avatar.avatar_id] = avatar;
+      this.avatarCache[avatar.id] = avatar;
     }
     
     this.avatarsLoaded = true;

@@ -27,10 +27,30 @@ export class TextToSpeechApi extends CreatifyApiClient {
 
   /**
    * Get all text-to-speech tasks
+   * @param page Page number (starts from 1)
+   * @param limit Number of items per page 
    * @returns Promise resolving to an array of text-to-speech tasks
    */
-  async getTextToSpeechList(): Promise<TextToSpeech.TextToSpeechResultResponse[]> {
-    return this.get<TextToSpeech.TextToSpeechResultResponse[]>('/api/text_to_speech/');
+  async getTextToSpeechList(page?: number, limit?: number): Promise<TextToSpeech.TextToSpeechResultResponse[]> {
+    return this.get<TextToSpeech.TextToSpeechResultResponse[]>('/api/text_to_speech/', { page, limit });
+  }
+
+  /**
+   * Get paginated list of text-to-speech tasks
+   * @param page Page number (starts from 1)
+   * @param limit Number of items per page
+   * @returns Promise resolving to paginated text-to-speech data
+   */
+  async getTextToSpeechPaginated(
+    page: number = 1,
+    limit: number = 20
+  ): Promise<{
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: TextToSpeech.TextToSpeechResultResponse[];
+  }> {
+    return this.get('/api/text_to_speech/paginated/', { page, limit });
   }
 
   /**

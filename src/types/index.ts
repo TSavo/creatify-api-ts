@@ -63,33 +63,119 @@ export type AspectRatio = '1:1' | '16:9' | '9:16' | '4:3' | '3:4';
  */
 export namespace Avatar {
   /**
-   * Avatar information
+   * Avatar information as returned by the /api/personas/ endpoint
+   * @see https://creatify.mintlify.app/api-reference/personas/get-apipersonas
    */
   export interface AvatarInfo {
     /**
      * Unique identifier for the avatar
      */
-    avatar_id: string;
+    id: string;
     
     /**
-     * Display name of the avatar
+     * Creation timestamp
      */
-    name: string;
+    created_at: string;
     
     /**
-     * URL to avatar preview image
+     * Last update timestamp
      */
-    preview_url: string;
+    updated_at: string;
     
     /**
-     * Avatar style (e.g., "normal", "casual")
+     * Gender of the avatar (m = male, f = female, nb = non binary)
      */
-    style: string;
+    gender: 'm' | 'f' | 'nb';
     
     /**
-     * Additional tags for the avatar
+     * Age range of the avatar (child, teen, adult, senior)
      */
-    tags: string[];
+    age_range: 'child' | 'teen' | 'adult' | 'senior';
+    
+    /**
+     * Location type (outdoor, fantasy, indoor, other)
+     */
+    location: 'outdoor' | 'fantasy' | 'indoor' | 'other';
+    
+    /**
+     * Style (selfie, presenter, other)
+     */
+    style: 'selfie' | 'presenter' | 'other';
+    
+    /**
+     * Name of the creator
+     */
+    creator_name: string;
+    
+    /**
+     * Video scene description
+     */
+    video_scene: string;
+    
+    /**
+     * Keywords associated with the avatar
+     */
+    keywords: string;
+    
+    /**
+     * Preview image URL for 16:9 aspect ratio
+     */
+    preview_image_16_9: string;
+    
+    /**
+     * Preview image URL for 1:1 aspect ratio
+     */
+    preview_image_1_1: string;
+    
+    /**
+     * Preview image URL for 9:16 aspect ratio
+     */
+    preview_image_9_16: string;
+    
+    /**
+     * Preview video URL for 16:9 aspect ratio
+     */
+    preview_video_16_9: string;
+    
+    /**
+     * Preview video URL for 1:1 aspect ratio
+     */
+    preview_video_1_1: string;
+    
+    /**
+     * Preview video URL for 9:16 aspect ratio
+     */
+    preview_video_9_16: string;
+    
+    /**
+     * Landscape preview video URL (legacy)
+     */
+    landscape_preview_video: string;
+    
+    /**
+     * Squared preview video URL (legacy)
+     */
+    squared_preview_video: string;
+    
+    /**
+     * Whether the avatar is active
+     */
+    is_active: boolean;
+    
+    /**
+     * Processing status
+     */
+    process_status: string;
+    
+    /**
+     * Reason for failure if any
+     */
+    failed_reason: string;
+    
+    /**
+     * Avatar type
+     */
+    type: string;
   }
 
   /**
@@ -119,6 +205,7 @@ export namespace Avatar {
 
   /**
    * Parameters for creating a lipsync video
+   * @see https://creatify.mintlify.app/api-reference/lipsyncs/post-apilipsyncs
    */
   export interface LipsyncParams {
     /**
@@ -133,23 +220,45 @@ export namespace Avatar {
     
     /**
      * Aspect ratio of the generated video
+     * Available options: "1:1", "16:9", "9:16"
      */
     aspect_ratio?: AspectRatio;
     
     /**
      * Voice ID to use (optional)
+     * If not provided, the system will use a default voice
      */
     voice_id?: string;
     
     /**
      * Background image URL (optional)
+     * If provided, this image will be used as the background
      */
     background_url?: string;
     
     /**
+     * Background color (optional)
+     * CSS color value like "#FF0000" or "rgb(255,0,0)"
+     */
+    background_color?: string;
+    
+    /**
+     * Output in transparent format (optional)
+     * If true, the output video will have transparent background (for compositing)
+     */
+    transparent?: boolean;
+    
+    /**
      * Webhook URL to be called when the video is ready (optional)
+     * The system will POST to this URL when processing is complete
      */
     webhook_url?: string;
+    
+    /**
+     * Custom metadata for tracking (optional)
+     * This data will be returned in webhook calls
+     */
+    metadata?: Record<string, any>;
   }
 
   /**
@@ -296,16 +405,38 @@ export namespace Avatar {
 
 /**
  * URL-to-Video API types
+ * @see https://creatify.mintlify.app/api-reference/link-to-video
  */
 export namespace UrlToVideo {
   /**
    * Parameters for creating a link
+   * @see https://creatify.mintlify.app/api-reference/link-to-video
    */
   export interface LinkParams {
     /**
      * URL to extract content from
      */
     url: string;
+  }
+
+  /**
+   * Response when creating a link
+   */
+  export interface LinkResponse {
+    /**
+     * Unique identifier for the link
+     */
+    id: string;
+    
+    /**
+     * Original URL
+     */
+    url: string;
+    
+    /**
+     * Link data object
+     */
+    link: LinkData;
   }
 
   /**
@@ -345,6 +476,7 @@ export namespace UrlToVideo {
 
   /**
    * Link data returned by the API
+   * @see https://creatify.mintlify.app/api-reference/link-to-video
    */
   export interface LinkData {
     /**
@@ -386,101 +518,22 @@ export namespace UrlToVideo {
      * URL of the logo extracted from the URL
      */
     logo_url?: string;
-    
-    /**
-     * AI-generated summary of the content
-     */
-    ai_summary?: string;
-    
-    /**
-     * AI-generated target audiences for the content
-     */
-    ai_target_audiences?: any;
   }
-
-  /**
-   * Response when creating a link
-   */
-  export interface LinkResponse extends ApiResponse {
-    /**
-     * Unique identifier for the link
-     */
-    id: string;
-    
-    /**
-     * Original URL
-     */
-    url: string;
-    
-    /**
-     * Link data
-     */
-    link: LinkData;
-    
-    /**
-     * Credits used for this operation
-     */
-    credits_used: number;
-  }
-
-  /**
-   * Script styles for video generation
-   */
-  export type ScriptStyle = 
-    'DontWorryWriter' | 
-    'CreativeWriter' | 
-    'EnthusiasticWriter' | 
-    'EcommerceSalesWriter' | 
-    'MinimalistWriter';
-
-  /**
-   * Visual styles for video generation
-   */
-  export type VisualStyle = 
-    'DynamicProductTemplate' | 
-    'SimpleCleanTemplate' | 
-    'MotionGraphicsTemplate' | 
-    'EcommerceShowcaseTemplate' | 
-    'ModernMinimalistTemplate';
 
   /**
    * Parameters for creating a video from a link
+   * @see https://creatify.mintlify.app/api-reference/link_to_videos/post-apilink_to_videos
    */
   export interface VideoFromLinkParams {
     /**
-     * Link ID to use for the video
+     * ID of the link to create a video from
      */
     link: string;
     
     /**
-     * Visual style to use for the video
+     * Optional name for the video
      */
-    visual_style: VisualStyle;
-    
-    /**
-     * Script style to use for the video
-     */
-    script_style: ScriptStyle;
-    
-    /**
-     * Aspect ratio of the generated video
-     */
-    aspect_ratio: AspectRatio;
-    
-    /**
-     * Video length in seconds
-     */
-    video_length?: number;
-    
-    /**
-     * Language to use for the video
-     */
-    language?: string;
-    
-    /**
-     * Target audience for the video
-     */
-    target_audience?: string;
+    name?: string;
     
     /**
      * Target platform for the video (e.g., "Tiktok", "Instagram")
@@ -488,58 +541,260 @@ export namespace UrlToVideo {
     target_platform?: string;
     
     /**
-     * Webhook URL to be called when the video is ready (optional)
+     * Target audience description
+     */
+    target_audience?: string;
+    
+    /**
+     * Language code for the video (e.g., "en", "es", "fr", "de", "ar")
+     */
+    language?: string;
+    
+    /**
+     * Length of the video in seconds (default: 15)
+     */
+    video_length?: number;
+    
+    /**
+     * Aspect ratio of the video (e.g., "16x9", "9x16", "1x1")
+     */
+    aspect_ratio?: string;
+    
+    /**
+     * Script style to use for generating the video script
+     */
+    script_style?: string;
+    
+    /**
+     * Visual style to use for generating the video
+     */
+    visual_style?: string;
+    
+    /**
+     * Override the avatar with a specific avatar ID
+     */
+    override_avatar?: string;
+    
+    /**
+     * Override the voice with a specific voice ID
+     */
+    override_voice?: string;
+    
+    /**
+     * Override the auto-generated script with a custom script
+     */
+    override_script?: string;
+    
+    /**
+     * URL to a background music track
+     */
+    background_music_url?: string;
+    
+    /**
+     * Volume level for background music (0.0 - 1.0)
+     */
+    background_music_volume?: number;
+    
+    /**
+     * Volume level for voiceover (0.0 - 1.0)
+     */
+    voiceover_volume?: number;
+    
+    /**
+     * Webhook URL to be called when the video is ready
      */
     webhook_url?: string;
+    
+    /**
+     * Disable background music if true
+     */
+    no_background_music?: boolean;
+    
+    /**
+     * Disable captions if true
+     */
+    no_caption?: boolean;
+    
+    /**
+     * Disable emotional expressions if true
+     */
+    no_emotion?: boolean;
+    
+    /**
+     * Disable call-to-action if true
+     */
+    no_cta?: boolean;
+    
+    /**
+     * Disable stock b-roll footage if true
+     */
+    no_stock_broll?: boolean;
+    
+    /**
+     * Caption style (e.g., "normal-black")
+     */
+    caption_style?: string;
+    
+    /**
+     * Caption horizontal offset
+     */
+    caption_offset_x?: string | number;
+    
+    /**
+     * Caption vertical offset
+     */
+    caption_offset_y?: string | number;
+    
+    /**
+     * Detailed caption settings
+     */
+    caption_setting?: {
+      /**
+       * Caption style
+       */
+      style?: string;
+      
+      /**
+       * Caption position offset
+       */
+      offset?: {
+        x: number;
+        y: number;
+      };
+      
+      /**
+       * Font family
+       */
+      font_family?: string;
+      
+      /**
+       * Font size
+       */
+      font_size?: number;
+      
+      /**
+       * Font style
+       */
+      font_style?: string;
+      
+      /**
+       * Background color
+       */
+      background_color?: string;
+      
+      /**
+       * Text color
+       */
+      text_color?: string;
+      
+      /**
+       * Highlight text color
+       */
+      highlight_text_color?: string;
+      
+      /**
+       * Maximum width
+       */
+      max_width?: number;
+      
+      /**
+       * Line height
+       */
+      line_height?: number;
+      
+      /**
+       * Text shadow
+       */
+      text_shadow?: string;
+      
+      /**
+       * Hide captions if true
+       */
+      hidden?: boolean;
+    };
   }
-
+  
   /**
    * Response when creating a video from a link
+   * @see https://creatify.mintlify.app/api-reference/link_to_videos/post-apilink_to_videos
    */
-  export interface VideoResponse extends ApiResponse {
+  export interface VideoResponse {
     /**
-     * Unique identifier for the video
+     * ID of the created video task
      */
     id: string;
     
     /**
-     * Status of the video generation
+     * Status of the video task
      */
-    status: 'pending' | 'processing' | 'done' | 'error';
+    status: 'pending' | 'in_queue' | 'running' | 'failed' | 'done';
+    
+    /**
+     * Link ID used to create the video
+     */
+    link: string;
+    
+    /**
+     * Media job ID
+     */
+    media_job: string;
+    
+    /**
+     * Reason for failure if the task failed
+     */
+    failed_reason?: string;
+    
+    /**
+     * Other parameters match the input parameters
+     */
+    [key: string]: any;
   }
-
+  
   /**
    * Response when getting a video result
+   * @see https://creatify.mintlify.app/api-reference/link_to_videos/get-apilink_to_videos-
    */
   export interface VideoResultResponse extends VideoResponse {
     /**
-     * Output URL of the generated video (only available when status is 'done')
+     * URL of the generated video (only available when status is 'done')
      */
-    output?: string;
+    video_output?: string;
     
     /**
-     * Error message if the task failed
+     * URL of the video thumbnail
      */
-    error_message?: string;
+    video_thumbnail?: string;
+    
+    /**
+     * Number of credits used for this video
+     */
+    credits_used?: number;
+    
+    /**
+     * Progress indication (e.g., percentage)
+     */
+    progress?: string;
     
     /**
      * Created timestamp
      */
-    created_at: string;
+    created_at?: string;
     
     /**
      * Updated timestamp
      */
-    updated_at: string;
+    updated_at?: string;
   }
 }
 
 /**
  * Text to Speech API types
+ * @see https://creatify.mintlify.app/api-reference/text-to-speech
  */
 export namespace TextToSpeech {
   /**
    * Parameters for creating a text-to-speech task
+   * @see https://creatify.mintlify.app/api-reference/text-to-speech/post-text-to-speech
    */
   export interface TextToSpeechParams {
     /**
@@ -549,11 +804,13 @@ export namespace TextToSpeech {
     
     /**
      * Accent/voice ID to use for the speech
+     * You can get the accent id by calling the Get voices endpoint
      */
     accent: string;
     
     /**
      * Webhook URL to be called when the audio is ready (optional)
+     * The system will POST to this URL when processing is complete
      */
     webhook_url?: string;
   }
@@ -561,7 +818,7 @@ export namespace TextToSpeech {
   /**
    * Response when creating a text-to-speech task
    */
-  export interface TextToSpeechResponse extends ApiResponse {
+  export interface TextToSpeechResponse {
     /**
      * ID of the created text-to-speech task
      */
@@ -570,22 +827,48 @@ export namespace TextToSpeech {
     /**
      * Status of the text-to-speech task
      */
-    status: 'pending' | 'processing' | 'done' | 'error';
+    status: 'pending' | 'in_queue' | 'running' | 'failed' | 'done' | 'error';
+    
+    /**
+     * The script that was submitted
+     */
+    script: string;
+    
+    /**
+     * The accent/voice ID that was used
+     */
+    accent: string;
+    
+    /**
+     * The webhook URL that was provided (if any)
+     */
+    webhook_url?: string;
+    
+    /**
+     * Media job ID
+     */
+    media_job?: string;
+    
+    /**
+     * Whether the TTS task is hidden
+     */
+    is_hidden?: boolean;
+    
+    /**
+     * Reason for failure if the task failed
+     */
+    failed_reason?: string;
   }
 
   /**
    * Response when getting a text-to-speech task
+   * @see https://creatify.mintlify.app/api-reference/text-to-speech/get-text-to-speech-
    */
   export interface TextToSpeechResultResponse extends TextToSpeechResponse {
     /**
      * Output URL of the generated audio (only available when status is 'done')
      */
     output?: string;
-    
-    /**
-     * Error message if the task failed
-     */
-    error_message?: string;
     
     /**
      * Created timestamp
