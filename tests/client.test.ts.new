@@ -6,122 +6,122 @@ import { mockErrorResponse } from './mocks/api-responses';
 describe('CreatifyApiClient', () => {
   let client: ICreatifyApiClient;
   let mockClient: MockCreatifyApiClient;
-
+  
   beforeEach(() => {
     // Create a client using the mock factory
     client = mockApiClientFactory.createClient({
       apiId: 'test-api-id',
       apiKey: 'test-api-key'
     });
-
+    
     // Get the mock client that was created
     mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;
-
+    
     // Reset mock history
     mockClient.reset();
   });
-
+  
   it('should initialize with API credentials', () => {
     expect(client).toBeDefined();
   });
-
+  
   it('should make a GET request with correct endpoint', async () => {
     // Setup mock response
     mockClient.get.mockResolvedValueOnce({ data: 'test' });
-
+    
     // Make the request
     const response = await client.get('/test-endpoint');
-
+    
     // Verify the endpoint was called correctly
-    expect(mockClient.get).toHaveBeenCalledWith('/test-endpoint');
+    expect(mockClient.get).toHaveBeenCalledWith('/test-endpoint', undefined, undefined);
     expect(response).toEqual({ data: 'test' });
   });
-
+  
   it('should make a POST request with correct endpoint and body', async () => {
     // Setup mock data
     const mockData = { success: true };
     const requestBody = { param1: 'value1', param2: 'value2' };
-
+    
     // Setup mock response
     mockClient.post.mockResolvedValueOnce(mockData);
-
+    
     // Make the request
     const response = await client.post('/test-endpoint', requestBody);
-
+    
     // Verify the endpoint and body were passed correctly
-    expect(mockClient.post).toHaveBeenCalledWith('/test-endpoint', requestBody);
+    expect(mockClient.post).toHaveBeenCalledWith('/test-endpoint', requestBody, undefined);
     expect(response).toEqual(mockData);
   });
-
+  
   it('should make a PUT request with correct endpoint and body', async () => {
     // Setup mock data
     const mockData = { success: true };
     const requestBody = { param1: 'value1', param2: 'value2' };
-
+    
     // Setup mock response
     mockClient.put.mockResolvedValueOnce(mockData);
-
+    
     // Make the request
     const response = await client.put('/test-endpoint', requestBody);
-
+    
     // Verify the endpoint and body were passed correctly
-    expect(mockClient.put).toHaveBeenCalledWith('/test-endpoint', requestBody);
+    expect(mockClient.put).toHaveBeenCalledWith('/test-endpoint', requestBody, undefined);
     expect(response).toEqual(mockData);
   });
-
+  
   it('should make a DELETE request with correct endpoint', async () => {
     // Setup mock data
     const mockData = { success: true };
-
+    
     // Setup mock response
     mockClient.delete.mockResolvedValueOnce(mockData);
-
+    
     // Make the request
     const response = await client.delete('/test-endpoint');
-
+    
     // Verify the endpoint was called correctly
-    expect(mockClient.delete).toHaveBeenCalledWith('/test-endpoint');
+    expect(mockClient.delete).toHaveBeenCalledWith('/test-endpoint', undefined, undefined);
     expect(response).toEqual(mockData);
   });
-
+  
   it('should handle API errors with appropriate error message', async () => {
     // Setup mock error response
     mockClient.get.mockRejectedValueOnce(mockErrorResponse);
-
+    
     // Make the request and expect it to throw
     await expect(client.get('/test-endpoint')).rejects.toEqual(mockErrorResponse);
   });
-
+  
   it('should handle network errors', async () => {
     // Setup mock network error
     const networkError = new Error('Network error');
     mockClient.get.mockRejectedValueOnce(networkError);
-
+    
     // Make the request and expect it to throw
     await expect(client.get('/test-endpoint')).rejects.toThrow('Network error');
   });
-
+  
   it('should pass query parameters correctly', async () => {
     // Setup mock response
     mockClient.get.mockResolvedValueOnce({ data: 'test' });
-
+    
     // Make the request with query parameters
     const params = { page: 1, limit: 10 };
     await client.get('/test-endpoint', params);
-
+    
     // Verify parameters were passed correctly
-    expect(mockClient.get).toHaveBeenCalledWith('/test-endpoint', params);
+    expect(mockClient.get).toHaveBeenCalledWith('/test-endpoint', params, undefined);
   });
-
+  
   it('should pass request config correctly', async () => {
     // Setup mock response
     mockClient.post.mockResolvedValueOnce({ data: 'test' });
-
+    
     // Make the request with custom config
     const data = { test: 'value' };
     const config = { headers: { 'Custom-Header': 'value' } };
     await client.post('/test-endpoint', data, config);
-
+    
     // Verify config was passed correctly
     expect(mockClient.post).toHaveBeenCalledWith('/test-endpoint', data, config);
   });

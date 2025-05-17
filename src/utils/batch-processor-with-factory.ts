@@ -1,6 +1,19 @@
+
+
 import { Creatify } from '../index';
 import { CreatifyApiOptions } from '../types';
+import { ICreatifyApiClientFactory } from '../types/api-client';
 import { apiClientFactory } from '../client-factory';
+import {
+  AvatarApi,
+  TextToSpeechApi,
+  AiEditingApi,
+  AiShortsApi,
+  AiScriptsApi,
+  MusicsApi,
+  WorkspaceApi,
+  LipsyncV2Api
+} from '../api';
 
 /**
  * Batch processing options
@@ -54,7 +67,7 @@ export interface BatchResult<T> {
 /**
  * Utility class for processing multiple API tasks in batch
  */
-export class BatchProcessor {
+export class BatchProcessorWithFactory {
   private api: Creatify;
 
   /**
@@ -65,15 +78,25 @@ export class BatchProcessor {
    */
   constructor(
     apiIdOrOptions: string | CreatifyApiOptions,
-    apiKey?: string,
-    clientFactory = apiClientFactory
+    apiKey?: string | ICreatifyApiClientFactory,
+    clientFactory: ICreatifyApiClientFactory = apiClientFactory
   ) {
     // Handle different constructor argument formats
     const options: CreatifyApiOptions = typeof apiIdOrOptions === 'string'
-      ? { apiId: apiIdOrOptions, apiKey: apiKey! }
+      ? { apiId: apiIdOrOptions, apiKey: apiKey as string }
       : apiIdOrOptions;
 
     this.api = new Creatify(options);
+
+    // Initialize API modules with the client factory
+    this.api.avatar = new AvatarApi(options, clientFactory);
+    this.api.textToSpeech = new TextToSpeechApi(options, clientFactory);
+    this.api.aiEditing = new AiEditingApi(options, clientFactory);
+    this.api.aiShorts = new AiShortsApi(options, clientFactory);
+    this.api.aiScripts = new AiScriptsApi(options, clientFactory);
+    this.api.musics = new MusicsApi(options, clientFactory);
+    this.api.workspace = new WorkspaceApi(options, clientFactory);
+    this.api.lipsyncV2 = new LipsyncV2Api(options, clientFactory);
   }
 
   /**
@@ -244,6 +267,27 @@ export class BatchProcessor {
   }
 
   /**
+   * Create and wait for a lipsync task to complete
+   */
+  async createAndWaitForLipsync(params: any, pollingInterval = 2000) {
+    return this.api.avatar.createAndWaitForLipsync(params, pollingInterval);
+  }
+
+  /**
+   * Create and wait for a text-to-speech task to complete
+   */
+  async createAndWaitForTextToSpeech(params: any, pollingInterval = 2000) {
+    return this.api.textToSpeech.createAndWaitForTextToSpeech(params, pollingInterval);
+  }
+
+  /**
+   * Create and wait for an AI editing task to complete
+   */
+  async createAndWaitForAiEditing(params: any, pollingInterval = 2000) {
+    return this.api.aiEditing.createAndWaitForAiEditing(params, pollingInterval);
+  }
+
+  /**
    * Process an array of AI Shorts tasks in batch
    * @param aiShortsTasks Array of AI Shorts tasks with prompt and aspectRatio
    * @param options Batch processing options
@@ -313,5 +357,26 @@ export class BatchProcessor {
     });
 
     return this.processBatch(tasks, options);
+  }
+
+  /**
+   * Create and wait for an AI Shorts task to complete
+   */
+  async createAndWaitForAiShorts(params: any, pollingInterval = 2000) {
+    return this.api.aiShorts.createAndWaitForAiShorts(params, pollingInterval);
+  }
+
+  /**
+   * Create and wait for an AI Script task to complete
+   */
+  async createAndWaitForAiScript(params: any, pollingInterval = 2000) {
+    return this.api.aiScripts.createAndWaitForAiScript(params, pollingInterval);
+  }
+
+  /**
+   * Create and wait for a Lipsync v2 task to complete
+   */
+  async createAndWaitForLipsyncV2(params: any, pollingInterval = 2000) {
+    return this.api.lipsyncV2.createAndWaitForLipsyncV2(params, pollingInterval);
   }
 }

@@ -34,12 +34,12 @@ export class AvatarApi {
   }): Promise<Avatar.AvatarInfo[]> {
     try {
       const avatars = await this.client.get<Avatar.AvatarInfo[]>('/api/personas/', filters);
-      
+
       // Ensure avatars is an array
       if (!Array.isArray(avatars)) {
         return [];
       }
-      
+
       // Add avatar_id property for backward compatibility
       return avatars.map(avatar => ({
         ...avatar,
@@ -84,17 +84,17 @@ export class AvatarApi {
   /**
    * Get a list of all available voices
    * @returns Promise resolving to an array of voice information
-   * @see https://docs.creatify.ai/api-reference/voices/get-apivoices
+   * @see https://creatify.mintlify.app/api-reference/voices/get-apivoices
    */
   async getVoices(): Promise<Avatar.VoiceInfo[]> {
     try {
       const voices = await this.client.get<Avatar.VoiceInfo[]>('/api/voices/');
-      
+
       // Ensure voices is an array
       if (!Array.isArray(voices)) {
         return [];
       }
-      
+
       return voices;
     } catch (error) {
       console.error('Error fetching voices:', error);
@@ -183,11 +183,11 @@ export class AvatarApi {
   ): Promise<Avatar.LipsyncResultResponse> {
     // Create the lipsync task
     const response = await this.createLipsync(params);
-    
+
     // Poll for completion
     let attempts = 0;
     let result = await this.getLipsync(response.id);
-    
+
     while (
       attempts < maxAttempts &&
       result.status !== 'done' &&
@@ -195,17 +195,17 @@ export class AvatarApi {
     ) {
       // Wait for the specified interval
       await new Promise(resolve => setTimeout(resolve, pollInterval));
-      
+
       // Check the status again
       result = await this.getLipsync(response.id);
       attempts++;
     }
-    
+
     // Check if we reached max attempts without completion
     if (attempts >= maxAttempts && result.status !== 'done' && result.status !== 'error') {
       throw new Error(`Lipsync task ${response.id} did not complete within the timeout period`);
     }
-    
+
     return result;
   }
 }

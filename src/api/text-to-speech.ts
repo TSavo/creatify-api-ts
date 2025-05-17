@@ -5,7 +5,7 @@ import { apiClientFactory } from '../client-factory';
 
 /**
  * Client for interacting with the Creatify Text-to-Speech API
- * @see https://docs.creatify.ai/api-reference/text-to-speech
+ * @see https://creatify.mintlify.app/api-reference/text-to-speech
  */
 export class TextToSpeechApi {
   private client: ICreatifyApiClient;
@@ -25,7 +25,7 @@ export class TextToSpeechApi {
    * Create a text-to-speech task to convert text into an audio file
    * @param params Parameters for the text-to-speech generation
    * @returns Promise resolving to the text-to-speech task response
-   * @see https://docs.creatify.ai/api-reference/text-to-speech
+   * @see https://creatify.mintlify.app/api-reference/text-to-speech/post-text-to-speech
    */
   async createTextToSpeech(
     params: TextToSpeech.TextToSpeechParams
@@ -37,7 +37,7 @@ export class TextToSpeechApi {
    * Get the status and result of a text-to-speech task
    * @param id ID of the text-to-speech task
    * @returns Promise resolving to the text-to-speech task status and result
-   * @see https://docs.creatify.ai/api-reference/text-to-speech
+   * @see https://creatify.mintlify.app/api-reference/text-to-speech/get-text-to-speech-
    */
   async getTextToSpeech(id: string): Promise<TextToSpeech.TextToSpeechResultResponse> {
     return this.client.get<TextToSpeech.TextToSpeechResultResponse>(`/api/text_to_speech/${id}/`);
@@ -46,9 +46,9 @@ export class TextToSpeechApi {
   /**
    * Get all text-to-speech tasks
    * @param page Page number (starts from 1)
-   * @param limit Number of items per page 
+   * @param limit Number of items per page
    * @returns Promise resolving to an array of text-to-speech tasks
-   * @see https://docs.creatify.ai/api-reference/text-to-speech
+   * @see https://creatify.mintlify.app/api-reference/text-to-speech/get-text-to-speech
    */
   async getTextToSpeechList(page?: number, limit?: number): Promise<TextToSpeech.TextToSpeechResultResponse[]> {
     return this.client.get<TextToSpeech.TextToSpeechResultResponse[]>('/api/text_to_speech/', { page, limit });
@@ -59,7 +59,7 @@ export class TextToSpeechApi {
    * @param page Page number (starts from 1)
    * @param limit Number of items per page
    * @returns Promise resolving to paginated text-to-speech data
-   * @see https://docs.creatify.ai/api-reference/text-to-speech
+   * @see https://creatify.mintlify.app/api-reference/text-to-speech/get-text-to-speech
    */
   async getTextToSpeechPaginated(
     page: number = 1,
@@ -87,11 +87,11 @@ export class TextToSpeechApi {
   ): Promise<TextToSpeech.TextToSpeechResultResponse> {
     // Create the text-to-speech task
     const response = await this.createTextToSpeech(params);
-    
+
     // Poll for completion
     let attempts = 0;
     let result = await this.getTextToSpeech(response.id);
-    
+
     while (
       attempts < maxAttempts &&
       result.status !== 'done' &&
@@ -99,17 +99,17 @@ export class TextToSpeechApi {
     ) {
       // Wait for the specified interval
       await new Promise(resolve => setTimeout(resolve, pollInterval));
-      
+
       // Check the status again
       result = await this.getTextToSpeech(response.id);
       attempts++;
     }
-    
+
     // Check if we reached max attempts without completion
     if (attempts >= maxAttempts && result.status !== 'done' && result.status !== 'error') {
       throw new Error(`Text-to-speech task ${response.id} did not complete within the timeout period`);
     }
-    
+
     return result;
   }
 }

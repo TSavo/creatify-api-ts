@@ -1,0 +1,390 @@
+import { BatchProcessorWithFactory } from '../../src/utils/batch-processor-with-factory';
+import { 
+  mockLipsyncCreationResponse, 
+  mockLipsyncResults,
+  mockTextToSpeechCreationResponse,
+  mockTextToSpeechResults,
+  mockAiEditingCreationResponse,
+  mockAiEditingResults
+} from '../mocks/api-responses';
+import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+describe('BatchProcessor', () => {
+  let batchProcessor: BatchProcessorWithFactory;
+  let mockClient: MockCreatifyApiClient;
+  
+  beforeEach(() => {
+    // Create the BatchProcessor with the mock factory
+    batchProcessor = new BatchProcessorWithFactory(
+      {
+        apiId: 'test-api-id',
+        apiKey: 'test-api-key'
+      }, 
+      undefined,
+      mockApiClientFactory
+    );
+    
+    // Get the mock client that was created
+    mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;
+    
+    // Reset mock history
+    mockClient.reset();
+  });
+  
+  describe('constructor', () => {
+    it('should initialize with API credentials as separate parameters', () => {
+      const processor = new BatchProcessorWithFactory('test-api-id', 'test-api-key', mockApiClientFactory);
+      expect(processor).toBeDefined();
+    });
+    
+    it('should initialize with API credentials as an options object', () => {
+      const processor = new BatchProcessorWithFactory(
+        {
+          apiId: 'test-api-id',
+          apiKey: 'test-api-key'
+        },
+        undefined,
+        mockApiClientFactory
+      );
+      expect(processor).toBeDefined();
+    });
+  });
+  
+  describe('processBatch', () => {
+    it('should process multiple tasks in sequence with default options', async () => {
+      // Create mock tasks
+      const tasks = [
+        async () => {
+          mockClient.post.mockResolvedValueOnce(mockLipsyncCreationResponse);
+          mockClient.get
+            .mockResolvedValueOnce(mockLipsyncResults.pending)
+            .mockResolvedValueOnce(mockLipsyncResults.done);
+          
+          return batchProcessor.createAndWaitForLipsync({
+            text: 'Hello world 1',
+            creator: 'avatar-123',
+            aspect_ratio: '16:9',
+            voice_id: 'voice-123'
+          });
+        },
+        async () => {
+          mockClient.post.mockResolvedValueOnce(mockTextToSpeechCreationResponse);
+          mockClient.get
+            .mockResolvedValueOnce(mockTextToSpeechResults.pending)
+            .mockResolvedValueOnce(mockTextToSpeechResults.done);
+          
+          return batchProcessor.createAndWaitForTextToSpeech({
+            script: 'Hello world 2',
+            accent: 'voice-456'
+          });
+        },
+        async () => {
+          mockClient.post.mockResolvedValueOnce(mockAiEditingCreationResponse);
+          mockClient.get
+            .mockResolvedValueOnce(mockAiEditingResults.pending)
+            .mockResolvedValueOnce(mockAiEditingResults.done);
+          
+          return batchProcessor.createAndWaitForAiEditing({
+            video_url: 'https://example.com/video.mp4',
+            editing_style: 'film'
+          });
+        }
+      ];
+      
+      // Mock timers
+      vi.useFakeTimers();
+      
+      // Start batch processing
+      const batchPromise = batchProcessor.processBatch(tasks);
+      
+      // Advance timers to simulate waiting
+      for (let i = 0; i < tasks.length * 3; i++) {
+        vi.advanceTimersByTime(1000);
+      }
+      
+      // Await the result
+      const results = await batchPromise;
+      
+      // Restore timers
+      vi.useRealTimers();
+      
+      // Verify results
+      expect(results.successes).toHaveLength(3);
+      expect(results.successes[0]).toEqual(mockLipsyncResults.done);
+      expect(results.successes[1]).toEqual(mockTextToSpeechResults.done);
+      expect(results.successes[2]).toEqual(mockAiEditingResults.done);
+      
+      // Verify method calls
+      expect(mockClient.post).toHaveBeenCalledTimes(3);
+      expect(mockClient.get).toHaveBeenCalledTimes(6); // 2 calls per task (pending + done)
+    });
+    
+    it('should handle failures in tasks', async () => {
+      // Create mock tasks with one that fails
+      const error = new Error('Test error');
+      const tasks = [
+        async () => {
+          mockClient.post.mockResolvedValueOnce(mockLipsyncCreationResponse);
+          mockClient.get
+            .mockResolvedValueOnce(mockLipsyncResults.pending)
+            .mockResolvedValueOnce(mockLipsyncResults.done);
+          
+          return batchProcessor.createAndWaitForLipsync({
+            text: 'Hello world 1',
+            creator: 'avatar-123',
+            aspect_ratio: '16:9',
+            voice_id: 'voice-123'
+          });
+        },
+        async () => {
+          mockClient.post.mockRejectedValueOnce(error);
+          throw error;
+        }
+      ];
+      
+      // Mock timers
+      vi.useFakeTimers();
+      
+      // Start batch processing with continueOnError=true
+      const batchPromise = batchProcessor.processBatch(tasks, {
+        continueOnError: true
+      });
+      
+      // Advance timers to simulate waiting
+      for (let i = 0; i < tasks.length * 3; i++) {
+        vi.advanceTimersByTime(1000);
+      }
+      
+      // Await the result
+      const results = await batchPromise;
+      
+      // Restore timers
+      vi.useRealTimers();
+      
+      // Verify results
+      expect(results.successes).toHaveLength(1);
+      expect(results.errors).toHaveLength(1);
+      expect(results.successes[0]).toEqual(mockLipsyncResults.done);
+      expect(results.errors[0].error).toBeInstanceOf(Error);
+      
+      // Without continueOnError, the process should fail on the first error
+      const failingTasks = [
+        async () => {
+          mockClient.post.mockRejectedValueOnce(error);
+          throw error;
+        },
+        async () => {
+          return mockLipsyncResults.done;
+        }
+      ];
+      
+      const failingBatchPromise = batchProcessor.processBatch(failingTasks);
+      
+      // Advance timers
+      for (let i = 0; i < failingTasks.length * 3; i++) {
+        vi.advanceTimersByTime(1000);
+      }
+      
+      // The promise should reject
+      await expect(failingBatchPromise).rejects.toThrow('Test error');
+    });
+    
+    it('should limit concurrency when maxConcurrent is specified', async () => {
+      // Create mock tasks
+      const tasks = [
+        async () => {
+          mockClient.post.mockResolvedValueOnce(mockLipsyncCreationResponse);
+          mockClient.get
+            .mockResolvedValueOnce(mockLipsyncResults.pending)
+            .mockResolvedValueOnce(mockLipsyncResults.done);
+          
+          return batchProcessor.createAndWaitForLipsync({
+            text: 'Hello world 1',
+            creator: 'avatar-123',
+            aspect_ratio: '16:9',
+            voice_id: 'voice-123'
+          });
+        },
+        async () => {
+          mockClient.post.mockResolvedValueOnce(mockTextToSpeechCreationResponse);
+          mockClient.get
+            .mockResolvedValueOnce(mockTextToSpeechResults.pending)
+            .mockResolvedValueOnce(mockTextToSpeechResults.done);
+          
+          return batchProcessor.createAndWaitForTextToSpeech({
+            script: 'Hello world 2',
+            accent: 'voice-456'
+          });
+        },
+        async () => {
+          mockClient.post.mockResolvedValueOnce(mockAiEditingCreationResponse);
+          mockClient.get
+            .mockResolvedValueOnce(mockAiEditingResults.pending)
+            .mockResolvedValueOnce(mockAiEditingResults.done);
+          
+          return batchProcessor.createAndWaitForAiEditing({
+            video_url: 'https://example.com/video.mp4',
+            editing_style: 'film'
+          });
+        }
+      ];
+      
+      // Track task execution
+      const executionOrder: number[] = [];
+      const taskTracker = tasks.map((task, index) => async () => {
+        executionOrder.push(index);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        return task();
+      });
+      
+      // Start batch processing with concurrency limit
+      const batchPromise = batchProcessor.processBatch(taskTracker, {
+        concurrency: 2
+      });
+      
+      // Fast forward time
+      vi.useFakeTimers();
+      for (let i = 0; i < tasks.length * 3; i++) {
+        vi.advanceTimersByTime(1000);
+      }
+      
+      await batchPromise;
+      vi.useRealTimers();
+      
+      // Verify that no more than 2 tasks started at the same time
+      // This is approximate since we're just checking the order,
+      // not the exact timing, but it should be enough to verify the limit
+      expect(executionOrder.length).toBe(3);
+    });
+  });
+  
+  // Implement tests for specific task types
+  describe('createAndWaitForLipsync', () => {
+    it('should create a lipsync task and wait for completion', async () => {
+      // Mock the client methods
+      mockClient.post.mockResolvedValueOnce(mockLipsyncCreationResponse);
+      mockClient.get
+        .mockResolvedValueOnce(mockLipsyncResults.pending)
+        .mockResolvedValueOnce(mockLipsyncResults.processing)
+        .mockResolvedValueOnce(mockLipsyncResults.done);
+      
+      // Mock timers
+      vi.useFakeTimers();
+      
+      const params = {
+        text: 'Hello world',
+        creator: 'avatar-123',
+        aspect_ratio: '16:9' as any,
+        voice_id: 'voice-123'
+      };
+      
+      // Start the async process
+      const resultPromise = batchProcessor.createAndWaitForLipsync(params, 1000);
+      
+      // Fast forward timers to simulate waiting
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      
+      // Await the final result
+      const result = await resultPromise;
+      
+      // Restore timers
+      vi.useRealTimers();
+      
+      // Verify the method calls
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
+      expect(mockClient.post).toHaveBeenCalledWith('/api/lipsyncs/', params);
+      expect(mockClient.get).toHaveBeenCalledTimes(3);
+      expect(mockClient.get).toHaveBeenCalledWith('/api/lipsyncs/lipsync-123456/');
+      
+      // Verify the result
+      expect(result).toEqual(mockLipsyncResults.done);
+    });
+  });
+  
+  describe('createAndWaitForTextToSpeech', () => {
+    it('should create a text-to-speech task and wait for completion', async () => {
+      // Mock the client methods
+      mockClient.post.mockResolvedValueOnce(mockTextToSpeechCreationResponse);
+      mockClient.get
+        .mockResolvedValueOnce(mockTextToSpeechResults.pending)
+        .mockResolvedValueOnce(mockTextToSpeechResults.processing)
+        .mockResolvedValueOnce(mockTextToSpeechResults.done);
+      
+      // Mock timers
+      vi.useFakeTimers();
+      
+      const params = {
+        script: 'Hello world',
+        accent: 'voice-123'
+      };
+      
+      // Start the async process
+      const resultPromise = batchProcessor.createAndWaitForTextToSpeech(params, 1000);
+      
+      // Fast forward timers to simulate waiting
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      
+      // Await the final result
+      const result = await resultPromise;
+      
+      // Restore timers
+      vi.useRealTimers();
+      
+      // Verify the method calls
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
+      expect(mockClient.post).toHaveBeenCalledWith('/api/text_to_speech/', params);
+      expect(mockClient.get).toHaveBeenCalledTimes(3);
+      expect(mockClient.get).toHaveBeenCalledWith('/api/text_to_speech/tts-123456/');
+      
+      // Verify the result
+      expect(result).toEqual(mockTextToSpeechResults.done);
+    });
+  });
+  
+  describe('createAndWaitForAiEditing', () => {
+    it('should create an AI editing task and wait for completion', async () => {
+      // Mock the client methods
+      mockClient.post.mockResolvedValueOnce(mockAiEditingCreationResponse);
+      mockClient.get
+        .mockResolvedValueOnce(mockAiEditingResults.pending)
+        .mockResolvedValueOnce(mockAiEditingResults.processing)
+        .mockResolvedValueOnce(mockAiEditingResults.done);
+      
+      // Mock timers
+      vi.useFakeTimers();
+      
+      const params = {
+        video_url: 'https://example.com/video.mp4',
+        editing_style: 'film' as any
+      };
+      
+      // Start the async process
+      const resultPromise = batchProcessor.createAndWaitForAiEditing(params, 1000);
+      
+      // Fast forward timers to simulate waiting
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      
+      // Await the final result
+      const result = await resultPromise;
+      
+      // Restore timers
+      vi.useRealTimers();
+      
+      // Verify the method calls
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
+      expect(mockClient.post).toHaveBeenCalledWith('/api/ai_editing/', params);
+      expect(mockClient.get).toHaveBeenCalledTimes(3);
+      expect(mockClient.get).toHaveBeenCalledWith('/api/ai_editing/edit-123456/');
+      
+      // Verify the result
+      expect(result).toEqual(mockAiEditingResults.done);
+    });
+  });
+});

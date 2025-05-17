@@ -1,0 +1,301 @@
+import { VideoCreatorWithFactory } from '../../src/utils/video-creator-with-factory';
+import { 
+  mockAvatars, 
+  mockVoices, 
+  mockLipsyncCreationResponse, 
+  mockLipsyncResults 
+} from '../mocks/api-responses';
+import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+describe('VideoCreator', () => {
+  let videoCreator: VideoCreatorWithFactory;
+  let mockClient: MockCreatifyApiClient;
+  
+  beforeEach(() => {
+    // Create the VideoCreator with the mock factory
+    videoCreator = new VideoCreatorWithFactory(
+      {
+        apiId: 'test-api-id',
+        apiKey: 'test-api-key'
+      }, 
+      undefined,
+      mockApiClientFactory
+    );
+    
+    // Get the mock client that was created
+    mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;
+    
+    // Reset mock history
+    mockClient.reset();
+  });
+  
+  describe('constructor', () => {
+    it('should initialize with API credentials as separate parameters', () => {
+      const creator = new VideoCreatorWithFactory('test-api-id', 'test-api-key', mockApiClientFactory);
+      expect(creator).toBeDefined();
+    });
+    
+    it('should initialize with API credentials as an options object', () => {
+      const creator = new VideoCreatorWithFactory(
+        {
+          apiId: 'test-api-id',
+          apiKey: 'test-api-key'
+        },
+        undefined,
+        mockApiClientFactory
+      );
+      expect(creator).toBeDefined();
+    });
+  });
+  
+  describe('createVideo', () => {
+    it('should create a video with avatar ID and voice ID', async () => {
+      // Mock API calls for avatar video creation
+      mockClient.post.mockResolvedValueOnce(mockLipsyncCreationResponse);
+      mockClient.get
+        .mockResolvedValueOnce(mockLipsyncResults.pending)
+        .mockResolvedValueOnce(mockLipsyncResults.processing)
+        .mockResolvedValueOnce(mockLipsyncResults.done);
+      
+      // Mock timers
+      vi.useFakeTimers();
+      
+      const params = {
+        text: 'Hello, this is a test video.',
+        avatarId: 'avatar-123',
+        voiceId: 'voice-123',
+        aspectRatio: '16:9' as const
+      };
+      
+      // Start the video creation process
+      const videoPromise = videoCreator.createVideo(params, 1000);
+      
+      // Fast forward timers to simulate waiting
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      
+      // Await the final result
+      const result = await videoPromise;
+      
+      // Restore timers
+      vi.useRealTimers();
+      
+      // Verify the API calls
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
+      expect(mockClient.post).toHaveBeenCalledWith('/api/lipsyncs/', {
+        text: params.text,
+        creator: params.avatarId,
+        voice_id: params.voiceId,
+        aspect_ratio: params.aspectRatio
+      });
+      
+      expect(mockClient.get).toHaveBeenCalledTimes(3);
+      expect(mockClient.get).toHaveBeenCalledWith('/api/lipsyncs/lipsync-123456/');
+      
+      // Verify the result
+      expect(result).toEqual(mockLipsyncResults.done);
+    });
+  });
+  
+  describe('loadAvatars', () => {
+    it('should fetch and cache available avatars', async () => {
+      // Mock the API response
+      mockClient.get.mockResolvedValueOnce(mockAvatars);
+      
+      const result = await videoCreator.loadAvatars();
+      
+      expect(mockClient.get).toHaveBeenCalledWith('/api/personas/', undefined);
+      expect(result).toEqual(mockAvatars);
+      
+      // Load again - should use cache
+      mockClient.reset();
+      const cachedResult = await videoCreator.loadAvatars();
+      
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(cachedResult).toEqual(mockAvatars);
+    });
+  });
+  
+  describe('loadVoices', () => {
+    it('should fetch and cache available voices', async () => {
+      // Mock the API response
+      mockClient.get.mockResolvedValueOnce(mockVoices);
+      
+      const result = await videoCreator.loadVoices();
+      
+      expect(mockClient.get).toHaveBeenCalledWith('/api/voices/');
+      expect(result).toEqual(mockVoices);
+      
+      // Load again - should use cache
+      mockClient.reset();
+      const cachedResult = await videoCreator.loadVoices();
+      
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(cachedResult).toEqual(mockVoices);
+    });
+  });
+  
+  describe('preload', () => {
+    it('should preload avatars and voices', async () => {
+      // Mock the API responses
+      mockClient.get
+        .mockResolvedValueOnce(mockAvatars)
+        .mockResolvedValueOnce(mockVoices);
+      
+      const result = await videoCreator.preload();
+      
+      expect(mockClient.get).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        avatars: mockAvatars.length,
+        voices: mockVoices.length
+      });
+    });
+  });
+  
+  describe('findAvatarByName', () => {
+    it('should find avatar by exact name match', async () => {
+      // Mock avatars
+      mockClient.get.mockResolvedValueOnce(mockAvatars);
+      
+      const result = await videoCreator.findAvatarByName('Business Person');
+      
+      expect(result).toEqual(mockAvatars[0]);
+    });
+    
+    it('should find avatar by partial name match', async () => {
+      // Mock avatars
+      mockClient.get.mockResolvedValueOnce(mockAvatars);
+      
+      const result = await videoCreator.findAvatarByName('Teacher');
+      
+      expect(result).toEqual(mockAvatars[1]);
+    });
+    
+    it('should return null if avatar not found', async () => {
+      // Mock avatars
+      mockClient.get.mockResolvedValueOnce(mockAvatars);
+      
+      const result = await videoCreator.findAvatarByName('Non-existent Avatar');
+      
+      expect(result).toBeNull();
+    });
+  });
+  
+  describe('findVoiceByName', () => {
+    it('should find voice by exact name match', async () => {
+      // Mock voices
+      mockClient.get.mockResolvedValueOnce(mockVoices);
+      
+      const result = await videoCreator.findVoiceByName('English Male');
+      
+      expect(result).toEqual(mockVoices[0]);
+    });
+    
+    it('should find voice by partial name match', async () => {
+      // Mock voices
+      mockClient.get.mockResolvedValueOnce(mockVoices);
+      
+      const result = await videoCreator.findVoiceByName('Female');
+      
+      expect(result).toEqual(mockVoices[1]);
+    });
+    
+    it('should return null if voice not found', async () => {
+      // Mock voices
+      mockClient.get.mockResolvedValueOnce(mockVoices);
+      
+      const result = await videoCreator.findVoiceByName('Non-existent Voice');
+      
+      expect(result).toBeNull();
+    });
+  });
+  
+  describe('createVideoWithNames', () => {
+    it('should create a video using avatar and voice names', async () => {
+      // Mock API calls
+      mockClient.get
+        .mockResolvedValueOnce(mockAvatars) // loadAvatars
+        .mockResolvedValueOnce(mockVoices); // loadVoices
+      
+      mockClient.post.mockResolvedValueOnce(mockLipsyncCreationResponse);
+      mockClient.get
+        .mockResolvedValueOnce(mockLipsyncResults.pending)
+        .mockResolvedValueOnce(mockLipsyncResults.processing)
+        .mockResolvedValueOnce(mockLipsyncResults.done);
+      
+      // Mock timers
+      vi.useFakeTimers();
+      
+      const params = {
+        text: 'Hello, this is a test video.',
+        avatarName: 'Business Person',
+        voiceName: 'English Male',
+        aspectRatio: '16:9' as const
+      };
+      
+      // Start the video creation process
+      const videoPromise = videoCreator.createVideoWithNames(params, 1000);
+      
+      // Fast forward timers to simulate waiting
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      
+      // Await the final result
+      const result = await videoPromise;
+      
+      // Restore timers
+      vi.useRealTimers();
+      
+      // Verify the API calls
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
+      expect(mockClient.post).toHaveBeenCalledWith('/api/lipsyncs/', {
+        text: params.text,
+        creator: mockAvatars[0].avatar_id,
+        voice_id: mockVoices[0].voice_id,
+        aspect_ratio: params.aspectRatio
+      });
+      
+      // Verify the result
+      expect(result).toEqual(mockLipsyncResults.done);
+    });
+    
+    it('should throw an error if avatar is not found', async () => {
+      // Mock API calls
+      mockClient.get
+        .mockResolvedValueOnce(mockAvatars) // loadAvatars
+        .mockResolvedValueOnce(mockVoices); // loadVoices
+      
+      const params = {
+        text: 'Hello, this is a test video.',
+        avatarName: 'Non-existent Avatar',
+        voiceName: 'English Male',
+        aspectRatio: '16:9' as const
+      };
+      
+      await expect(videoCreator.createVideoWithNames(params)).rejects.toThrow(
+        'Avatar not found with name: Non-existent Avatar'
+      );
+    });
+    
+    it('should throw an error if voice is not found', async () => {
+      // Mock API calls
+      mockClient.get
+        .mockResolvedValueOnce(mockAvatars) // loadAvatars
+        .mockResolvedValueOnce(mockVoices); // loadVoices
+      
+      const params = {
+        text: 'Hello, this is a test video.',
+        avatarName: 'Business Person',
+        voiceName: 'Non-existent Voice',
+        aspectRatio: '16:9' as const
+      };
+      
+      await expect(videoCreator.createVideoWithNames(params)).rejects.toThrow(
+        'Voice not found with name: Non-existent Voice'
+      );
+    });
+  });
+});
