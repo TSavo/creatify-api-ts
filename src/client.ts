@@ -1,10 +1,11 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { CreatifyApiOptions } from './types';
+import { ICreatifyApiClient } from './types/api-client';
 
 /**
  * Base API client for Creatify API
  */
-export class CreatifyApiClient {
+export class CreatifyApiClient implements ICreatifyApiClient {
   private client: AxiosInstance;
   private apiId: string;
   private apiKey: string;
@@ -64,7 +65,7 @@ export class CreatifyApiClient {
    * @param config Additional axios config
    * @returns Promise resolving to the response data
    */
-  protected async get<T = any>(
+  public async get<T = any>(
     endpoint: string,
     params?: Record<string, any>,
     config?: AxiosRequestConfig
@@ -83,7 +84,7 @@ export class CreatifyApiClient {
    * @param config Additional axios config
    * @returns Promise resolving to the response data
    */
-  protected async post<T = any>(
+  public async post<T = any>(
     endpoint: string,
     data?: Record<string, any>,
     config?: AxiosRequestConfig
@@ -99,7 +100,7 @@ export class CreatifyApiClient {
    * @param config Additional axios config
    * @returns Promise resolving to the response data
    */
-  protected async put<T = any>(
+  public async put<T = any>(
     endpoint: string,
     data?: Record<string, any>,
     config?: AxiosRequestConfig
@@ -111,14 +112,19 @@ export class CreatifyApiClient {
   /**
    * Make a DELETE request to the API
    * @param endpoint API endpoint to call
+   * @param params Query parameters
    * @param config Additional axios config
    * @returns Promise resolving to the response data
    */
-  protected async delete<T = any>(
+  public async delete<T = any>(
     endpoint: string,
+    params?: Record<string, any>,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await this.client.delete<T>(endpoint, config);
+    const response = await this.client.delete<T>(endpoint, {
+      params,
+      ...config,
+    });
     return response.data;
   }
 }

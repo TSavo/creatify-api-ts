@@ -1,28 +1,46 @@
-import { CreatifyApiClient } from '../client';
+import { CreatifyApiOptions } from '../types';
 import { TextToSpeech } from '../types';
+import { ICreatifyApiClient } from '../types/api-client';
+import { apiClientFactory } from '../client-factory';
 
 /**
  * Client for interacting with the Creatify Text-to-Speech API
+ * @see https://docs.creatify.ai/api-reference/text-to-speech
  */
-export class TextToSpeechApi extends CreatifyApiClient {
+export class TextToSpeechApi {
+  private client: ICreatifyApiClient;
+
+  /**
+   * Create a new TextToSpeechApi instance
+   * @param options API client options
+   * @param clientFactory Optional factory for creating API clients (useful for testing)
+   */
+  constructor(
+    options: CreatifyApiOptions,
+    clientFactory = apiClientFactory
+  ) {
+    this.client = clientFactory.createClient(options);
+  }
   /**
    * Create a text-to-speech task to convert text into an audio file
    * @param params Parameters for the text-to-speech generation
    * @returns Promise resolving to the text-to-speech task response
+   * @see https://docs.creatify.ai/api-reference/text-to-speech
    */
   async createTextToSpeech(
     params: TextToSpeech.TextToSpeechParams
   ): Promise<TextToSpeech.TextToSpeechResponse> {
-    return this.post<TextToSpeech.TextToSpeechResponse>('/api/text_to_speech/', params);
+    return this.client.post<TextToSpeech.TextToSpeechResponse>('/api/text_to_speech/', params);
   }
 
   /**
    * Get the status and result of a text-to-speech task
    * @param id ID of the text-to-speech task
    * @returns Promise resolving to the text-to-speech task status and result
+   * @see https://docs.creatify.ai/api-reference/text-to-speech
    */
   async getTextToSpeech(id: string): Promise<TextToSpeech.TextToSpeechResultResponse> {
-    return this.get<TextToSpeech.TextToSpeechResultResponse>(`/api/text_to_speech/${id}/`);
+    return this.client.get<TextToSpeech.TextToSpeechResultResponse>(`/api/text_to_speech/${id}/`);
   }
 
   /**
@@ -30,9 +48,10 @@ export class TextToSpeechApi extends CreatifyApiClient {
    * @param page Page number (starts from 1)
    * @param limit Number of items per page 
    * @returns Promise resolving to an array of text-to-speech tasks
+   * @see https://docs.creatify.ai/api-reference/text-to-speech
    */
   async getTextToSpeechList(page?: number, limit?: number): Promise<TextToSpeech.TextToSpeechResultResponse[]> {
-    return this.get<TextToSpeech.TextToSpeechResultResponse[]>('/api/text_to_speech/', { page, limit });
+    return this.client.get<TextToSpeech.TextToSpeechResultResponse[]>('/api/text_to_speech/', { page, limit });
   }
 
   /**
@@ -40,6 +59,7 @@ export class TextToSpeechApi extends CreatifyApiClient {
    * @param page Page number (starts from 1)
    * @param limit Number of items per page
    * @returns Promise resolving to paginated text-to-speech data
+   * @see https://docs.creatify.ai/api-reference/text-to-speech
    */
   async getTextToSpeechPaginated(
     page: number = 1,
@@ -50,7 +70,7 @@ export class TextToSpeechApi extends CreatifyApiClient {
     previous: string | null;
     results: TextToSpeech.TextToSpeechResultResponse[];
   }> {
-    return this.get('/api/text_to_speech/paginated/', { page, limit });
+    return this.client.get('/api/text_to_speech/paginated/', { page, limit });
   }
 
   /**

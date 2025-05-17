@@ -114,7 +114,11 @@ export class BatchProcessor {
       const currentIndex = taskIndex++;
       activeTasks++;
       
-      const taskPromise = (async () => {
+      // Define the task promise first
+      let taskPromise: Promise<void>;
+      
+      // Then create and assign it
+      taskPromise = (async () => {
         try {
           // Add delay between task starts if specified
           if (opts.taskStartDelay > 0 && currentIndex > 0) {
@@ -137,10 +141,10 @@ export class BatchProcessor {
           // Decrease active task count
           activeTasks--;
           
-          // Remove this promise from the queue
-          const index = queue.indexOf(taskPromise);
-          if (index !== -1) {
-            queue.splice(index, 1);
+          // Remove this promise from the queue - find it by filtering instead of using indexOf
+          const taskIndex = queue.findIndex(p => p === taskPromise);
+          if (taskIndex !== -1) {
+            queue.splice(taskIndex, 1);
           }
         }
       })();

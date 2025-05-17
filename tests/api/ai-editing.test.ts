@@ -3,9 +3,10 @@ import {
   mockAiEditingCreationResponse,
   mockAiEditingResults
 } from '../mocks/api-responses';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock fetch for testing
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 // Create a mock Response
 const mockJsonPromise = (data: any) => Promise.resolve(data);
@@ -26,12 +27,12 @@ describe('AiEditingApi', () => {
     });
     
     // Clear mock history
-    (global.fetch as jest.Mock).mockClear();
+    (global.fetch as ReturnType<typeof vi.fn>).mockClear();
   });
   
   describe('createAiEditing', () => {
     it('should create an AI editing task', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockAiEditingCreationResponse));
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockAiEditingCreationResponse));
       
       const params = {
         video_url: 'https://example.com/video.mp4',
@@ -54,7 +55,7 @@ describe('AiEditingApi', () => {
   
   describe('getAiEditing', () => {
     it('should fetch an AI editing task by ID', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockAiEditingResults.done));
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockAiEditingResults.done));
       
       const result = await aiEditingApi.getAiEditing('edit-123456');
       
@@ -72,7 +73,7 @@ describe('AiEditingApi', () => {
   describe('getAiEditingList', () => {
     it('should fetch all AI editing tasks', async () => {
       const mockAiEditingList = [mockAiEditingResults.done, mockAiEditingResults.processing];
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockAiEditingList));
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockAiEditingList));
       
       const result = await aiEditingApi.getAiEditingList();
       
@@ -90,14 +91,14 @@ describe('AiEditingApi', () => {
   describe('createAndWaitForAiEditing', () => {
     it('should create an AI editing task and wait for completion', async () => {
       // Mock multiple fetch calls for the create and polling sequence
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockAiEditingCreationResponse))
         .mockImplementationOnce(() => mockFetchPromise(mockAiEditingResults.pending))
         .mockImplementationOnce(() => mockFetchPromise(mockAiEditingResults.processing))
         .mockImplementationOnce(() => mockFetchPromise(mockAiEditingResults.done));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       const params = {
         video_url: 'https://example.com/video.mp4',
@@ -108,15 +109,15 @@ describe('AiEditingApi', () => {
       const resultPromise = aiEditingApi.createAndWaitForAiEditing(params, 1000);
       
       // Fast forward timers to simulate waiting
-      jest.advanceTimersByTime(1000);
-      jest.advanceTimersByTime(1000);
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Await the final result
       const result = await resultPromise;
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
       
       // Verify the fetch calls
       expect(global.fetch).toHaveBeenCalledTimes(4);
@@ -146,12 +147,12 @@ describe('AiEditingApi', () => {
     
     it('should handle error responses', async () => {
       // Mock fetch to return an error response
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockAiEditingCreationResponse))
         .mockImplementationOnce(() => mockFetchPromise(mockAiEditingResults.error));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       const params = {
         video_url: 'https://example.com/video.mp4',
@@ -162,13 +163,13 @@ describe('AiEditingApi', () => {
       const resultPromise = aiEditingApi.createAndWaitForAiEditing(params, 1000);
       
       // Fast forward timers to simulate waiting
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Await the final result
       const result = await resultPromise;
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
       
       // Final result should be the error response
       expect(result).toEqual(mockAiEditingResults.error);
@@ -176,12 +177,12 @@ describe('AiEditingApi', () => {
     
     it('should throw an error if max attempts is reached', async () => {
       // Mock fetch to always return pending status
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockAiEditingCreationResponse))
         .mockImplementation(() => mockFetchPromise(mockAiEditingResults.pending));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       const params = {
         video_url: 'https://example.com/video.mp4',
@@ -193,14 +194,14 @@ describe('AiEditingApi', () => {
       
       // Fast forward timers to simulate waiting
       for (let i = 0; i < 3; i++) {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
       
       // Expect the function to throw an error due to timeout
       await expect(resultPromise).rejects.toThrow(/did not complete within the timeout period/);
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 });

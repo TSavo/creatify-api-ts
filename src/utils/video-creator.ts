@@ -153,7 +153,7 @@ export class VideoCreator {
     // Create the lipsync video
     const lipsyncResponse = await this.creatify.avatar.createLipsync({
       text: options.script,
-      creator: avatarId,
+      creator: avatarId || '',
       aspect_ratio: aspectRatio as any,
       voice_id: voiceId
     });
@@ -192,25 +192,23 @@ export class VideoCreator {
 
   /**
    * Create a video with multiple avatars having a conversation
-   * @param conversations Array of conversation segments with different avatars
-   * @param options Additional options
+   * @param options Configuration options for the conversation
    * @returns The URL of the generated video
    */
-  async createConversation(
-    conversations: Array<{
+  async createConversation(options: {
+    conversation: Array<{
       avatarName?: string;
       avatarId?: string;
       voiceName?: string;
       voiceId?: string;
-      script: string;
+      text: string;
     }>,
-    options: {
-      backgroundUrl?: string;
-      aspectRatio?: string;
-      pollInterval?: number;
-      maxPollingAttempts?: number;
-    } = {}
-  ) {
+    backgroundUrl?: string;
+    aspectRatio?: string;
+    pollInterval?: number;
+    maxPollingAttempts?: number;
+  }) {
+    const conversations = options.conversation;
     // Default values
     const pollInterval = options.pollInterval || 5000;
     const maxPollingAttempts = options.maxPollingAttempts || 30;
@@ -253,14 +251,14 @@ export class VideoCreator {
       videoInputs.push({
         character: {
           type: "avatar" as const,
-          avatar_id: avatarId,
+          avatar_id: avatarId || '',
           avatar_style: "normal",
           offset: { x: -0.23, y: 0.35 }
         },
         voice: {
           type: "text" as const,
-          input_text: conversation.script,
-          voice_id: voiceId
+          input_text: conversation.text,
+          voice_id: voiceId || ''
         },
         background: {
           type: "image" as const,

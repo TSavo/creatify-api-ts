@@ -1,8 +1,11 @@
-import { CreatifyApiClient } from '../../src/client';
-import { mockErrorResponse } from '../mocks/api-responses';
+import { CreatifyApiClient } from '../src/client';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+import { mockErrorResponse } from './mocks/api-responses';
+import { expect, describe, it, beforeEach, vi } from 'vitest';
 
 // Mock fetch for testing
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 // Create a mock Response
 const mockJsonPromise = (data: any) => Promise.resolve(data);
@@ -23,7 +26,7 @@ describe('CreatifyApiClient', () => {
     });
     
     // Clear mock history
-    (global.fetch as jest.Mock).mockClear();
+    (global.fetch as ReturnType<typeof vi.fn>).mockClear();
   });
   
   it('should initialize with API credentials', () => {
@@ -47,7 +50,7 @@ describe('CreatifyApiClient', () => {
   
   it('should make a GET request with auth headers', async () => {
     const mockData = { data: 'test' };
-    (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockData));
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockData));
     
     const response = await client.get('/test-endpoint');
     
@@ -70,7 +73,7 @@ describe('CreatifyApiClient', () => {
     const mockData = { success: true };
     const requestBody = { param1: 'value1', param2: 'value2' };
     
-    (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockData));
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockData));
     
     const response = await client.post('/test-endpoint', requestBody);
     
@@ -94,7 +97,7 @@ describe('CreatifyApiClient', () => {
     const mockData = { success: true };
     const requestBody = { param1: 'value1', param2: 'value2' };
     
-    (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockData));
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockData));
     
     const response = await client.put('/test-endpoint', requestBody);
     
@@ -117,7 +120,7 @@ describe('CreatifyApiClient', () => {
   it('should make a DELETE request with auth headers', async () => {
     const mockData = { success: true };
     
-    (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockData));
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockData));
     
     const response = await client.delete('/test-endpoint');
     
@@ -137,7 +140,7 @@ describe('CreatifyApiClient', () => {
   });
   
   it('should handle API errors with appropriate error message', async () => {
-    (global.fetch as jest.Mock).mockImplementationOnce(() => 
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => 
       mockFetchPromise(mockErrorResponse, 401)
     );
     
@@ -145,7 +148,7 @@ describe('CreatifyApiClient', () => {
   });
   
   it('should handle network errors', async () => {
-    (global.fetch as jest.Mock).mockImplementationOnce(() => 
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => 
       Promise.reject(new Error('Network error'))
     );
     
@@ -153,7 +156,7 @@ describe('CreatifyApiClient', () => {
   });
   
   it('should handle unexpected response format', async () => {
-    (global.fetch as jest.Mock).mockImplementationOnce(() => 
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => 
       Promise.resolve({
         ok: true,
         status: 200,
@@ -172,10 +175,10 @@ describe('CreatifyApiClient', () => {
     });
     
     const controller = new AbortController();
-    jest.spyOn(AbortController.prototype, 'abort');
+    vi.spyOn(AbortController.prototype, 'abort');
     
     const mockData = { data: 'test' };
-    (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockData));
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockData));
     
     await timeoutClient.get('/test-endpoint');
     

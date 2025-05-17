@@ -1,34 +1,53 @@
-import { CreatifyApiClient } from '../client';
+import { CreatifyApiOptions } from '../types';
 import { DYOA } from '../types';
+import { ICreatifyApiClient } from '../types/api-client';
+import { apiClientFactory } from '../client-factory';
 
 /**
  * Client for interacting with the Creatify DYOA (Design Your Own Avatar) API
+ * @see https://creatify.mintlify.app/api-reference/introduction
  */
-export class DyoaApi extends CreatifyApiClient {
+export class DyoaApi {
+  private client: ICreatifyApiClient;
+
+  /**
+   * Create a new DyoaApi instance
+   * @param options API client options
+   * @param clientFactory Optional factory for creating API clients (useful for testing)
+   */
+  constructor(
+    options: CreatifyApiOptions,
+    clientFactory = apiClientFactory
+  ) {
+    this.client = clientFactory.createClient(options);
+  }
   /**
    * Create a DYOA with avatar details
    * @param params Parameters for the DYOA creation
    * @returns Promise resolving to the DYOA response
+   * @see https://creatify.mintlify.app/api-reference/introduction
    */
   async createDyoa(params: DYOA.DyoaParams): Promise<DYOA.DyoaResponse> {
-    return this.post<DYOA.DyoaResponse>('/api/dyoa/', params);
+    return this.client.post<DYOA.DyoaResponse>('/api/dyoa/', params);
   }
 
   /**
    * Get a DYOA by ID
    * @param id ID of the DYOA
    * @returns Promise resolving to the DYOA details
+   * @see https://creatify.mintlify.app/api-reference/introduction
    */
   async getDyoa(id: string): Promise<DYOA.DyoaResponse> {
-    return this.get<DYOA.DyoaResponse>(`/api/dyoa/${id}/`);
+    return this.client.get<DYOA.DyoaResponse>(`/api/dyoa/${id}/`);
   }
 
   /**
    * Get all DYOAs
    * @returns Promise resolving to an array of DYOAs
+   * @see https://creatify.mintlify.app/api-reference/introduction
    */
   async getDyoaList(): Promise<DYOA.DyoaResponse[]> {
-    return this.get<DYOA.DyoaResponse[]>('/api/dyoa/');
+    return this.client.get<DYOA.DyoaResponse[]>('/api/dyoa/');
   }
 
   /**
@@ -36,21 +55,23 @@ export class DyoaApi extends CreatifyApiClient {
    * @param id ID of the DYOA
    * @param params Parameters for the DYOA submission
    * @returns Promise resolving to the updated DYOA details
+   * @see https://creatify.mintlify.app/api-reference/introduction
    */
   async submitDyoaForReview(
     id: string,
     params: DYOA.DyoaSubmitParams
   ): Promise<DYOA.DyoaResponse> {
-    return this.post<DYOA.DyoaResponse>(`/api/dyoa/${id}/submit_for_review/`, params);
+    return this.client.post<DYOA.DyoaResponse>(`/api/dyoa/${id}/submit_for_review/`, params);
   }
 
   /**
    * Delete a DYOA
    * @param id ID of the DYOA to delete
    * @returns Promise resolving to the deletion response
+   * @see https://creatify.mintlify.app/api-reference/introduction
    */
   async deleteDyoa(id: string): Promise<void> {
-    return this.delete<void>(`/api/dyoa/${id}/`);
+    return this.client.delete<void>(`/api/dyoa/${id}/`);
   }
 
   /**

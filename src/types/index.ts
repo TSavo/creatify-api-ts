@@ -73,6 +73,11 @@ export namespace Avatar {
     id: string;
     
     /**
+     * Alias for id - used in MultiAvatarLipsyncParams and other API interactions
+     */
+    avatar_id?: string;
+    
+    /**
      * Creation timestamp
      */
     created_at: string;
@@ -727,7 +732,7 @@ export namespace UrlToVideo {
     /**
      * Status of the video task
      */
-    status: 'pending' | 'in_queue' | 'running' | 'failed' | 'done';
+    status: 'pending' | 'in_queue' | 'running' | 'failed' | 'done' | 'error';
     
     /**
      * Link ID used to create the video

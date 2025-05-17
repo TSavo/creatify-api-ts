@@ -45,26 +45,27 @@ async function simplifiedExample() {
     
     // Example 2: Create a conversation with multiple avatars
     console.log('\nCreating a conversation with multiple avatars...');
-    const conversationResult = await videoCreator.createConversation([
-      {
-        // First avatar's segment
-        // avatarName: 'Sarah',  // Will find any avatar with "Sarah" in the name
-        // voiceName: 'Female',  // Will find any voice with "Female" in the name
-        script: "Hi there! Have you heard about the new Creatify API TypeScript library?"
-      },
-      {
-        // Second avatar's segment
-        // avatarName: 'Michael',  // Will find any avatar with "Michael" in the name
-        // voiceName: 'Male',      // Will find any voice with "Male" in the name
-        script: "Yes, I have! It makes it super easy to create AI avatar videos programmatically."
-      },
-      {
-        // Third avatar's segment
-        // avatarName: 'Emily',  // Will find any avatar with "Emily" in the name
-        // voiceName: 'British', // Will find any voice with "British" in the name
-        script: "The best part is that you can create conversations with multiple avatars, just like this one!"
-      }
-    ], {
+    const conversationResult = await videoCreator.createConversation({
+      conversation: [
+        {
+          // First avatar's segment
+          // avatarName: 'Sarah',  // Will find any avatar with "Sarah" in the name
+          // voiceName: 'Female',  // Will find any voice with "Female" in the name
+          text: "Hi there! Have you heard about the new Creatify API TypeScript library?"
+        },
+        {
+          // Second avatar's segment
+          // avatarName: 'Michael',  // Will find any avatar with "Michael" in the name
+          // voiceName: 'Male',      // Will find any voice with "Male" in the name
+          text: "Yes, I have! It makes it super easy to create AI avatar videos programmatically."
+        },
+        {
+          // Third avatar's segment
+          // avatarName: 'Emily',  // Will find any avatar with "Emily" in the name
+          // voiceName: 'British', // Will find any voice with "British" in the name
+          text: "The best part is that you can create conversations with multiple avatars, just like this one!"
+        }
+      ],
       // Background image URL (optional)
       // backgroundUrl: "https://example.com/your-background.jpg",
       

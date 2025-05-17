@@ -3,9 +3,10 @@ import {
   mockCustomTemplateCreationResponse,
   mockCustomTemplateResults
 } from '../mocks/api-responses';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock fetch for testing
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 // Create a mock Response
 const mockJsonPromise = (data: any) => Promise.resolve(data);
@@ -26,12 +27,12 @@ describe('CustomTemplatesApi', () => {
     });
     
     // Clear mock history
-    (global.fetch as jest.Mock).mockClear();
+    (global.fetch as ReturnType<typeof vi.fn>).mockClear();
   });
   
   describe('createCustomTemplate', () => {
     it('should create a custom template video', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockCustomTemplateCreationResponse));
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockCustomTemplateCreationResponse));
       
       const params = {
         visual_style: 'HouseSale',
@@ -61,7 +62,7 @@ describe('CustomTemplatesApi', () => {
   
   describe('getCustomTemplate', () => {
     it('should fetch a custom template task by ID', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockCustomTemplateResults.done));
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockCustomTemplateResults.done));
       
       const result = await customTemplatesApi.getCustomTemplate('template-123456');
       
@@ -79,7 +80,7 @@ describe('CustomTemplatesApi', () => {
   describe('getCustomTemplateList', () => {
     it('should fetch all custom template tasks', async () => {
       const mockTemplateList = [mockCustomTemplateResults.done, mockCustomTemplateResults.processing];
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockTemplateList));
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockTemplateList));
       
       const result = await customTemplatesApi.getCustomTemplateList();
       
@@ -97,14 +98,14 @@ describe('CustomTemplatesApi', () => {
   describe('createAndWaitForCustomTemplate', () => {
     it('should create a custom template video and wait for completion', async () => {
       // Mock multiple fetch calls for the create and polling sequence
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockCustomTemplateCreationResponse))
         .mockImplementationOnce(() => mockFetchPromise(mockCustomTemplateResults.pending))
         .mockImplementationOnce(() => mockFetchPromise(mockCustomTemplateResults.processing))
         .mockImplementationOnce(() => mockFetchPromise(mockCustomTemplateResults.done));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       const params = {
         visual_style: 'HouseSale',
@@ -122,15 +123,15 @@ describe('CustomTemplatesApi', () => {
       const resultPromise = customTemplatesApi.createAndWaitForCustomTemplate(params, 1000);
       
       // Fast forward timers to simulate waiting
-      jest.advanceTimersByTime(1000);
-      jest.advanceTimersByTime(1000);
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Await the final result
       const result = await resultPromise;
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
       
       // Verify the fetch calls
       expect(global.fetch).toHaveBeenCalledTimes(4);
@@ -160,12 +161,12 @@ describe('CustomTemplatesApi', () => {
     
     it('should handle error responses', async () => {
       // Mock fetch to return an error response
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockCustomTemplateCreationResponse))
         .mockImplementationOnce(() => mockFetchPromise(mockCustomTemplateResults.error));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       const params = {
         visual_style: 'HouseSale',
@@ -183,13 +184,13 @@ describe('CustomTemplatesApi', () => {
       const resultPromise = customTemplatesApi.createAndWaitForCustomTemplate(params, 1000);
       
       // Fast forward timers to simulate waiting
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Await the final result
       const result = await resultPromise;
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
       
       // Final result should be the error response
       expect(result).toEqual(mockCustomTemplateResults.error);
@@ -197,12 +198,12 @@ describe('CustomTemplatesApi', () => {
     
     it('should throw an error if max attempts is reached', async () => {
       // Mock fetch to always return pending status
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockCustomTemplateCreationResponse))
         .mockImplementation(() => mockFetchPromise(mockCustomTemplateResults.pending));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       const params = {
         visual_style: 'HouseSale',
@@ -221,14 +222,14 @@ describe('CustomTemplatesApi', () => {
       
       // Fast forward timers to simulate waiting
       for (let i = 0; i < 3; i++) {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
       
       // Expect the function to throw an error due to timeout
       await expect(resultPromise).rejects.toThrow(/did not complete within the timeout period/);
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 });

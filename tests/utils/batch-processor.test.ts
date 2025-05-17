@@ -7,9 +7,10 @@ import {
   mockAiEditingCreationResponse,
   mockAiEditingResults
 } from '../mocks/api-responses';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock fetch for testing
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 // Create a mock Response
 const mockJsonPromise = (data: any) => Promise.resolve(data);
@@ -27,7 +28,7 @@ describe('BatchProcessor', () => {
     batchProcessor = new BatchProcessor('test-api-id', 'test-api-key');
     
     // Clear mock history
-    (global.fetch as jest.Mock).mockClear();
+    (global.fetch as ReturnType<typeof vi.fn>).mockClear();
   });
   
   describe('constructor', () => {
@@ -48,9 +49,9 @@ describe('BatchProcessor', () => {
   describe('processBatch', () => {
     it('should process multiple tasks in sequence with default options', async () => {
       // Create mock tasks
-      const task1 = jest.fn().mockResolvedValue('result1');
-      const task2 = jest.fn().mockResolvedValue('result2');
-      const task3 = jest.fn().mockResolvedValue('result3');
+      const task1 = vi.fn().mockResolvedValue('result1');
+      const task2 = vi.fn().mockResolvedValue('result2');
+      const task3 = vi.fn().mockResolvedValue('result3');
       
       // Process batch
       const result = await batchProcessor.processBatch([task1, task2, task3]);
@@ -69,7 +70,7 @@ describe('BatchProcessor', () => {
     it('should respect concurrency limit', async () => {
       // Create mock tasks with delays
       const createDelayedTask = (name: string, delay: number) => {
-        return jest.fn().mockImplementation(() => {
+        return vi.fn().mockImplementation(() => {
           return new Promise(resolve => setTimeout(() => resolve(name), delay));
         });
       };
@@ -112,9 +113,9 @@ describe('BatchProcessor', () => {
     
     it('should handle errors when continueOnError is true', async () => {
       // Create mock tasks
-      const task1 = jest.fn().mockResolvedValue('result1');
-      const task2 = jest.fn().mockRejectedValue(new Error('Task 2 failed'));
-      const task3 = jest.fn().mockResolvedValue('result3');
+      const task1 = vi.fn().mockResolvedValue('result1');
+      const task2 = vi.fn().mockRejectedValue(new Error('Task 2 failed'));
+      const task3 = vi.fn().mockResolvedValue('result3');
       
       // Process batch with continueOnError option
       const result = await batchProcessor.processBatch(
@@ -137,9 +138,9 @@ describe('BatchProcessor', () => {
     
     it('should stop on first error when continueOnError is false', async () => {
       // Create mock tasks
-      const task1 = jest.fn().mockResolvedValue('result1');
-      const task2 = jest.fn().mockRejectedValue(new Error('Task 2 failed'));
-      const task3 = jest.fn().mockResolvedValue('result3');
+      const task1 = vi.fn().mockResolvedValue('result1');
+      const task2 = vi.fn().mockRejectedValue(new Error('Task 2 failed'));
+      const task3 = vi.fn().mockResolvedValue('result3');
       
       // Process batch with default options (continueOnError = false)
       await expect(batchProcessor.processBatch([task1, task2, task3]))
@@ -153,12 +154,12 @@ describe('BatchProcessor', () => {
     
     it('should respect taskStartDelay option', async () => {
       // Mock setTimeout
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       // Create mock tasks
-      const task1 = jest.fn().mockResolvedValue('result1');
-      const task2 = jest.fn().mockResolvedValue('result2');
-      const task3 = jest.fn().mockResolvedValue('result3');
+      const task1 = vi.fn().mockResolvedValue('result1');
+      const task2 = vi.fn().mockResolvedValue('result2');
+      const task3 = vi.fn().mockResolvedValue('result3');
       
       // Start the batch process with a 1000ms delay between tasks
       const resultPromise = batchProcessor.processBatch(
@@ -172,14 +173,14 @@ describe('BatchProcessor', () => {
       expect(task3).not.toHaveBeenCalled();
       
       // Advance timers to trigger second task
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Second task should now have started
       expect(task2).toHaveBeenCalled();
       expect(task3).not.toHaveBeenCalled();
       
       // Advance timers to trigger third task
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Third task should now have started
       expect(task3).toHaveBeenCalled();
@@ -188,14 +189,14 @@ describe('BatchProcessor', () => {
       await resultPromise;
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
   
   describe('processAvatarBatch', () => {
     it('should process multiple avatar video creation tasks', async () => {
       // Mock API calls for two avatar tasks
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         // First task - create
         .mockImplementationOnce(() => mockFetchPromise(mockLipsyncCreationResponse))
         // First task - check status
@@ -212,7 +213,7 @@ describe('BatchProcessor', () => {
         }));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       // Create avatar tasks
       const avatarTasks = [
@@ -234,7 +235,7 @@ describe('BatchProcessor', () => {
       const resultPromise = batchProcessor.processAvatarBatch(avatarTasks);
       
       // Fast forward time to complete all tasks
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       
       // Get the final result
       const result = await resultPromise;
@@ -245,14 +246,13 @@ describe('BatchProcessor', () => {
       expect(result.allSuccessful).toBe(true);
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
-  
-  describe('processTextToSpeechBatch', () => {
+    describe('processTextToSpeechBatch', () => {
     it('should process multiple text-to-speech tasks', async () => {
       // Mock API calls for two TTS tasks
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         // First task - create
         .mockImplementationOnce(() => mockFetchPromise(mockTextToSpeechCreationResponse))
         // First task - check status
@@ -269,7 +269,7 @@ describe('BatchProcessor', () => {
         }));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       // Create TTS tasks
       const ttsTasks = [
@@ -287,7 +287,7 @@ describe('BatchProcessor', () => {
       const resultPromise = batchProcessor.processTextToSpeechBatch(ttsTasks);
       
       // Fast forward time to complete all tasks
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       
       // Get the final result
       const result = await resultPromise;
@@ -298,14 +298,13 @@ describe('BatchProcessor', () => {
       expect(result.allSuccessful).toBe(true);
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
-  
-  describe('processAiEditingBatch', () => {
+    describe('processAiEditingBatch', () => {
     it('should process multiple AI editing tasks', async () => {
       // Mock API calls for two AI editing tasks
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         // First task - create
         .mockImplementationOnce(() => mockFetchPromise(mockAiEditingCreationResponse))
         // First task - check status
@@ -322,7 +321,7 @@ describe('BatchProcessor', () => {
         }));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       // Create AI editing tasks
       const aiEditingTasks = [
@@ -340,7 +339,7 @@ describe('BatchProcessor', () => {
       const resultPromise = batchProcessor.processAiEditingBatch(aiEditingTasks);
       
       // Fast forward time to complete all tasks
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       
       // Get the final result
       const result = await resultPromise;
@@ -351,7 +350,7 @@ describe('BatchProcessor', () => {
       expect(result.allSuccessful).toBe(true);
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 });

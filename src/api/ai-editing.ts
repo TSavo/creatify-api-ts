@@ -1,36 +1,55 @@
-import { CreatifyApiClient } from '../client';
+import { CreatifyApiOptions } from '../types';
 import { AiEditing } from '../types';
+import { ICreatifyApiClient } from '../types/api-client';
+import { apiClientFactory } from '../client-factory';
 
 /**
  * Client for interacting with the Creatify AI Editing API
+ * @see https://creatify.mintlify.app/api-reference/ai-editing
  */
-export class AiEditingApi extends CreatifyApiClient {
+export class AiEditingApi {
+  private client: ICreatifyApiClient;
+
+  /**
+   * Create a new AiEditingApi instance
+   * @param options API client options
+   * @param clientFactory Optional factory for creating API clients (useful for testing)
+   */
+  constructor(
+    options: CreatifyApiOptions,
+    clientFactory = apiClientFactory
+  ) {
+    this.client = clientFactory.createClient(options);
+  }
   /**
    * Create an AI editing task to edit a video with AI
    * @param params Parameters for the AI editing task
    * @returns Promise resolving to the AI editing task response
+   * @see https://creatify.mintlify.app/api-reference/ai-editing
    */
   async createAiEditing(
     params: AiEditing.AiEditingParams
   ): Promise<AiEditing.AiEditingResponse> {
-    return this.post<AiEditing.AiEditingResponse>('/api/ai_editing/', params);
+    return this.client.post<AiEditing.AiEditingResponse>('/api/ai_editing/', params);
   }
 
   /**
    * Get the status and result of an AI editing task
    * @param id ID of the AI editing task
    * @returns Promise resolving to the AI editing task status and result
+   * @see https://creatify.mintlify.app/api-reference/ai-editing
    */
   async getAiEditing(id: string): Promise<AiEditing.AiEditingResultResponse> {
-    return this.get<AiEditing.AiEditingResultResponse>(`/api/ai_editing/${id}/`);
+    return this.client.get<AiEditing.AiEditingResultResponse>(`/api/ai_editing/${id}/`);
   }
 
   /**
    * Get all AI editing tasks
    * @returns Promise resolving to an array of AI editing tasks
+   * @see https://creatify.mintlify.app/api-reference/ai-editing
    */
   async getAiEditingList(): Promise<AiEditing.AiEditingResultResponse[]> {
-    return this.get<AiEditing.AiEditingResultResponse[]>('/api/ai_editing/');
+    return this.client.get<AiEditing.AiEditingResultResponse[]>('/api/ai_editing/');
   }
 
   /**

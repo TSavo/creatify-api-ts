@@ -1,8 +1,9 @@
 import { AudioProcessor } from '../../src/utils/audio-processor';
 import { mockTextToSpeechCreationResponse, mockTextToSpeechResults } from '../mocks/api-responses';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock fetch for testing
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 // Create a mock Response
 const mockJsonPromise = (data: any) => Promise.resolve(data);
@@ -20,7 +21,7 @@ describe('AudioProcessor', () => {
     audioProcessor = new AudioProcessor('test-api-id', 'test-api-key');
     
     // Clear mock history
-    (global.fetch as jest.Mock).mockClear();
+    (global.fetch as ReturnType<typeof vi.fn>).mockClear();
   });
   
   describe('constructor', () => {
@@ -40,7 +41,7 @@ describe('AudioProcessor', () => {
   
   describe('generateAudio', () => {
     it('should generate audio from text without waiting for completion', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockTextToSpeechCreationResponse));
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockTextToSpeechCreationResponse));
       
       const result = await audioProcessor.generateAudio(
         'Hello, this is a test of the audio processor.',
@@ -64,13 +65,13 @@ describe('AudioProcessor', () => {
     
     it('should generate audio from text and wait for completion', async () => {
       // Mock multiple fetch calls for the create and polling sequence
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockTextToSpeechCreationResponse))
         .mockImplementationOnce(() => mockFetchPromise(mockTextToSpeechResults.pending))
         .mockImplementationOnce(() => mockFetchPromise(mockTextToSpeechResults.done));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       // Start the async process
       const resultPromise = audioProcessor.generateAudio(
@@ -80,14 +81,14 @@ describe('AudioProcessor', () => {
       );
       
       // Fast forward timers to simulate waiting
-      jest.advanceTimersByTime(2000);
-      jest.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(2000);
       
       // Await the final result
       const result = await resultPromise;
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
       
       // Verify the fetch calls
       expect(global.fetch).toHaveBeenCalledTimes(3);
@@ -99,7 +100,7 @@ describe('AudioProcessor', () => {
   
   describe('checkAudioStatus', () => {
     it('should check the status of an audio generation task', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockTextToSpeechResults.done));
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockTextToSpeechResults.done));
       
       const result = await audioProcessor.checkAudioStatus('tts-123456');
       
@@ -117,26 +118,26 @@ describe('AudioProcessor', () => {
   describe('waitForAudioCompletion', () => {
     it('should poll for audio generation completion', async () => {
       // Mock multiple fetch calls for the polling sequence
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockTextToSpeechResults.pending))
         .mockImplementationOnce(() => mockFetchPromise(mockTextToSpeechResults.processing))
         .mockImplementationOnce(() => mockFetchPromise(mockTextToSpeechResults.done));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       // Start the async process
       const resultPromise = audioProcessor.waitForAudioCompletion('tts-123456', 1000);
       
       // Fast forward timers to simulate waiting
-      jest.advanceTimersByTime(1000);
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Await the final result
       const result = await resultPromise;
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
       
       // Verify the fetch calls
       expect(global.fetch).toHaveBeenCalledTimes(3);
@@ -156,23 +157,23 @@ describe('AudioProcessor', () => {
     
     it('should handle error responses', async () => {
       // Mock fetch to return an error response
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockTextToSpeechResults.error));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       // Start the async process
       const resultPromise = audioProcessor.waitForAudioCompletion('tts-123456', 1000);
       
       // Fast forward timers to simulate waiting
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Await the final result
       const result = await resultPromise;
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
       
       // Final result should be the error response
       expect(result).toEqual(mockTextToSpeechResults.error);
@@ -180,32 +181,32 @@ describe('AudioProcessor', () => {
     
     it('should throw an error if max attempts is reached', async () => {
       // Mock fetch to always return pending status
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementation(() => mockFetchPromise(mockTextToSpeechResults.pending));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       // Start the async process with only 3 max attempts
       const resultPromise = audioProcessor.waitForAudioCompletion('tts-123456', 1000, 3);
       
       // Fast forward timers to simulate waiting
       for (let i = 0; i < 3; i++) {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
       
       // Expect the function to throw an error due to timeout
       await expect(resultPromise).rejects.toThrow(/did not complete within the timeout period/);
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
   
   describe('listAudioTasks', () => {
     it('should list all audio generation tasks', async () => {
       const mockTtsList = [mockTextToSpeechResults.done, mockTextToSpeechResults.processing];
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockTtsList));
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockTtsList));
       
       const result = await audioProcessor.listAudioTasks();
       

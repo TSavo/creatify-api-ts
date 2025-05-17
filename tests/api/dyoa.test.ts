@@ -6,35 +6,44 @@ import {
   mockDyoaApproved,
   mockDyoaList
 } from '../mocks/api-responses';
+import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+// No need to mock fetch anymore
 // Mock fetch for testing
-global.fetch = jest.fn();
+// global.fetch = vi.fn();
 
-// Create a mock Response
-const mockJsonPromise = (data: any) => Promise.resolve(data);
-const mockFetchPromise = (data: any, status = 200) => 
-  Promise.resolve({
-    ok: status >= 200 && status < 300,
-    status,
-    json: () => mockJsonPromise(data)
-  } as Response);
+// Mock responses are handled by the mock client instead
+// const mockJsonPromise = (data: any) => Promise.resolve(data);
+// const mockFetchPromise = (data: any, status = 200) => 
+//   Promise.resolve({
+//     ok: status >= 200 && status < 300,
+//     status,
+//     json: () => mockJsonPromise(data)
+//   } as Response);
 
 describe('DyoaApi', () => {
   let dyoaApi: DyoaApi;
+  let mockClient: MockCreatifyApiClient;
   
   beforeEach(() => {
+    // Create a new instance of the DyoaApi with the mock factory
     dyoaApi = new DyoaApi({
       apiId: 'test-api-id',
       apiKey: 'test-api-key'
-    });
+    }, mockApiClientFactory);
     
-    // Clear mock history
-    (global.fetch as jest.Mock).mockClear();
+    // Get the mock client that was created
+    mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;
+    
+    // Reset mock history
+    mockClient.reset();
   });
   
   describe('createDyoa', () => {
     it('should create a DYOA with avatar details', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockDyoaCreationResponse));
+      // Mock the post method to return the expected response
+      mockClient.post.mockResolvedValueOnce(mockDyoaCreationResponse);
       
       const params = {
         name: 'Tech Expert Avatar',
@@ -47,21 +56,14 @@ describe('DyoaApi', () => {
       
       const result = await dyoaApi.createDyoa(params);
       
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.creatify.ai/api/dyoa/',
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify(params)
-        })
-      );
-      
+      expect(mockClient.post).toHaveBeenCalledWith('/api/dyoa/', params);
       expect(result).toEqual(mockDyoaCreationResponse);
     });
   });
   
   describe('getDyoa', () => {
     it('should fetch a DYOA by ID', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockDyoaWithPhotos));
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockDyoaWithPhotos));
       
       const result = await dyoaApi.getDyoa('dyoa-123456');
       
@@ -78,7 +80,7 @@ describe('DyoaApi', () => {
   
   describe('getDyoaList', () => {
     it('should fetch all DYOAs', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockDyoaList));
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockDyoaList));
       
       const result = await dyoaApi.getDyoaList();
       
@@ -95,7 +97,7 @@ describe('DyoaApi', () => {
   
   describe('submitDyoaForReview', () => {
     it('should submit a DYOA for review with the chosen photo', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockDyoaSubmittedForReview));
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockDyoaSubmittedForReview));
       
       const params = {
         chosen_photo_id: 'photo-1'
@@ -117,7 +119,7 @@ describe('DyoaApi', () => {
   
   describe('deleteDyoa', () => {
     it('should delete a DYOA', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise({}));
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise({}));
       
       await dyoaApi.deleteDyoa('dyoa-123456');
       
@@ -133,13 +135,13 @@ describe('DyoaApi', () => {
   describe('createAndWaitForDyoaPhotos', () => {
     it('should create a DYOA and wait for photos to be generated', async () => {
       // Mock multiple fetch calls for the create and polling sequence
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockDyoaCreationResponse))
         .mockImplementationOnce(() => mockFetchPromise({...mockDyoaCreationResponse, status: 'initializing'}))
         .mockImplementationOnce(() => mockFetchPromise(mockDyoaWithPhotos));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       const params = {
         name: 'Tech Expert Avatar',
@@ -154,14 +156,14 @@ describe('DyoaApi', () => {
       const resultPromise = dyoaApi.createAndWaitForDyoaPhotos(params, 1000);
       
       // Fast forward timers to simulate waiting
-      jest.advanceTimersByTime(1000);
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Await the final result
       const result = await resultPromise;
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
       
       // Verify the fetch calls
       expect(global.fetch).toHaveBeenCalledTimes(3);
@@ -191,12 +193,12 @@ describe('DyoaApi', () => {
     
     it('should throw an error if max attempts is reached without photos', async () => {
       // Mock fetch to always return DYOA without photos
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockDyoaCreationResponse))
         .mockImplementation(() => mockFetchPromise({...mockDyoaCreationResponse, status: 'initializing'}));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       const params = {
         name: 'Tech Expert Avatar',
@@ -212,21 +214,21 @@ describe('DyoaApi', () => {
       
       // Fast forward timers to simulate waiting
       for (let i = 0; i < 3; i++) {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
       
       // Expect the function to throw an error due to timeout
       await expect(resultPromise).rejects.toThrow(/photos were not generated within the timeout period/);
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
   
   describe('createSubmitAndWaitForDyoa', () => {
     it('should create a DYOA, wait for photos, submit for review and wait for approval', async () => {
       // Mock multiple fetch calls for the create, photo generation, submission, and review sequence
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockDyoaCreationResponse))
         .mockImplementationOnce(() => mockFetchPromise(mockDyoaWithPhotos)) // Photos generated
         .mockImplementationOnce(() => mockFetchPromise(mockDyoaSubmittedForReview)) // Submitted for review
@@ -234,7 +236,7 @@ describe('DyoaApi', () => {
         .mockImplementationOnce(() => mockFetchPromise(mockDyoaApproved)); // Approved
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       const params = {
         name: 'Tech Expert Avatar',
@@ -256,17 +258,17 @@ describe('DyoaApi', () => {
       );
       
       // Fast forward timers to simulate waiting for photos
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Fast forward timers to simulate waiting for review
-      jest.advanceTimersByTime(1000);
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Await the final result
       const result = await resultPromise;
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
       
       // Verify the fetch calls
       expect(global.fetch).toHaveBeenCalledTimes(5);
@@ -277,7 +279,7 @@ describe('DyoaApi', () => {
     
     it('should throw an error if no photos are generated', async () => {
       // Mock fetch to return DYOA with no photos
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockDyoaCreationResponse))
         .mockImplementationOnce(() => mockFetchPromise({
           ...mockDyoaCreationResponse,
@@ -286,7 +288,7 @@ describe('DyoaApi', () => {
         }));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       const params = {
         name: 'Tech Expert Avatar',
@@ -308,25 +310,25 @@ describe('DyoaApi', () => {
       );
       
       // Fast forward timers
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Expect the function to throw an error due to no photos
       await expect(resultPromise).rejects.toThrow(/No photos were generated for the DYOA/);
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
     
     it('should throw an error if review does not complete within timeout', async () => {
       // Mock fetch calls with stuck pending review
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockDyoaCreationResponse))
         .mockImplementationOnce(() => mockFetchPromise(mockDyoaWithPhotos))
         .mockImplementationOnce(() => mockFetchPromise(mockDyoaSubmittedForReview))
         .mockImplementation(() => mockFetchPromise(mockDyoaSubmittedForReview)); // Always pending
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       const params = {
         name: 'Tech Expert Avatar',
@@ -348,17 +350,17 @@ describe('DyoaApi', () => {
       );
       
       // Fast forward timers for photo generation
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Fast forward timers for review polling
-      jest.advanceTimersByTime(1000);
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Expect the function to throw an error due to review timeout
       await expect(resultPromise).rejects.toThrow(/review did not complete within the timeout period/);
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 });

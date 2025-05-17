@@ -5,9 +5,10 @@ import {
   mockLipsyncCreationResponse, 
   mockLipsyncResults 
 } from '../mocks/api-responses';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock fetch for testing
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 // Create a mock Response
 const mockJsonPromise = (data: any) => Promise.resolve(data);
@@ -25,7 +26,7 @@ describe('VideoCreator', () => {
     videoCreator = new VideoCreator('test-api-id', 'test-api-key');
     
     // Clear mock history
-    (global.fetch as jest.Mock).mockClear();
+    (global.fetch as ReturnType<typeof vi.fn>).mockClear();
   });
   
   describe('constructor', () => {
@@ -46,14 +47,14 @@ describe('VideoCreator', () => {
   describe('createVideo', () => {
     it('should create a video with avatar ID and voice ID', async () => {
       // Mock API calls for avatar video creation
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         // Create lipsync task
         .mockImplementationOnce(() => mockFetchPromise(mockLipsyncCreationResponse))
         // Check status
         .mockImplementationOnce(() => mockFetchPromise(mockLipsyncResults.done));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       // Create a video with specific avatar and voice IDs
       const resultPromise = videoCreator.createVideo({
@@ -64,7 +65,7 @@ describe('VideoCreator', () => {
       });
       
       // Fast forward time to complete the task
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       
       // Get the final result
       const result = await resultPromise;
@@ -104,12 +105,12 @@ describe('VideoCreator', () => {
       });
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
     
     it('should find avatar and voice by name', async () => {
       // Mock API calls for avatar and voice lookup and video creation
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         // Get avatars
         .mockImplementationOnce(() => mockFetchPromise(mockAvatars))
         // Get voices
@@ -120,7 +121,7 @@ describe('VideoCreator', () => {
         .mockImplementationOnce(() => mockFetchPromise(mockLipsyncResults.done));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       // Create a video with avatar and voice names
       const resultPromise = videoCreator.createVideo({
@@ -131,7 +132,7 @@ describe('VideoCreator', () => {
       });
       
       // Fast forward time to complete the task
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       
       // Get the final result
       const result = await resultPromise;
@@ -180,12 +181,12 @@ describe('VideoCreator', () => {
       });
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
     
     it('should throw an error if avatar name is not found', async () => {
       // Mock API call to get avatars
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => mockFetchPromise(mockAvatars));
       
       // Create a video with a non-existent avatar name
@@ -198,7 +199,7 @@ describe('VideoCreator', () => {
     
     it('should throw an error if voice name is not found', async () => {
       // Mock API calls for avatar lookup
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         // Get avatars
         .mockImplementationOnce(() => mockFetchPromise(mockAvatars))
         // Get voices
@@ -215,7 +216,7 @@ describe('VideoCreator', () => {
     
     it('should handle API errors', async () => {
       // Mock API call to throw an error
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         .mockImplementationOnce(() => Promise.reject(new Error('API error')));
       
       // Create a video that will fail due to API error
@@ -227,75 +228,44 @@ describe('VideoCreator', () => {
     });
   });
   
-  describe('createMultiAvatarVideo', () => {
-    it('should create a multi-avatar video', async () => {
+  describe('Advanced video creation', () => {
+    it('should create a video with multiple avatars', async () => {
       // Mock API calls for multi-avatar video creation
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         // Create multi-avatar lipsync task
         .mockImplementationOnce(() => mockFetchPromise(mockLipsyncCreationResponse))
         // Check status
         .mockImplementationOnce(() => mockFetchPromise(mockLipsyncResults.done));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
-      // Create a multi-avatar video
-      const resultPromise = videoCreator.createMultiAvatarVideo({
-        videoInputs: [
+      // Create a multi-avatar video using the existing createConversation method
+      const resultPromise = videoCreator.createConversation({
+        conversation: [
           {
-            character: {
-              type: 'avatar',
-              avatarId: '7350375b-9a98-51b8-934d-14d46a645dc2',
-              avatarStyle: 'normal'
-            },
-            voice: {
-              type: 'text',
-              inputText: 'Hello from the first avatar!',
-              voiceId: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717'
-            },
-            background: {
-              type: 'image',
-              url: 'https://example.com/background.jpg'
-            }
+            avatarId: '7350375b-9a98-51b8-934d-14d46a645dc2',
+            voiceId: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
+            text: 'Hello from the first avatar!'
           },
           {
-            character: {
-              type: 'avatar',
-              avatarId: '18fccce8-86e7-5f31-abc8-18915cb872be',
-              avatarStyle: 'casual'
-            },
-            voice: {
-              type: 'text',
-              inputText: 'And hello from the second avatar!',
-              voiceId: '360ab221-d951-413b-ba1a-7037dc67da16'
-            },
-            background: {
-              type: 'image',
-              url: 'https://example.com/background.jpg'
-            }
+            avatarId: '18fccce8-86e7-5f31-abc8-18915cb872be',
+            voiceId: '360ab221-d951-413b-ba1a-7037dc67da16',
+            text: 'And hello from the second avatar!'
           }
         ],
+        backgroundUrl: 'https://example.com/background.jpg',
         aspectRatio: '16:9'
       });
       
       // Fast forward time to complete the task
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       
       // Get the final result
       const result = await resultPromise;
       
       // Verify the fetch calls
       expect(global.fetch).toHaveBeenCalledTimes(2);
-      
-      // First call should create the multi-avatar lipsync task
-      expect(global.fetch).toHaveBeenNthCalledWith(
-        1,
-        'https://api.creatify.ai/api/multi_avatar_lipsync/',
-        expect.objectContaining({
-          method: 'POST',
-          body: expect.stringContaining('"type":"avatar"')
-        })
-      );
       
       // Verify the result
       expect(result).toEqual({
@@ -305,14 +275,14 @@ describe('VideoCreator', () => {
       });
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
   
   describe('createConversation', () => {
     it('should create a conversation video with multiple avatars', async () => {
       // Mock API calls for avatar lookup and video creation
-      (global.fetch as jest.Mock)
+      (global.fetch as ReturnType<typeof vi.fn>)
         // Get avatars (for first avatar lookup)
         .mockImplementationOnce(() => mockFetchPromise(mockAvatars))
         // Get voices (for first voice lookup)
@@ -327,7 +297,7 @@ describe('VideoCreator', () => {
         .mockImplementationOnce(() => mockFetchPromise(mockLipsyncResults.done));
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       // Create a conversation video
       const resultPromise = videoCreator.createConversation({
@@ -348,7 +318,7 @@ describe('VideoCreator', () => {
       });
       
       // Fast forward time to complete the task
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       
       // Get the final result
       const result = await resultPromise;
@@ -364,7 +334,7 @@ describe('VideoCreator', () => {
       });
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 });

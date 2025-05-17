@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AvatarApi } from '../../src/api/avatar';
 import { 
   mockAvatars, 
@@ -5,73 +6,70 @@ import {
   mockLipsyncCreationResponse, 
   mockLipsyncResults 
 } from '../mocks/api-responses';
-
-// Mock fetch for testing
-global.fetch = jest.fn();
-
-// Create a mock Response
-const mockJsonPromise = (data: any) => Promise.resolve(data);
-const mockFetchPromise = (data: any, status = 200) => 
-  Promise.resolve({
-    ok: status >= 200 && status < 300,
-    status,
-    json: () => mockJsonPromise(data)
-  } as Response);
+import { MockCreatifyApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
 
 describe('AvatarApi', () => {
   let avatarApi: AvatarApi;
+  let mockClientFactory: MockCreatifyApiClientFactory;
+  let mockClient: MockCreatifyApiClient;
   
   beforeEach(() => {
-    avatarApi = new AvatarApi({
-      apiId: 'test-api-id',
-      apiKey: 'test-api-key'
-    });
+    // Create a new factory instance for each test
+    mockClientFactory = new MockCreatifyApiClientFactory();
     
-    // Clear mock history
-    (global.fetch as jest.Mock).mockClear();
+    // Create the API with our mock factory
+    avatarApi = new AvatarApi(
+      {
+        apiId: 'test-api-id',
+        apiKey: 'test-api-key'
+      },
+      mockClientFactory
+    );
+    
+    // Get the mock client instance that was created
+    mockClient = mockClientFactory.getLastCreatedClient() as MockCreatifyApiClient;
   });
   
   describe('getAvatars', () => {
     it('should fetch available avatars', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockAvatars));
+      // Mock the client's get method to return our mock data
+      mockClient.get.mockResolvedValueOnce(mockAvatars);
       
       const result = await avatarApi.getAvatars();
       
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.creatify.ai/api/creators/',
-        expect.objectContaining({
-          method: 'GET',
-          headers: expect.objectContaining({
-            'X-API-ID': 'test-api-id',
-            'X-API-KEY': 'test-api-key'
-          })
-        })
-      );
+      // Verify the client was called correctly
+      expect(mockClient.get).toHaveBeenCalledWith('/api/personas/', undefined);
       
-      expect(result).toEqual(mockAvatars);
+      // Verify the result
+      expect(result).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          avatar_id: expect.any(String),
+          name: expect.any(String)
+        })
+      ]));
     });
   });
   
   describe('getVoices', () => {
     it('should fetch available voices', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockVoices));
+      // Mock the client's get method to return our mock data
+      mockClient.get.mockResolvedValueOnce(mockVoices);
       
       const result = await avatarApi.getVoices();
       
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.creatify.ai/api/voices/',
-        expect.objectContaining({
-          method: 'GET'
-        })
-      );
+      // Verify the client was called correctly
+      expect(mockClient.get).toHaveBeenCalledWith('/api/voices/');
       
+      // Verify the result
       expect(result).toEqual(mockVoices);
     });
   });
   
+  
   describe('createLipsync', () => {
     it('should create a lipsync video', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockLipsyncCreationResponse));
+      // Mock the response
+      mockClient.post.mockResolvedValueOnce(mockLipsyncCreationResponse);
       
       const params = {
         text: 'Hello world!',
@@ -82,31 +80,25 @@ describe('AvatarApi', () => {
       
       const result = await avatarApi.createLipsync(params);
       
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.creatify.ai/api/lipsync/',
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify(params)
-        })
-      );
+      // Verify the client was called correctly
+      expect(mockClient.post).toHaveBeenCalledWith('/api/lipsyncs/', params);
       
+      // Verify the result
       expect(result).toEqual(mockLipsyncCreationResponse);
     });
   });
   
   describe('getLipsync', () => {
     it('should fetch a lipsync task by ID', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockLipsyncResults.done));
+      // Mock the response
+      mockClient.get.mockResolvedValueOnce(mockLipsyncResults.done);
       
       const result = await avatarApi.getLipsync('lipsync-123456');
       
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.creatify.ai/api/lipsync/lipsync-123456/',
-        expect.objectContaining({
-          method: 'GET'
-        })
-      );
+      // Verify the client was called correctly
+      expect(mockClient.get).toHaveBeenCalledWith('/api/lipsyncs/lipsync-123456/');
       
+      // Verify the result
       expect(result).toEqual(mockLipsyncResults.done);
     });
   });
@@ -114,24 +106,24 @@ describe('AvatarApi', () => {
   describe('getLipsyncs', () => {
     it('should fetch all lipsync tasks', async () => {
       const mockLipsyncList = [mockLipsyncResults.done, mockLipsyncResults.processing];
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockLipsyncList));
+      
+      // Mock the response
+      mockClient.get.mockResolvedValueOnce(mockLipsyncList);
       
       const result = await avatarApi.getLipsyncs();
       
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.creatify.ai/api/lipsync/',
-        expect.objectContaining({
-          method: 'GET'
-        })
-      );
+      // Verify the client was called correctly
+      expect(mockClient.get).toHaveBeenCalledWith('/api/lipsyncs/');
       
+      // Verify the result
       expect(result).toEqual(mockLipsyncList);
     });
   });
   
   describe('createMultiAvatarLipsync', () => {
     it('should create a multi-avatar lipsync video', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(() => mockFetchPromise(mockLipsyncCreationResponse));
+      // Mock the response
+      mockClient.post.mockResolvedValueOnce(mockLipsyncCreationResponse);
       
       const params = {
         video_inputs: [
@@ -173,29 +165,25 @@ describe('AvatarApi', () => {
       
       const result = await avatarApi.createMultiAvatarLipsync(params);
       
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.creatify.ai/api/multi_avatar_lipsync/',
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify(params)
-        })
-      );
+      // Verify the client was called correctly
+      expect(mockClient.post).toHaveBeenCalledWith('/api/lipsyncs/multi_avatar/', params);
       
+      // Verify the result
       expect(result).toEqual(mockLipsyncCreationResponse);
     });
   });
   
   describe('createAndWaitForLipsync', () => {
     it('should create a lipsync and wait for completion', async () => {
-      // Mock multiple fetch calls for the create and polling sequence
-      (global.fetch as jest.Mock)
-        .mockImplementationOnce(() => mockFetchPromise(mockLipsyncCreationResponse))
-        .mockImplementationOnce(() => mockFetchPromise(mockLipsyncResults.pending))
-        .mockImplementationOnce(() => mockFetchPromise(mockLipsyncResults.processing))
-        .mockImplementationOnce(() => mockFetchPromise(mockLipsyncResults.done));
+      // Mock the responses in sequence
+      mockClient.post.mockResolvedValueOnce(mockLipsyncCreationResponse);
+      mockClient.get
+        .mockResolvedValueOnce(mockLipsyncResults.pending)
+        .mockResolvedValueOnce(mockLipsyncResults.processing)
+        .mockResolvedValueOnce(mockLipsyncResults.done);
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       const params = {
         text: 'Hello world!',
@@ -206,50 +194,34 @@ describe('AvatarApi', () => {
       const resultPromise = avatarApi.createAndWaitForLipsync(params, 1000);
       
       // Fast forward timers to simulate waiting
-      jest.advanceTimersByTime(1000);
-      jest.advanceTimersByTime(1000);
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       
       // Await the final result
       const result = await resultPromise;
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
       
-      // Verify the fetch calls
-      expect(global.fetch).toHaveBeenCalledTimes(4);
+      // Verify the client calls
+      expect(mockClient.post).toHaveBeenCalledWith('/api/lipsyncs/', params);
       
-      // First call should create the lipsync
-      expect(global.fetch).toHaveBeenNthCalledWith(
-        1,
-        'https://api.creatify.ai/api/lipsync/',
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify(params)
-        })
-      );
-      
-      // Subsequent calls should poll for status
-      expect(global.fetch).toHaveBeenNthCalledWith(
-        2,
-        'https://api.creatify.ai/api/lipsync/lipsync-123456/',
-        expect.objectContaining({
-          method: 'GET'
-        })
-      );
+      // Should call get multiple times to check status
+      expect(mockClient.get).toHaveBeenCalledTimes(3);
+      expect(mockClient.get).toHaveBeenCalledWith('/api/lipsyncs/lipsync-123456/');
       
       // Final result should be the completed lipsync
       expect(result).toEqual(mockLipsyncResults.done);
     });
     
     it('should throw an error if max attempts is reached', async () => {
-      // Mock fetch to always return pending status
-      (global.fetch as jest.Mock)
-        .mockImplementationOnce(() => mockFetchPromise(mockLipsyncCreationResponse))
-        .mockImplementation(() => mockFetchPromise(mockLipsyncResults.pending));
+      // Mock the create response and pending status for all get calls
+      mockClient.post.mockResolvedValueOnce(mockLipsyncCreationResponse);
+      mockClient.get.mockResolvedValue(mockLipsyncResults.pending);
       
       // Mock timers
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       
       const params = {
         text: 'Hello world!',
@@ -261,14 +233,14 @@ describe('AvatarApi', () => {
       
       // Fast forward timers to simulate waiting
       for (let i = 0; i < 3; i++) {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
       
       // Expect the function to throw an error due to timeout
       await expect(resultPromise).rejects.toThrow(/did not complete within the timeout period/);
       
       // Restore timers
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 });
