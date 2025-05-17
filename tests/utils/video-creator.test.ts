@@ -6,32 +6,95 @@ import {
   mockLipsyncResults 
 } from '../mocks/api-responses';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { mockApiClientFactory } from '../mocks/mock-api-client';
 
-// Mock fetch for testing
-global.fetch = vi.fn();
-
-// Create a mock Response
-const mockJsonPromise = (data: any) => Promise.resolve(data);
-const mockFetchPromise = (data: any, status = 200) => 
-  Promise.resolve({
-    ok: status >= 200 && status < 300,
-    status,
-    json: () => mockJsonPromise(data)
-  } as Response);
-
+/**
+ * NOTE: This test file uses a legacy approach to testing the VideoCreator class
+ * by mocking the client factory. For a more reliable and maintainable approach,
+ * see the video-creator-direct-mock.test.ts file, which directly mocks the AvatarApi class.
+ * 
+ * This file is kept for reference, but new tests should be added to the direct mock approach.
+ */
 describe('VideoCreator', () => {
   let videoCreator: VideoCreator;
+  let mockClient: any;
   
   beforeEach(() => {
-    videoCreator = new VideoCreator('test-api-id', 'test-api-key');
+    // Reset mock history
+    mockClient = mockApiClientFactory.getLastCreatedClient();
+    if (mockClient) {
+      mockClient.reset();
+    }
     
-    // Clear mock history
-    (global.fetch as ReturnType<typeof vi.fn>).mockClear();
+    // Set up default mock behaviors
+    mockClient = mockApiClientFactory.createClient({
+      apiId: 'test-api-id',
+      apiKey: 'test-api-key'
+    });
+    
+    // Setup standard mock responses
+    mockClient.get.mockImplementation((endpoint: string) => {
+      if (endpoint === '/api/personas/') {
+        return Promise.resolve([
+          {
+            avatar_id: '7350375b-9a98-51b8-934d-14d46a645dc2',
+            id: '7350375b-9a98-51b8-934d-14d46a645dc2',
+            name: 'John',
+            gender: 'm',
+            age_range: 'adult'
+          },
+          {
+            avatar_id: '18fccce8-86e7-5f31-abc8-18915cb872be',
+            id: '18fccce8-86e7-5f31-abc8-18915cb872be',
+            name: 'Emma',
+            gender: 'f',
+            age_range: 'adult'
+          }
+        ]);
+      }
+      if (endpoint === '/api/voices/') {
+        return Promise.resolve([
+          {
+            voice_id: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
+            name: 'English Male',
+            language: 'en',
+            gender: 'male'
+          },
+          {
+            voice_id: '360ab221-d951-413b-ba1a-7037dc67da16',
+            name: 'English Female',
+            language: 'en',
+            gender: 'female'
+          }
+        ]);
+      }
+      if (endpoint.startsWith('/api/lipsyncs/')) {
+        return Promise.resolve({
+          id: 'lipsync-123456',
+          status: 'done',
+          output: 'https://example.com/videos/lipsync-123456.mp4'
+        });
+      }
+      return Promise.resolve({});
+    });
+    
+    mockClient.post.mockImplementation((endpoint: string) => {
+      if (endpoint === '/api/lipsyncs/' || endpoint === '/api/lipsyncs/multi_avatar/') {
+        return Promise.resolve({
+          id: 'lipsync-123456',
+          status: 'pending'
+        });
+      }
+      return Promise.resolve({});
+    });
+    
+    // Create VideoCreator with mock client factory
+    videoCreator = new VideoCreator('test-api-id', 'test-api-key', mockApiClientFactory);
   });
   
   describe('constructor', () => {
     it('should initialize with API credentials as separate parameters', () => {
-      const creator = new VideoCreator('test-api-id', 'test-api-key');
+      const creator = new VideoCreator('test-api-id', 'test-api-key', mockApiClientFactory);
       expect(creator).toBeDefined();
     });
     
@@ -39,20 +102,13 @@ describe('VideoCreator', () => {
       const creator = new VideoCreator({
         apiId: 'test-api-id',
         apiKey: 'test-api-key'
-      });
+      }, undefined, mockApiClientFactory);
       expect(creator).toBeDefined();
     });
   });
   
   describe('createVideo', () => {
     it('should create a video with avatar ID and voice ID', async () => {
-      // Mock API calls for avatar video creation
-      (global.fetch as ReturnType<typeof vi.fn>)
-        // Create lipsync task
-        .mockImplementationOnce(() => mockFetchPromise(mockLipsyncCreationResponse))
-        // Check status
-        .mockImplementationOnce(() => mockFetchPromise(mockLipsyncResults.done));
-      
       // Mock timers
       vi.useFakeTimers();
       
@@ -70,31 +126,19 @@ describe('VideoCreator', () => {
       // Get the final result
       const result = await resultPromise;
       
-      // Verify the fetch calls
-      expect(global.fetch).toHaveBeenCalledTimes(2);
+      // Verify the mock calls
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
       
       // First call should create the lipsync task
-      expect(global.fetch).toHaveBeenNthCalledWith(
+      expect(mockClient.post).toHaveBeenNthCalledWith(
         1,
-        'https://api.creatify.ai/api/lipsync/',
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify({
-            text: 'Hello! This is a test video created with the Creatify API.',
-            creator: '7350375b-9a98-51b8-934d-14d46a645dc2',
-            voice_id: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
-            aspect_ratio: '16:9'
-          })
-        })
-      );
-      
-      // Second call should check the status
-      expect(global.fetch).toHaveBeenNthCalledWith(
-        2,
-        'https://api.creatify.ai/api/lipsync/lipsync-123456/',
-        expect.objectContaining({
-          method: 'GET'
-        })
+        '/api/lipsyncs/',
+        {
+          text: 'Hello! This is a test video created with the Creatify API.',
+          creator: '7350375b-9a98-51b8-934d-14d46a645dc2',
+          voice_id: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
+          aspect_ratio: '16:9'
+        }
       );
       
       // Verify the result
@@ -109,16 +153,47 @@ describe('VideoCreator', () => {
     });
     
     it('should find avatar and voice by name', async () => {
-      // Mock API calls for avatar and voice lookup and video creation
-      (global.fetch as ReturnType<typeof vi.fn>)
-        // Get avatars
-        .mockImplementationOnce(() => mockFetchPromise(mockAvatars))
-        // Get voices
-        .mockImplementationOnce(() => mockFetchPromise(mockVoices))
-        // Create lipsync task
-        .mockImplementationOnce(() => mockFetchPromise(mockLipsyncCreationResponse))
-        // Check status
-        .mockImplementationOnce(() => mockFetchPromise(mockLipsyncResults.done));
+      // Setup mock avatar response
+      mockClient.get.mockImplementation((endpoint: string) => {
+        if (endpoint === '/api/personas/') {
+          return Promise.resolve([
+            {
+              avatar_id: '7350375b-9a98-51b8-934d-14d46a645dc2',
+              id: '7350375b-9a98-51b8-934d-14d46a645dc2',
+              name: 'John',
+              gender: 'm',
+              age_range: 'adult'
+            },
+            {
+              avatar_id: '18fccce8-86e7-5f31-abc8-18915cb872be',
+              id: '18fccce8-86e7-5f31-abc8-18915cb872be',
+              name: 'Emma',
+              gender: 'f',
+              age_range: 'adult'
+            }
+          ]);
+        }
+        if (endpoint === '/api/voices/') {
+          return Promise.resolve([
+            {
+              voice_id: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
+              name: 'English Male',
+              language: 'en',
+              gender: 'male'
+            },
+            {
+              voice_id: '360ab221-d951-413b-ba1a-7037dc67da16',
+              name: 'English Female',
+              language: 'en',
+              gender: 'female'
+            }
+          ]);
+        }
+        if (endpoint.startsWith('/api/lipsyncs/')) {
+          return Promise.resolve(mockLipsyncResults.done);
+        }
+        return Promise.resolve({});
+      });
       
       // Mock timers
       vi.useFakeTimers();
@@ -138,39 +213,36 @@ describe('VideoCreator', () => {
       const result = await resultPromise;
       
       // Verify the fetch calls
-      expect(global.fetch).toHaveBeenCalledTimes(4);
+      expect(mockClient.get).toHaveBeenCalledTimes(3);
       
       // First call should get the list of avatars
-      expect(global.fetch).toHaveBeenNthCalledWith(
+      expect(mockClient.get).toHaveBeenNthCalledWith(
         1,
-        'https://api.creatify.ai/api/creators/',
-        expect.objectContaining({
-          method: 'GET'
-        })
+        '/api/personas/'
       );
       
       // Second call should get the list of voices
-      expect(global.fetch).toHaveBeenNthCalledWith(
+      expect(mockClient.get).toHaveBeenNthCalledWith(
         2,
-        'https://api.creatify.ai/api/voices/',
-        expect.objectContaining({
-          method: 'GET'
-        })
+        '/api/voices/'
       );
       
-      // Third call should create the lipsync task with the found avatar and voice IDs
-      expect(global.fetch).toHaveBeenNthCalledWith(
+      // Third call should check the lipsync status
+      expect(mockClient.get).toHaveBeenNthCalledWith(
         3,
-        'https://api.creatify.ai/api/lipsync/',
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify({
-            text: 'Hello! This is a test video created with the Creatify API.',
-            creator: '7350375b-9a98-51b8-934d-14d46a645dc2',
-            voice_id: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
-            aspect_ratio: '16:9'
-          })
-        })
+        '/api/lipsyncs/lipsync-123456/'
+      );
+      
+      // Verify the post call to create the lipsync
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/api/lipsyncs/',
+        {
+          text: 'Hello! This is a test video created with the Creatify API.',
+          creator: '7350375b-9a98-51b8-934d-14d46a645dc2',
+          voice_id: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
+          aspect_ratio: '16:9'
+        }
       );
       
       // Verify the result
@@ -185,11 +257,9 @@ describe('VideoCreator', () => {
     });
     
     it('should throw an error if avatar name is not found', async () => {
-      // Mock API call to get avatars
-      (global.fetch as ReturnType<typeof vi.fn>)
-        .mockImplementationOnce(() => mockFetchPromise(mockAvatars));
+      // Create a video with a non-existent avatar name after preloading the avatars
+      await videoCreator.loadAvatars();
       
-      // Create a video with a non-existent avatar name
       await expect(videoCreator.createVideo({
         avatarName: 'NonExistentAvatar',
         script: 'Hello! This is a test video.',
@@ -198,12 +268,9 @@ describe('VideoCreator', () => {
     });
     
     it('should throw an error if voice name is not found', async () => {
-      // Mock API calls for avatar lookup
-      (global.fetch as ReturnType<typeof vi.fn>)
-        // Get avatars
-        .mockImplementationOnce(() => mockFetchPromise(mockAvatars))
-        // Get voices
-        .mockImplementationOnce(() => mockFetchPromise(mockVoices));
+      // Preload avatars and voices first
+      await videoCreator.loadAvatars();
+      await videoCreator.loadVoices();
       
       // Create a video with a non-existent voice name
       await expect(videoCreator.createVideo({
@@ -216,8 +283,16 @@ describe('VideoCreator', () => {
     
     it('should handle API errors', async () => {
       // Mock API call to throw an error
-      (global.fetch as ReturnType<typeof vi.fn>)
-        .mockImplementationOnce(() => Promise.reject(new Error('API error')));
+      mockClient.post.mockImplementationOnce(() => {
+        throw new Error('API error');
+      });
+      
+      // We need to mock loadAvatars to prevent it from failing before the post request
+      videoCreator.loadAvatars = vi.fn().mockResolvedValue([{
+        avatar_id: '7350375b-9a98-51b8-934d-14d46a645dc2',
+        id: '7350375b-9a98-51b8-934d-14d46a645dc2',
+        name: 'John'
+      }]);
       
       // Create a video that will fail due to API error
       await expect(videoCreator.createVideo({
@@ -231,11 +306,12 @@ describe('VideoCreator', () => {
   describe('Advanced video creation', () => {
     it('should create a video with multiple avatars', async () => {
       // Mock API calls for multi-avatar video creation
-      (global.fetch as ReturnType<typeof vi.fn>)
-        // Create multi-avatar lipsync task
-        .mockImplementationOnce(() => mockFetchPromise(mockLipsyncCreationResponse))
-        // Check status
-        .mockImplementationOnce(() => mockFetchPromise(mockLipsyncResults.done));
+      mockClient.post.mockImplementation((endpoint: string) => {
+        if (endpoint === '/api/lipsyncs/multi_avatar/') {
+          return Promise.resolve(mockLipsyncCreationResponse);
+        }
+        return Promise.resolve({});
+      });
       
       // Mock timers
       vi.useFakeTimers();
@@ -264,8 +340,8 @@ describe('VideoCreator', () => {
       // Get the final result
       const result = await resultPromise;
       
-      // Verify the fetch calls
-      expect(global.fetch).toHaveBeenCalledTimes(2);
+      // Verify the mock calls
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
       
       // Verify the result
       expect(result).toEqual({
@@ -282,19 +358,46 @@ describe('VideoCreator', () => {
   describe('createConversation', () => {
     it('should create a conversation video with multiple avatars', async () => {
       // Mock API calls for avatar lookup and video creation
-      (global.fetch as ReturnType<typeof vi.fn>)
-        // Get avatars (for first avatar lookup)
-        .mockImplementationOnce(() => mockFetchPromise(mockAvatars))
-        // Get voices (for first voice lookup)
-        .mockImplementationOnce(() => mockFetchPromise(mockVoices))
-        // Get avatars (for second avatar lookup)
-        .mockImplementationOnce(() => mockFetchPromise(mockAvatars))
-        // Get voices (for second voice lookup)
-        .mockImplementationOnce(() => mockFetchPromise(mockVoices))
-        // Create multi-avatar lipsync task
-        .mockImplementationOnce(() => mockFetchPromise(mockLipsyncCreationResponse))
-        // Check status
-        .mockImplementationOnce(() => mockFetchPromise(mockLipsyncResults.done));
+      mockClient.get.mockImplementation((endpoint: string) => {
+        if (endpoint === '/api/personas/') {
+          return Promise.resolve([
+            {
+              avatar_id: '7350375b-9a98-51b8-934d-14d46a645dc2',
+              id: '7350375b-9a98-51b8-934d-14d46a645dc2',
+              name: 'John',
+              gender: 'm',
+              age_range: 'adult'
+            },
+            {
+              avatar_id: '18fccce8-86e7-5f31-abc8-18915cb872be',
+              id: '18fccce8-86e7-5f31-abc8-18915cb872be',
+              name: 'Emma',
+              gender: 'f',
+              age_range: 'adult'
+            }
+          ]);
+        }
+        if (endpoint === '/api/voices/') {
+          return Promise.resolve([
+            {
+              voice_id: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
+              name: 'English Male',
+              language: 'en',
+              gender: 'male'
+            },
+            {
+              voice_id: '360ab221-d951-413b-ba1a-7037dc67da16',
+              name: 'English Female',
+              language: 'en',
+              gender: 'female'
+            }
+          ]);
+        }
+        if (endpoint.startsWith('/api/lipsyncs/')) {
+          return Promise.resolve(mockLipsyncResults.done);
+        }
+        return Promise.resolve({});
+      });
       
       // Mock timers
       vi.useFakeTimers();
@@ -323,8 +426,15 @@ describe('VideoCreator', () => {
       // Get the final result
       const result = await resultPromise;
       
-      // Verify the fetch calls
-      expect(global.fetch).toHaveBeenCalledTimes(6);
+      // Verify the mock calls
+      expect(mockClient.get).toHaveBeenCalledTimes(5); // 2 avatar lookups, 2 voice lookups, 1 status check
+      
+      // Verify the post call for the multi-avatar lipsync
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
+      expect(mockClient.post).toHaveBeenCalledWith('/api/lipsyncs/multi_avatar/', expect.objectContaining({
+        video_inputs: expect.any(Array),
+        aspect_ratio: '16:9'
+      }));
       
       // Verify the result
       expect(result).toEqual({
