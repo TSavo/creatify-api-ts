@@ -32,13 +32,23 @@ export class AvatarApi {
     location?: 'outdoor' | 'fantasy' | 'indoor' | 'other',
     style?: 'selfie' | 'presenter' | 'other'
   }): Promise<Avatar.AvatarInfo[]> {
-    const avatars = await this.client.get<Avatar.AvatarInfo[]>('/api/personas/', filters);
-    
-    // Add avatar_id property for backward compatibility
-    return avatars.map(avatar => ({
-      ...avatar,
-      avatar_id: avatar.id
-    }));
+    try {
+      const avatars = await this.client.get<Avatar.AvatarInfo[]>('/api/personas/', filters);
+      
+      // Ensure avatars is an array
+      if (!Array.isArray(avatars)) {
+        return [];
+      }
+      
+      // Add avatar_id property for backward compatibility
+      return avatars.map(avatar => ({
+        ...avatar,
+        avatar_id: avatar.id
+      }));
+    } catch (error) {
+      console.error('Error fetching avatars:', error);
+      return [];
+    }
   }
 
   /**
@@ -77,7 +87,19 @@ export class AvatarApi {
    * @see https://docs.creatify.ai/api-reference/voices/get-apivoices
    */
   async getVoices(): Promise<Avatar.VoiceInfo[]> {
-    return this.client.get<Avatar.VoiceInfo[]>('/api/voices/');
+    try {
+      const voices = await this.client.get<Avatar.VoiceInfo[]>('/api/voices/');
+      
+      // Ensure voices is an array
+      if (!Array.isArray(voices)) {
+        return [];
+      }
+      
+      return voices;
+    } catch (error) {
+      console.error('Error fetching voices:', error);
+      return [];
+    }
   }
 
   /**
@@ -87,7 +109,12 @@ export class AvatarApi {
    * @see https://creatify.mintlify.app/api-reference/lipsync
    */
   async createLipsync(params: Avatar.LipsyncParams): Promise<Avatar.LipsyncResponse> {
-    return this.client.post<Avatar.LipsyncResponse>('/api/lipsyncs/', params);
+    try {
+      return await this.client.post<Avatar.LipsyncResponse>('/api/lipsyncs/', params);
+    } catch (error) {
+      console.error('Error creating lipsync:', error);
+      throw error;
+    }
   }
 
   /**
@@ -97,7 +124,17 @@ export class AvatarApi {
    * @see https://creatify.mintlify.app/api-reference/lipsync
    */
   async getLipsync(id: string): Promise<Avatar.LipsyncResultResponse> {
-    return this.client.get<Avatar.LipsyncResultResponse>(`/api/lipsyncs/${id}/`);
+    try {
+      return await this.client.get<Avatar.LipsyncResultResponse>(`/api/lipsyncs/${id}/`);
+    } catch (error) {
+      console.error(`Error fetching lipsync result for ID ${id}:`, error);
+      // Return a default response to prevent crashes
+      return {
+        id,
+        status: 'error',
+        error_message: error instanceof Error ? error.message : 'An error occurred with the API request'
+      } as Avatar.LipsyncResultResponse;
+    }
   }
 
   /**
@@ -106,7 +143,13 @@ export class AvatarApi {
    * @see https://creatify.mintlify.app/api-reference/lipsync
    */
   async getLipsyncs(): Promise<Avatar.LipsyncResultResponse[]> {
-    return this.client.get<Avatar.LipsyncResultResponse[]>('/api/lipsyncs/');
+    try {
+      const results = await this.client.get<Avatar.LipsyncResultResponse[]>('/api/lipsyncs/');
+      return Array.isArray(results) ? results : [];
+    } catch (error) {
+      console.error('Error fetching lipsync tasks:', error);
+      return [];
+    }
   }
 
   /**
@@ -118,7 +161,12 @@ export class AvatarApi {
   async createMultiAvatarLipsync(
     params: Avatar.MultiAvatarLipsyncParams
   ): Promise<Avatar.LipsyncResponse> {
-    return this.client.post<Avatar.LipsyncResponse>('/api/lipsyncs/multi_avatar/', params);
+    try {
+      return await this.client.post<Avatar.LipsyncResponse>('/api/lipsyncs/multi_avatar/', params);
+    } catch (error) {
+      console.error('Error creating multi-avatar lipsync:', error);
+      throw error;
+    }
   }
 
   /**
