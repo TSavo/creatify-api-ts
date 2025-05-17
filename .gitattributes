@@ -1,0 +1,17 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# These files are binary and should be left untouched
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+*.ttf binary
+*.mp4 binary
+*.webm binary
+*.mp3 binary
+*.wav binary

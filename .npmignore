@@ -1,0 +1,55 @@
+# Development files
+.git/
+.github/
+.vscode/
+.idea/
+.editorconfig
+.gitignore
+.eslintrc.js
+.prettierrc.js
+.eslintignore
+.prettierignore
+
+# Build artifacts
+coverage/
+.nyc_output/
+tmp/
+temp/
+*.tsbuildinfo
+
+# Development source
+tests/
+examples/
+src/**/*.test.ts
+src/**/*.spec.ts
+vitest.config.ts
+.vitest/
+*.test.ts
+*.spec.ts
+
+# Configuration files
+.travis.yml
+.circleci/
+.github/
+.gitlab-ci.yml
+.npmrc
+tsconfig.tests.json
+convert-jest-to-vitest.js
+
+# Documentation
+docs/
+doc/
+wiki/
+*.md
+!README.md
+
+# Misc
+changelog.md
+CHANGELOG.md
+CONTRIBUTING.md
+.DS_Store
+*.log
+*.swp
+node_modules/
+checkpoint.md
+claude.md

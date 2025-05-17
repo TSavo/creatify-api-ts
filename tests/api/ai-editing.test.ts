@@ -3,36 +3,31 @@ import {
   mockAiEditingCreationResponse,
   mockAiEditingResults
 } from '../mocks/api-responses';
+import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-
-// Mock fetch for testing
-global.fetch = vi.fn();
-
-// Create a mock Response
-const mockJsonPromise = (data: any) => Promise.resolve(data);
-const mockFetchPromise = (data: any, status = 200) => 
-  Promise.resolve({
-    ok: status >= 200 && status < 300,
-    status,
-    json: () => mockJsonPromise(data)
-  } as Response);
 
 describe('AiEditingApi', () => {
   let aiEditingApi: AiEditingApi;
+  let mockClient: MockCreatifyApiClient;
   
   beforeEach(() => {
+    // Create a new instance of the AiEditingApi with the mock factory
     aiEditingApi = new AiEditingApi({
       apiId: 'test-api-id',
       apiKey: 'test-api-key'
-    });
+    }, mockApiClientFactory);
     
-    // Clear mock history
-    (global.fetch as ReturnType<typeof vi.fn>).mockClear();
+    // Get the mock client that was created
+    mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;
+    
+    // Reset mock history
+    mockClient.reset();
   });
   
   describe('createAiEditing', () => {
     it('should create an AI editing task', async () => {
-      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockAiEditingCreationResponse));
+      // Mock the post method to return the expected response
+      mockClient.post.mockResolvedValueOnce(mockAiEditingCreationResponse);
       
       const params = {
         video_url: 'https://example.com/video.mp4',
@@ -41,61 +36,43 @@ describe('AiEditingApi', () => {
       
       const result = await aiEditingApi.createAiEditing(params);
       
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.creatify.ai/api/ai_editing/',
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify(params)
-        })
-      );
-      
+      expect(mockClient.post).toHaveBeenCalledWith('/api/ai_editing/', params);
       expect(result).toEqual(mockAiEditingCreationResponse);
     });
   });
   
   describe('getAiEditing', () => {
     it('should fetch an AI editing task by ID', async () => {
-      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockAiEditingResults.done));
+      // Mock the get method to return the expected response
+      mockClient.get.mockResolvedValueOnce(mockAiEditingResults.done);
       
       const result = await aiEditingApi.getAiEditing('edit-123456');
       
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.creatify.ai/api/ai_editing/edit-123456/',
-        expect.objectContaining({
-          method: 'GET'
-        })
-      );
-      
+      expect(mockClient.get).toHaveBeenCalledWith('/api/ai_editing/edit-123456/');
       expect(result).toEqual(mockAiEditingResults.done);
     });
   });
   
   describe('getAiEditingList', () => {
     it('should fetch all AI editing tasks', async () => {
-      const mockAiEditingList = [mockAiEditingResults.done, mockAiEditingResults.processing];
-      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockAiEditingList));
+      const mockEditList = [mockAiEditingResults.done, mockAiEditingResults.processing];
+      mockClient.get.mockResolvedValueOnce(mockEditList);
       
       const result = await aiEditingApi.getAiEditingList();
       
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.creatify.ai/api/ai_editing/',
-        expect.objectContaining({
-          method: 'GET'
-        })
-      );
-      
-      expect(result).toEqual(mockAiEditingList);
+      expect(mockClient.get).toHaveBeenCalledWith('/api/ai_editing/');
+      expect(result).toEqual(mockEditList);
     });
   });
   
   describe('createAndWaitForAiEditing', () => {
     it('should create an AI editing task and wait for completion', async () => {
-      // Mock multiple fetch calls for the create and polling sequence
-      (global.fetch as ReturnType<typeof vi.fn>)
-        .mockImplementationOnce(() => mockFetchPromise(mockAiEditingCreationResponse))
-        .mockImplementationOnce(() => mockFetchPromise(mockAiEditingResults.pending))
-        .mockImplementationOnce(() => mockFetchPromise(mockAiEditingResults.processing))
-        .mockImplementationOnce(() => mockFetchPromise(mockAiEditingResults.done));
+      // Mock the post and get methods to return the expected responses in sequence
+      mockClient.post.mockResolvedValueOnce(mockAiEditingCreationResponse);
+      mockClient.get
+        .mockResolvedValueOnce(mockAiEditingResults.pending)
+        .mockResolvedValueOnce(mockAiEditingResults.processing)
+        .mockResolvedValueOnce(mockAiEditingResults.done);
       
       // Mock timers
       vi.useFakeTimers();
@@ -119,37 +96,21 @@ describe('AiEditingApi', () => {
       // Restore timers
       vi.useRealTimers();
       
-      // Verify the fetch calls
-      expect(global.fetch).toHaveBeenCalledTimes(4);
+      // Verify the method calls
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
+      expect(mockClient.post).toHaveBeenCalledWith('/api/ai_editing/', params);
       
-      // First call should create the AI editing task
-      expect(global.fetch).toHaveBeenNthCalledWith(
-        1,
-        'https://api.creatify.ai/api/ai_editing/',
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify(params)
-        })
-      );
-      
-      // Subsequent calls should poll for status
-      expect(global.fetch).toHaveBeenNthCalledWith(
-        2,
-        'https://api.creatify.ai/api/ai_editing/edit-123456/',
-        expect.objectContaining({
-          method: 'GET'
-        })
-      );
+      expect(mockClient.get).toHaveBeenCalledTimes(3);
+      expect(mockClient.get).toHaveBeenCalledWith('/api/ai_editing/edit-123456/');
       
       // Final result should be the completed AI editing task
       expect(result).toEqual(mockAiEditingResults.done);
     });
     
     it('should handle error responses', async () => {
-      // Mock fetch to return an error response
-      (global.fetch as ReturnType<typeof vi.fn>)
-        .mockImplementationOnce(() => mockFetchPromise(mockAiEditingCreationResponse))
-        .mockImplementationOnce(() => mockFetchPromise(mockAiEditingResults.error));
+      // Mock the post and get methods to return an error response
+      mockClient.post.mockResolvedValueOnce(mockAiEditingCreationResponse);
+      mockClient.get.mockResolvedValueOnce(mockAiEditingResults.error);
       
       // Mock timers
       vi.useFakeTimers();
@@ -176,10 +137,9 @@ describe('AiEditingApi', () => {
     });
     
     it('should throw an error if max attempts is reached', async () => {
-      // Mock fetch to always return pending status
-      (global.fetch as ReturnType<typeof vi.fn>)
-        .mockImplementationOnce(() => mockFetchPromise(mockAiEditingCreationResponse))
-        .mockImplementation(() => mockFetchPromise(mockAiEditingResults.pending));
+      // Mock the post and get methods to always return pending status
+      mockClient.post.mockResolvedValueOnce(mockAiEditingCreationResponse);
+      mockClient.get.mockResolvedValue(mockAiEditingResults.pending);
       
       // Mock timers
       vi.useFakeTimers();

@@ -6,21 +6,36 @@
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "src",
+    "LICENSE",
+    "README.md"
   ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build",
+    "prepare": "npm run build",
+    "lint": "tsc --noEmit"
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
   "keywords": [
     "creatify",
     "api",
     "typescript",
     "ai",
     "avatar",
-    "video"
+    "video",
+    "text-to-speech",
+    "url-to-video",
+    "ai-editing",
+    "custom-templates",
+    "dyoa"
   ],
   "homepage": "https://github.com/TSavo/creatify-api-ts",
   "repository": {
@@ -32,6 +47,9 @@
   },
   "author": "TSavo",
   "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "devDependencies": {
     "@types/node": "^20.10.0",
     "tsup": "^8.0.0",
