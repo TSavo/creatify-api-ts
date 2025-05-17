@@ -22,7 +22,15 @@
     "avatar",
     "video"
   ],
-  "author": "",
+  "homepage": "https://github.com/TSavo/creatify-api-ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TSavo/creatify-api-ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TSavo/creatify-api-ts/issues"
+  },
+  "author": "TSavo",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.10.0",
