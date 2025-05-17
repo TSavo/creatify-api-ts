@@ -538,26 +538,421 @@ export namespace UrlToVideo {
  * Text to Speech API types
  */
 export namespace TextToSpeech {
-  // Add TTS types here when implementing this part of the API
+  /**
+   * Parameters for creating a text-to-speech task
+   */
+  export interface TextToSpeechParams {
+    /**
+     * Text script to be converted to speech
+     */
+    script: string;
+    
+    /**
+     * Accent/voice ID to use for the speech
+     */
+    accent: string;
+    
+    /**
+     * Webhook URL to be called when the audio is ready (optional)
+     */
+    webhook_url?: string;
+  }
+
+  /**
+   * Response when creating a text-to-speech task
+   */
+  export interface TextToSpeechResponse extends ApiResponse {
+    /**
+     * ID of the created text-to-speech task
+     */
+    id: string;
+    
+    /**
+     * Status of the text-to-speech task
+     */
+    status: 'pending' | 'processing' | 'done' | 'error';
+  }
+
+  /**
+   * Response when getting a text-to-speech task
+   */
+  export interface TextToSpeechResultResponse extends TextToSpeechResponse {
+    /**
+     * Output URL of the generated audio (only available when status is 'done')
+     */
+    output?: string;
+    
+    /**
+     * Error message if the task failed
+     */
+    error_message?: string;
+    
+    /**
+     * Created timestamp
+     */
+    created_at: string;
+    
+    /**
+     * Updated timestamp
+     */
+    updated_at: string;
+  }
 }
 
 /**
  * AI Editing API types
  */
 export namespace AiEditing {
-  // Add AI Editing types here when implementing this part of the API
+  /**
+   * Editing styles available for AI editing
+   */
+  export type EditingStyle = 
+    'film' | 
+    'commercial' | 
+    'music' | 
+    'tutorial' | 
+    'vlog' | 
+    'social';
+
+  /**
+   * Parameters for creating an AI editing task
+   */
+  export interface AiEditingParams {
+    /**
+     * URL of the video to be edited
+     */
+    video_url: string;
+    
+    /**
+     * Editing style to apply
+     */
+    editing_style: EditingStyle;
+    
+    /**
+     * Webhook URL to be called when the edited video is ready (optional)
+     */
+    webhook_url?: string;
+  }
+
+  /**
+   * Response when creating an AI editing task
+   */
+  export interface AiEditingResponse extends ApiResponse {
+    /**
+     * ID of the created AI editing task
+     */
+    id: string;
+    
+    /**
+     * Status of the AI editing task
+     */
+    status: 'pending' | 'processing' | 'done' | 'error';
+  }
+
+  /**
+   * Response when getting an AI editing task
+   */
+  export interface AiEditingResultResponse extends AiEditingResponse {
+    /**
+     * Output URL of the edited video (only available when status is 'done')
+     */
+    output?: string;
+    
+    /**
+     * Error message if the task failed
+     */
+    error_message?: string;
+    
+    /**
+     * Created timestamp
+     */
+    created_at: string;
+    
+    /**
+     * Updated timestamp
+     */
+    updated_at: string;
+  }
 }
 
 /**
  * Custom Templates API types
  */
 export namespace CustomTemplates {
-  // Add Custom Templates types here when implementing this part of the API
+  /**
+   * Parameters for creating a video using a custom template
+   */
+  export interface CustomTemplateParams {
+    /**
+     * Visual style/template name to use
+     */
+    visual_style: string;
+    
+    /**
+     * Custom data to populate the template
+     */
+    data: Record<string, any>;
+    
+    /**
+     * Webhook URL to be called when the video is ready (optional)
+     */
+    webhook_url?: string;
+  }
+
+  /**
+   * Response when creating a custom template video
+   */
+  export interface CustomTemplateResponse extends ApiResponse {
+    /**
+     * ID of the created custom template task
+     */
+    id: string;
+    
+    /**
+     * Status of the custom template task
+     */
+    status: 'pending' | 'processing' | 'done' | 'error';
+  }
+
+  /**
+   * Response when getting a custom template task
+   */
+  export interface CustomTemplateResultResponse extends CustomTemplateResponse {
+    /**
+     * Output URL of the generated video (only available when status is 'done')
+     */
+    output?: string;
+    
+    /**
+     * Error message if the task failed
+     */
+    error_message?: string;
+    
+    /**
+     * Created timestamp
+     */
+    created_at: string;
+    
+    /**
+     * Updated timestamp
+     */
+    updated_at: string;
+  }
 }
 
 /**
  * DYOA (Design Your Own Avatar) API types
  */
 export namespace DYOA {
-  // Add DYOA types here when implementing this part of the API
+  /**
+   * Age group options for DYOA
+   */
+  export type AgeGroup = 
+    'young_adult' | 
+    'adult' | 
+    'middle_aged' | 
+    'senior';
+
+  /**
+   * Gender options for DYOA
+   */
+  export type Gender = 
+    'm' | 
+    'f' | 
+    'other';
+
+  /**
+   * Status options for DYOA
+   */
+  export type DyoaStatus = 
+    'initializing' | 
+    'draft' | 
+    'pending' | 
+    'approved' | 
+    'rejected' | 
+    'done' | 
+    'error';
+
+  /**
+   * Status options for DYOA review
+   */
+  export type DyoaReviewStatus = 
+    'pending' | 
+    'approved' | 
+    'rejected';
+
+  /**
+   * Photo information for DYOA
+   */
+  export interface DyoaPhoto {
+    /**
+     * Unique identifier for the photo
+     */
+    id: string;
+    
+    /**
+     * URL to the photo image
+     */
+    image: string;
+    
+    /**
+     * Creation timestamp
+     */
+    created_at: string;
+  }
+
+  /**
+   * Review information for DYOA
+   */
+  export interface DyoaReview {
+    /**
+     * Unique identifier for the review
+     */
+    id: string;
+    
+    /**
+     * Status of the review
+     */
+    status: DyoaReviewStatus;
+    
+    /**
+     * Comment from the reviewer (optional)
+     */
+    comment: string | null;
+    
+    /**
+     * Photo being reviewed
+     */
+    photo: DyoaPhoto;
+    
+    /**
+     * Avatar creator ID (only available after approval)
+     */
+    creator: string | null;
+    
+    /**
+     * Social link for the avatar (optional)
+     */
+    social_link: string | null;
+  }
+
+  /**
+   * Parameters for creating a DYOA
+   */
+  export interface DyoaParams {
+    /**
+     * Name for the avatar
+     */
+    name: string;
+    
+    /**
+     * Age group of the avatar
+     */
+    age_group: AgeGroup;
+    
+    /**
+     * Gender of the avatar
+     */
+    gender: Gender;
+    
+    /**
+     * Detailed description of the avatar's appearance
+     */
+    more_details: string;
+    
+    /**
+     * Description of the avatar's outfit
+     */
+    outfit_description: string;
+    
+    /**
+     * Description of the avatar's background
+     */
+    background_description: string;
+  }
+
+  /**
+   * Parameters for submitting a DYOA for review
+   */
+  export interface DyoaSubmitParams {
+    /**
+     * ID of the chosen photo to use for the avatar
+     */
+    chosen_photo_id: string;
+  }
+
+  /**
+   * Response containing DYOA information
+   */
+  export interface DyoaResponse {
+    /**
+     * Unique identifier for the DYOA
+     */
+    id: string;
+    
+    /**
+     * User ID of the creator
+     */
+    user: number;
+    
+    /**
+     * Workspace ID
+     */
+    workspace: string;
+    
+    /**
+     * Name of the avatar
+     */
+    name: string;
+    
+    /**
+     * Age group of the avatar
+     */
+    age_group: AgeGroup;
+    
+    /**
+     * Gender of the avatar
+     */
+    gender: Gender;
+    
+    /**
+     * Detailed description of the avatar's appearance
+     */
+    more_details: string;
+    
+    /**
+     * Description of the avatar's outfit
+     */
+    outfit_description: string;
+    
+    /**
+     * Description of the avatar's background
+     */
+    background_description: string;
+    
+    /**
+     * Array of generated photos
+     */
+    photos: DyoaPhoto[];
+    
+    /**
+     * Array of reviews
+     */
+    reviews: DyoaReview[];
+    
+    /**
+     * Status of the DYOA
+     */
+    status: DyoaStatus;
+    
+    /**
+     * Creation timestamp
+     */
+    created_at: string;
+    
+    /**
+     * Last update timestamp
+     */
+    updated_at: string;
+  }
 }

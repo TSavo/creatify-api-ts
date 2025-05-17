@@ -16,11 +16,18 @@ C:\Users\T\Projects\creatify-api\
 │   │   └── index.ts          # API modules export
 │   ├── types/                # Type definitions
 │   │   └── index.ts          # All types and interfaces
+│   ├── utils/                # Utility classes
+│   │   ├── video-creator.ts  # Simplified video creation
+│   │   └── index.ts          # Utils exports
 │   ├── client.ts             # Base API client
 │   └── index.ts              # Main exports
 │
 ├── examples/                 # Example usage
-│   └── basic-usage.ts        # Basic examples
+│   ├── basic-usage.ts        # Basic API examples
+│   ├── create-avatar-video.ts    # Avatar video creation
+│   ├── create-multi-avatar-conversation.ts  # Multi-avatar example
+│   ├── simplified-video-creation.ts   # Using VideoCreator utility
+│   └── create-video.js       # Command-line script
 │
 ├── dist/                     # Compiled output (generated)
 ├── node_modules/             # Dependencies (generated)
@@ -47,7 +54,9 @@ C:\Users\T\Projects\creatify-api\
 
 5. **Documentation**: Full JSDoc comments and README with examples.
 
-6. **Examples**: Sample code showing common use cases.
+6. **Helper Utilities**: VideoCreator utility for simplified video creation.
+
+7. **Examples**: Sample code showing common use cases.
 
 ## API Modules Implemented
 
@@ -63,6 +72,72 @@ C:\Users\T\Projects\creatify-api\
    - Generate videos from links with various styles
    - Update links and check video generation status
 
+3. **Utilities**: Helper classes for common tasks:
+   - VideoCreator for simplified video creation
+   - Avatar and voice search by name
+   - Automatic polling for task completion
+
+## Creating MP4 Videos with Avatars
+
+The library provides multiple ways to create MP4 videos with avatars:
+
+### Using the VideoCreator utility (recommended):
+
+```typescript
+import { VideoCreator } from 'creatify-api-ts/utils';
+
+// Initialize the VideoCreator
+const videoCreator = new VideoCreator('your-api-id', 'your-api-key');
+
+// Create a video with an avatar and script
+const result = await videoCreator.createVideo({
+  avatarName: 'John',  // Optional: find avatar by name
+  voiceName: 'English',  // Optional: find voice by name
+  script: "Hello! This is a test video created with the Creatify API.",
+  aspectRatio: "16:9"
+});
+
+console.log(`Video created! MP4 URL: ${result.url}`);
+```
+
+### Using the core API:
+
+```typescript
+import { Creatify } from 'creatify-api-ts';
+
+// Initialize the API client
+const creatify = new Creatify({
+  apiId: 'your-api-id',
+  apiKey: 'your-api-key'
+});
+
+// Get available avatars
+const avatars = await creatify.avatar.getAvatars();
+const avatarId = avatars[0].avatar_id;
+
+// Create a lipsync video
+const response = await creatify.avatar.createLipsync({
+  text: "Hello world! This is a test video.",
+  creator: avatarId,
+  aspect_ratio: "16:9"
+});
+
+// Poll for completion
+let result = await creatify.avatar.getLipsync(response.id);
+while (result.status !== 'done' && result.status !== 'error') {
+  await new Promise(resolve => setTimeout(resolve, 5000));
+  result = await creatify.avatar.getLipsync(response.id);
+}
+
+console.log(`Video URL: ${result.output}`);
+```
+
+### Command-line script:
+
+```bash
+node examples/create-video.js your-api-id your-api-key "Hello world!" "John" "English Male"
+```
+
 ## Getting Started
 
 1. Install dependencies and build the library:
@@ -74,11 +149,12 @@ C:\Users\T\Projects\creatify-api\
 
 2. Try the examples (you'll need to add your Creatify API credentials):
    ```bash
-   # First, compile the examples
-   npx tsc examples/basic-usage.ts --esModuleInterop
+   # Use the command-line script for a quick test
+   node examples/create-video.js your-api-id your-api-key "Hello world!"
    
-   # Then run the example
-   node examples/basic-usage.js
+   # Or compile and run the TypeScript examples
+   npx tsc examples/simplified-video-creation.ts --esModuleInterop
+   node examples/simplified-video-creation.js
    ```
 
 3. Reference the README.md for complete documentation and example usage.
