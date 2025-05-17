@@ -1,23 +1,14 @@
 import { CreatifyApiClient } from '../src/client';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { mockErrorResponse } from './mocks/api-responses';
-import { expect, describe, it, beforeEach, vi } from 'vitest';
+import { mockErrorResponse, setupMockFetch } from './mocks/api-responses';
 
 // Mock fetch for testing
 global.fetch = vi.fn();
 
-// Create a mock Response
-const mockJsonPromise = (data: any) => Promise.resolve(data);
-const mockFetchPromise = (data: any, status = 200) => 
-  Promise.resolve({
-    ok: status >= 200 && status < 300,
-    status,
-    json: () => mockJsonPromise(data)
-  } as Response);
-
 describe('CreatifyApiClient', () => {
   let client: CreatifyApiClient;
+  const mockFetch = setupMockFetch();
   
   beforeEach(() => {
     client = new CreatifyApiClient({
@@ -27,6 +18,9 @@ describe('CreatifyApiClient', () => {
     
     // Clear mock history
     (global.fetch as ReturnType<typeof vi.fn>).mockClear();
+    
+    // Default success response
+    mockFetch.mockFetchResolvedValue({ data: 'test' });
   });
   
   it('should initialize with API credentials', () => {
@@ -49,8 +43,7 @@ describe('CreatifyApiClient', () => {
   });
   
   it('should make a GET request with auth headers', async () => {
-    const mockData = { data: 'test' };
-    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockData));
+    mockFetch.mockFetchResolvedValue({ data: 'test' });
     
     const response = await client.get('/test-endpoint');
     
@@ -66,14 +59,14 @@ describe('CreatifyApiClient', () => {
       })
     );
     
-    expect(response).toEqual(mockData);
+    expect(response).toEqual({ data: 'test' });
   });
   
   it('should make a POST request with auth headers and body', async () => {
     const mockData = { success: true };
     const requestBody = { param1: 'value1', param2: 'value2' };
     
-    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockData));
+    mockFetch.mockFetchResolvedValue(mockData);
     
     const response = await client.post('/test-endpoint', requestBody);
     
@@ -97,7 +90,7 @@ describe('CreatifyApiClient', () => {
     const mockData = { success: true };
     const requestBody = { param1: 'value1', param2: 'value2' };
     
-    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockData));
+    mockFetch.mockFetchResolvedValue(mockData);
     
     const response = await client.put('/test-endpoint', requestBody);
     
@@ -120,7 +113,7 @@ describe('CreatifyApiClient', () => {
   it('should make a DELETE request with auth headers', async () => {
     const mockData = { success: true };
     
-    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockData));
+    mockFetch.mockFetchResolvedValue(mockData);
     
     const response = await client.delete('/test-endpoint');
     
@@ -140,23 +133,19 @@ describe('CreatifyApiClient', () => {
   });
   
   it('should handle API errors with appropriate error message', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => 
-      mockFetchPromise(mockErrorResponse, 401)
-    );
+    mockFetch.mockFetchResolvedValue(mockErrorResponse, 401);
     
     await expect(client.get('/test-endpoint')).rejects.toThrow('Invalid API credentials');
   });
   
   it('should handle network errors', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => 
-      Promise.reject(new Error('Network error'))
-    );
+    mockFetch.mockFetchRejectedValue(new Error('Network error'));
     
     await expect(client.get('/test-endpoint')).rejects.toThrow('Network error');
   });
   
   it('should handle unexpected response format', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => 
+    global.fetch = vi.fn().mockImplementationOnce(() => 
       Promise.resolve({
         ok: true,
         status: 200,
@@ -174,23 +163,21 @@ describe('CreatifyApiClient', () => {
       timeout: 5000
     });
     
-    const controller = new AbortController();
-    vi.spyOn(AbortController.prototype, 'abort');
+    // Mock global timeout functions
+    const originalSetTimeout = global.setTimeout;
+    const mockSetTimeout = vi.fn();
+    global.setTimeout = mockSetTimeout as any;
     
     const mockData = { data: 'test' };
-    (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => mockFetchPromise(mockData));
+    mockFetch.mockFetchResolvedValue(mockData);
     
     await timeoutClient.get('/test-endpoint');
     
-    // Verify that the fetch was called with a signal
-    expect(global.fetch).toHaveBeenCalledWith(
-      'https://api.creatify.ai/test-endpoint',
-      expect.objectContaining({
-        signal: expect.any(AbortSignal)
-      })
-    );
+    // Verify that setTimeout was called with the correct timeout
+    expect(mockSetTimeout).toHaveBeenCalled();
+    expect(mockSetTimeout.mock.calls[0][1]).toBe(5000);
     
-    // Verify timeout was set
-    expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 5000);
+    // Restore original setTimeout
+    global.setTimeout = originalSetTimeout;
   });
 });

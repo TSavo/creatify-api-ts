@@ -1,312 +1,155 @@
-/**
- * Mock API responses for testing
- */
+import { mockApiClientFactory, MockCreatifyApiClient } from './mock-api-client';
+import { vi } from 'vitest';
 
-/**
- * Mock avatar list response
- */
-export const mockAvatars = [
-  {
-    avatar_id: '7350375b-9a98-51b8-934d-14d46a645dc2',
-    name: 'John',
-    preview_url: 'https://example.com/avatars/john.jpg',
-    style: 'normal',
-    tags: ['male', 'professional']
-  },
-  {
-    avatar_id: '18fccce8-86e7-5f31-abc8-18915cb872be',
-    name: 'Emma',
-    preview_url: 'https://example.com/avatars/emma.jpg',
-    style: 'casual',
-    tags: ['female', 'casual']
-  }
-];
-
-/**
- * Mock voice list response
- */
-export const mockVoices = [
-  {
-    voice_id: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
-    name: 'English Male',
-    language: 'en',
-    gender: 'male'
-  },
-  {
-    voice_id: '360ab221-d951-413b-ba1a-7037dc67da16',
-    name: 'English Female',
-    language: 'en',
-    gender: 'female'
-  },
-  {
-    voice_id: 'a5e7d9c3-f8b0-4e1a-9c5d-2b7f6a8c9e0d',
-    name: 'French Male',
-    language: 'fr',
-    gender: 'male'
-  }
-];
-
-/**
- * Mock lipsync creation response
- */
-export const mockLipsyncCreationResponse = {
-  success: true,
-  id: 'lipsync-123456',
-  status: 'pending'
+// Common mock responses for testing
+export const mockAvatarInfo = {
+  id: 'avatar-123',
+  avatar_id: 'avatar-123',
+  created_at: '2023-01-01T12:00:00Z',
+  updated_at: '2023-01-01T12:00:00Z',
+  gender: 'm',
+  age_range: 'adult',
+  location: 'outdoor',
+  style: 'presenter',
+  creator_name: 'Test Avatar',
+  video_scene: 'Office setting',
+  keywords: 'professional, business',
+  preview_image_16_9: 'https://example.com/preview_16_9.jpg',
+  preview_image_1_1: 'https://example.com/preview_1_1.jpg',
+  preview_image_9_16: 'https://example.com/preview_9_16.jpg',
+  preview_video_16_9: 'https://example.com/preview_16_9.mp4',
+  preview_video_1_1: 'https://example.com/preview_1_1.mp4',
+  preview_video_9_16: 'https://example.com/preview_9_16.mp4',
+  landscape_preview_video: 'https://example.com/landscape.mp4',
+  squared_preview_video: 'https://example.com/squared.mp4',
+  is_active: true,
+  process_status: 'done',
+  failed_reason: '',
+  type: 'standard'
 };
 
-/**
- * Mock lipsync result responses for different statuses
- */
-export const mockLipsyncResults = {
-  pending: {
-    success: true,
-    id: 'lipsync-123456',
-    status: 'pending',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:00:00Z'
-  },
-  processing: {
-    success: true,
-    id: 'lipsync-123456',
-    status: 'processing',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:01:00Z'
-  },
-  done: {
-    success: true,
-    id: 'lipsync-123456',
-    status: 'done',
-    output: 'https://example.com/videos/lipsync-123456.mp4',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:05:00Z'
-  },
-  error: {
-    success: false,
-    id: 'lipsync-123456',
-    status: 'error',
-    error_message: 'An error occurred while processing the video',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:02:00Z'
-  }
+export const mockVoiceInfo = {
+  voice_id: 'voice-123',
+  name: 'English Male',
+  language: 'en',
+  gender: 'male'
 };
 
-/**
- * Mock link creation response
- */
-export const mockLinkCreationResponse = {
-  success: true,
-  id: 'link-123456',
-  url: 'https://example.com/product',
+export const mockLipsyncResponse = {
+  id: 'lipsync-123',
+  status: 'pending',
+  success: true
+};
+
+export const mockLipsyncResultResponse = {
+  id: 'lipsync-123',
+  status: 'done',
+  output: 'https://example.com/video.mp4',
+  created_at: '2023-01-01T12:00:00Z',
+  updated_at: '2023-01-01T12:30:00Z',
+  success: true
+};
+
+export const mockLipsyncErrorResponse = {
+  id: 'lipsync-123',
+  status: 'error',
+  error_message: 'Failed to process video',
+  created_at: '2023-01-01T12:00:00Z',
+  updated_at: '2023-01-01T12:30:00Z',
+  success: false
+};
+
+export const mockTTSResponse = {
+  id: 'tts-123',
+  status: 'pending',
+  script: 'Hello world',
+  accent: 'voice-123',
+  success: true
+};
+
+export const mockTTSResultResponse = {
+  id: 'tts-123',
+  status: 'done',
+  script: 'Hello world',
+  accent: 'voice-123',
+  output: 'https://example.com/audio.mp3',
+  created_at: '2023-01-01T12:00:00Z',
+  updated_at: '2023-01-01T12:30:00Z',
+  success: true
+};
+
+export const mockLinkResponse = {
+  id: 'link-123',
+  url: 'https://example.com',
   link: {
-    id: 'link-123456',
-    url: 'https://example.com/product',
-    title: 'Example Product',
-    description: 'This is an example product description',
-    image_urls: [
-      'https://example.com/images/product1.jpg',
-      'https://example.com/images/product2.jpg'
-    ],
+    id: 'link-123',
+    url: 'https://example.com',
+    title: 'Example Page',
+    description: 'This is an example page',
+    image_urls: ['https://example.com/image.jpg'],
     video_urls: [],
-    logo_url: 'https://example.com/logo.png',
-    ai_summary: 'A high-quality product with excellent features'
-  },
-  credits_used: 1
-};
-
-/**
- * Mock video creation response
- */
-export const mockVideoCreationResponse = {
-  success: true,
-  id: 'video-123456',
-  status: 'pending'
-};
-
-/**
- * Mock video result responses for different statuses
- */
-export const mockVideoResults = {
-  pending: {
-    success: true,
-    id: 'video-123456',
-    status: 'pending',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:00:00Z'
-  },
-  processing: {
-    success: true,
-    id: 'video-123456',
-    status: 'processing',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:01:00Z'
-  },
-  done: {
-    success: true,
-    id: 'video-123456',
-    status: 'done',
-    output: 'https://example.com/videos/video-123456.mp4',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:10:00Z'
-  },
-  error: {
-    success: false,
-    id: 'video-123456',
-    status: 'error',
-    error_message: 'An error occurred while processing the video',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:02:00Z'
+    reviews: null,
+    logo_url: 'https://example.com/logo.png'
   }
 };
 
-/**
- * Mock text-to-speech creation response
- */
-export const mockTextToSpeechCreationResponse = {
-  success: true,
-  id: 'tts-123456',
-  status: 'pending'
+export const mockVideoResponse = {
+  id: 'video-123',
+  status: 'pending',
+  link: 'link-123',
+  media_job: 'job-123'
 };
 
-/**
- * Mock text-to-speech result responses for different statuses
- */
-export const mockTextToSpeechResults = {
-  pending: {
-    success: true,
-    id: 'tts-123456',
-    status: 'pending',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:00:00Z'
-  },
-  processing: {
-    success: true,
-    id: 'tts-123456',
-    status: 'processing',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:01:00Z'
-  },
-  done: {
-    success: true,
-    id: 'tts-123456',
-    status: 'done',
-    output: 'https://example.com/audio/tts-123456.mp3',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:03:00Z'
-  },
-  error: {
-    success: false,
-    id: 'tts-123456',
-    status: 'error',
-    error_message: 'An error occurred while processing the audio',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:02:00Z'
-  }
+export const mockVideoResultResponse = {
+  id: 'video-123',
+  status: 'done',
+  link: 'link-123',
+  media_job: 'job-123',
+  video_output: 'https://example.com/video.mp4',
+  created_at: '2023-01-01T12:00:00Z',
+  updated_at: '2023-01-01T12:30:00Z'
 };
 
-/**
- * Mock AI editing creation response
- */
-export const mockAiEditingCreationResponse = {
-  success: true,
-  id: 'edit-123456',
-  status: 'pending'
+export const mockAiEditingResponse = {
+  id: 'edit-123',
+  status: 'pending',
+  success: true
 };
 
-/**
- * Mock AI editing result responses for different statuses
- */
-export const mockAiEditingResults = {
-  pending: {
-    success: true,
-    id: 'edit-123456',
-    status: 'pending',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:00:00Z'
-  },
-  processing: {
-    success: true,
-    id: 'edit-123456',
-    status: 'processing',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:01:00Z'
-  },
-  done: {
-    success: true,
-    id: 'edit-123456',
-    status: 'done',
-    output: 'https://example.com/videos/edit-123456.mp4',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:15:00Z'
-  },
-  error: {
-    success: false,
-    id: 'edit-123456',
-    status: 'error',
-    error_message: 'An error occurred while editing the video',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:02:00Z'
-  }
+export const mockAiEditingResultResponse = {
+  id: 'edit-123',
+  status: 'done',
+  output: 'https://example.com/edited-video.mp4',
+  created_at: '2023-01-01T12:00:00Z',
+  updated_at: '2023-01-01T12:30:00Z',
+  success: true
 };
 
-/**
- * Mock custom template creation response
- */
-export const mockCustomTemplateCreationResponse = {
-  success: true,
-  id: 'template-123456',
-  status: 'pending'
+export const mockCustomTemplateResponse = {
+  id: 'template-123',
+  status: 'pending',
+  success: true
 };
 
-/**
- * Mock custom template result responses for different statuses
- */
-export const mockCustomTemplateResults = {
-  pending: {
-    success: true,
-    id: 'template-123456',
-    status: 'pending',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:00:00Z'
-  },
-  processing: {
-    success: true,
-    id: 'template-123456',
-    status: 'processing',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:01:00Z'
-  },
-  done: {
-    success: true,
-    id: 'template-123456',
-    status: 'done',
-    output: 'https://example.com/videos/template-123456.mp4',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:08:00Z'
-  },
-  error: {
-    success: false,
-    id: 'template-123456',
-    status: 'error',
-    error_message: 'An error occurred while processing the template video',
-    created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:02:00Z'
-  }
+export const mockCustomTemplateResultResponse = {
+  id: 'template-123',
+  status: 'done',
+  output: 'https://example.com/template-video.mp4',
+  created_at: '2023-01-01T12:00:00Z',
+  updated_at: '2023-01-01T12:30:00Z',
+  success: true
 };
 
-/**
- * Mock DYOA creation response
- */
-export const mockDyoaCreationResponse = {
-  id: 'dyoa-123456',
-  user: 12345,
+export const mockDyoaResponse = {
+  id: 'dyoa-123',
+  user: 1,
   workspace: 'workspace-123',
-  name: 'Tech Expert Avatar',
+  name: 'Custom Avatar',
   age_group: 'adult',
-  gender: 'f',
-  more_details: 'Mid-length brown hair with subtle highlights, green eyes, warm smile',
-  outfit_description: 'Professional blazer in navy blue, simple white blouse, minimal jewelry',
-  background_description: 'Modern tech office environment, clean desk with laptop',
+  gender: 'm',
+  more_details: 'Brown hair, blue eyes',
+  outfit_description: 'Business suit',
+  background_description: 'Office setting',
   photos: [],
   reviews: [],
   status: 'initializing',
@@ -314,81 +157,55 @@ export const mockDyoaCreationResponse = {
   updated_at: '2023-01-01T12:00:00Z'
 };
 
-/**
- * Mock DYOA with generated photos
- */
-export const mockDyoaWithPhotos = {
-  id: 'dyoa-123456',
-  user: 12345,
+export const mockDyoaWithPhotosResponse = {
+  id: 'dyoa-123',
+  user: 1,
   workspace: 'workspace-123',
-  name: 'Tech Expert Avatar',
+  name: 'Custom Avatar',
   age_group: 'adult',
-  gender: 'f',
-  more_details: 'Mid-length brown hair with subtle highlights, green eyes, warm smile',
-  outfit_description: 'Professional blazer in navy blue, simple white blouse, minimal jewelry',
-  background_description: 'Modern tech office environment, clean desk with laptop',
+  gender: 'm',
+  more_details: 'Brown hair, blue eyes',
+  outfit_description: 'Business suit',
+  background_description: 'Office setting',
   photos: [
     {
-      id: 'photo-1',
-      image: 'https://example.com/dyoa/photo-1.jpg',
-      created_at: '2023-01-01T12:05:00Z'
-    },
-    {
-      id: 'photo-2',
-      image: 'https://example.com/dyoa/photo-2.jpg',
-      created_at: '2023-01-01T12:05:00Z'
-    },
-    {
-      id: 'photo-3',
-      image: 'https://example.com/dyoa/photo-3.jpg',
-      created_at: '2023-01-01T12:05:00Z'
+      id: 'photo-123',
+      image: 'https://example.com/avatar-photo.jpg',
+      created_at: '2023-01-01T12:30:00Z'
     }
   ],
   reviews: [],
   status: 'draft',
   created_at: '2023-01-01T12:00:00Z',
-  updated_at: '2023-01-01T12:05:00Z'
+  updated_at: '2023-01-01T12:30:00Z'
 };
 
-/**
- * Mock DYOA submitted for review
- */
-export const mockDyoaSubmittedForReview = {
-  id: 'dyoa-123456',
-  user: 12345,
+export const mockDyoaSubmittedResponse = {
+  id: 'dyoa-123',
+  user: 1,
   workspace: 'workspace-123',
-  name: 'Tech Expert Avatar',
+  name: 'Custom Avatar',
   age_group: 'adult',
-  gender: 'f',
-  more_details: 'Mid-length brown hair with subtle highlights, green eyes, warm smile',
-  outfit_description: 'Professional blazer in navy blue, simple white blouse, minimal jewelry',
-  background_description: 'Modern tech office environment, clean desk with laptop',
+  gender: 'm',
+  more_details: 'Brown hair, blue eyes',
+  outfit_description: 'Business suit',
+  background_description: 'Office setting',
   photos: [
     {
-      id: 'photo-1',
-      image: 'https://example.com/dyoa/photo-1.jpg',
-      created_at: '2023-01-01T12:05:00Z'
-    },
-    {
-      id: 'photo-2',
-      image: 'https://example.com/dyoa/photo-2.jpg',
-      created_at: '2023-01-01T12:05:00Z'
-    },
-    {
-      id: 'photo-3',
-      image: 'https://example.com/dyoa/photo-3.jpg',
-      created_at: '2023-01-01T12:05:00Z'
+      id: 'photo-123',
+      image: 'https://example.com/avatar-photo.jpg',
+      created_at: '2023-01-01T12:30:00Z'
     }
   ],
   reviews: [
     {
-      id: 'review-1',
+      id: 'review-123',
       status: 'pending',
       comment: null,
       photo: {
-        id: 'photo-1',
-        image: 'https://example.com/dyoa/photo-1.jpg',
-        created_at: '2023-01-01T12:05:00Z'
+        id: 'photo-123',
+        image: 'https://example.com/avatar-photo.jpg',
+        created_at: '2023-01-01T12:30:00Z'
       },
       creator: null,
       social_link: null
@@ -396,85 +213,133 @@ export const mockDyoaSubmittedForReview = {
   ],
   status: 'pending',
   created_at: '2023-01-01T12:00:00Z',
-  updated_at: '2023-01-01T12:10:00Z'
+  updated_at: '2023-01-01T13:00:00Z'
 };
 
-/**
- * Mock DYOA approved
- */
-export const mockDyoaApproved = {
-  id: 'dyoa-123456',
-  user: 12345,
-  workspace: 'workspace-123',
-  name: 'Tech Expert Avatar',
-  age_group: 'adult',
-  gender: 'f',
-  more_details: 'Mid-length brown hair with subtle highlights, green eyes, warm smile',
-  outfit_description: 'Professional blazer in navy blue, simple white blouse, minimal jewelry',
-  background_description: 'Modern tech office environment, clean desk with laptop',
-  photos: [
-    {
-      id: 'photo-1',
-      image: 'https://example.com/dyoa/photo-1.jpg',
-      created_at: '2023-01-01T12:05:00Z'
-    },
-    {
-      id: 'photo-2',
-      image: 'https://example.com/dyoa/photo-2.jpg',
-      created_at: '2023-01-01T12:05:00Z'
-    },
-    {
-      id: 'photo-3',
-      image: 'https://example.com/dyoa/photo-3.jpg',
-      created_at: '2023-01-01T12:05:00Z'
-    }
-  ],
-  reviews: [
-    {
-      id: 'review-1',
-      status: 'approved',
-      comment: 'Avatar approved',
-      photo: {
-        id: 'photo-1',
-        image: 'https://example.com/dyoa/photo-1.jpg',
-        created_at: '2023-01-01T12:05:00Z'
-      },
-      creator: 'avatar-123456',
-      social_link: null
-    }
-  ],
-  status: 'approved',
-  created_at: '2023-01-01T12:00:00Z',
-  updated_at: '2023-01-01T14:00:00Z'
-};
-
-/**
- * Mock DYOA list response
- */
-export const mockDyoaList = [
-  mockDyoaApproved,
-  {
-    id: 'dyoa-654321',
-    user: 12345,
-    workspace: 'workspace-123',
-    name: 'Business Consultant Avatar',
-    age_group: 'middle_aged',
-    gender: 'm',
-    more_details: 'Professional appearance, short dark hair, glasses',
-    outfit_description: 'Dark suit with blue tie',
-    background_description: 'Modern office with city view',
-    photos: [],
-    reviews: [],
-    status: 'initializing',
-    created_at: '2023-01-02T12:00:00Z',
-    updated_at: '2023-01-02T12:00:00Z'
-  }
-];
-
-/**
- * Mock error response
- */
 export const mockErrorResponse = {
-  success: false,
-  error: 'Invalid API credentials'
+  status: 401,
+  message: 'Invalid API credentials',
+  data: {
+    detail: 'Authentication credentials were not provided.'
+  }
+};
+
+// Setup mock fetch for Vitest
+export const setupMockFetch = () => {
+  global.fetch = vi.fn();
+
+  const jsonPromise = (data: any) => Promise.resolve(data);
+  
+  const mockFetchPromise = (data: any, status = 200) => 
+    Promise.resolve({
+      ok: status >= 200 && status < 300,
+      status,
+      json: () => jsonPromise(data)
+    } as Response);
+
+  return {
+    mockFetchResolvedValue: (data: any, status = 200) => {
+      (global.fetch as any).mockImplementation(() => mockFetchPromise(data, status));
+    },
+    mockFetchRejectedValue: (error: any) => {
+      (global.fetch as any).mockImplementation(() => Promise.reject(error));
+    }
+  };
+};
+
+// Setup a test client with standard mocks
+export const setupTestClient = () => {
+  const client = mockApiClientFactory.createClient({
+    apiId: 'test-api-id',
+    apiKey: 'test-api-key'
+  });
+  
+  // Reset all mocks
+  const mockClient = mockApiClientFactory.getLastCreatedClient();
+  mockClient?.reset();
+  
+  // Setup default mocks
+  mockClient?.get.mockImplementation((endpoint) => {
+    if (endpoint === '/api/personas/') {
+      return Promise.resolve([mockAvatarInfo]);
+    }
+    if (endpoint === '/api/voices/') {
+      return Promise.resolve([mockVoiceInfo]);
+    }
+    if (endpoint.includes('/api/lipsyncs/')) {
+      return Promise.resolve(mockLipsyncResultResponse);
+    }
+    if (endpoint.includes('/api/text_to_speech/')) {
+      return Promise.resolve(mockTTSResultResponse);
+    }
+    if (endpoint.includes('/api/links/')) {
+      return Promise.resolve(mockLinkResponse.link);
+    }
+    if (endpoint.includes('/api/link_to_videos/')) {
+      return Promise.resolve(mockVideoResultResponse);
+    }
+    if (endpoint.includes('/api/ai_editing/')) {
+      return Promise.resolve(mockAiEditingResultResponse);
+    }
+    if (endpoint.includes('/api/custom_templates/')) {
+      return Promise.resolve(mockCustomTemplateResultResponse);
+    }
+    if (endpoint.includes('/api/dyoa/')) {
+      return Promise.resolve(mockDyoaWithPhotosResponse);
+    }
+    
+    // Default response
+    return Promise.resolve({ success: true });
+  });
+  
+  mockClient?.post.mockImplementation((endpoint) => {
+    if (endpoint === '/api/lipsyncs/') {
+      return Promise.resolve(mockLipsyncResponse);
+    }
+    if (endpoint === '/api/lipsyncs/multi_avatar/') {
+      return Promise.resolve(mockLipsyncResponse);
+    }
+    if (endpoint === '/api/text_to_speech/') {
+      return Promise.resolve(mockTTSResponse);
+    }
+    if (endpoint === '/api/links/') {
+      return Promise.resolve(mockLinkResponse);
+    }
+    if (endpoint === '/api/links/link_with_params/') {
+      return Promise.resolve(mockLinkResponse);
+    }
+    if (endpoint === '/api/link_to_videos/') {
+      return Promise.resolve(mockVideoResponse);
+    }
+    if (endpoint === '/api/ai_editing/') {
+      return Promise.resolve(mockAiEditingResponse);
+    }
+    if (endpoint === '/api/custom_templates/') {
+      return Promise.resolve(mockCustomTemplateResponse);
+    }
+    if (endpoint === '/api/dyoa/') {
+      return Promise.resolve(mockDyoaResponse);
+    }
+    if (endpoint.includes('/api/dyoa/') && endpoint.includes('/submit_for_review/')) {
+      return Promise.resolve(mockDyoaSubmittedResponse);
+    }
+    
+    // Default response
+    return Promise.resolve({ success: true });
+  });
+  
+  mockClient?.put.mockImplementation((endpoint) => {
+    if (endpoint.includes('/api/links/')) {
+      return Promise.resolve(mockLinkResponse.link);
+    }
+    
+    // Default response
+    return Promise.resolve({ success: true });
+  });
+  
+  mockClient?.delete.mockImplementation(() => {
+    return Promise.resolve({ success: true });
+  });
+  
+  return { client, mockClient };
 };

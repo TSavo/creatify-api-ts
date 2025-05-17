@@ -1,4 +1,5 @@
 import { CreatifyApiClient } from './client';
+import { apiClientFactory } from './client-factory';
 import {
   AvatarApi,
   UrlToVideoApi,
@@ -55,12 +56,12 @@ export class Creatify {
    */
   constructor(options: Types.CreatifyApiOptions) {
     this.options = options;
-    this.avatar = new AvatarApi(options);
-    this.urlToVideo = new UrlToVideoApi(options);
-    this.textToSpeech = new TextToSpeechApi(options);
-    this.aiEditing = new AiEditingApi(options);
-    this.customTemplates = new CustomTemplatesApi(options);
-    this.dyoa = new DyoaApi(options);
+    this.avatar = new AvatarApi(options, apiClientFactory);
+    this.urlToVideo = new UrlToVideoApi(options, apiClientFactory);
+    this.textToSpeech = new TextToSpeechApi(options, apiClientFactory);
+    this.aiEditing = new AiEditingApi(options, apiClientFactory);
+    this.customTemplates = new CustomTemplatesApi(options, apiClientFactory);
+    this.dyoa = new DyoaApi(options, apiClientFactory);
   }
 }
 
@@ -77,6 +78,9 @@ export {
   CustomTemplatesApi,
   DyoaApi
 };
+
+// Export client factory
+export { apiClientFactory, CreatifyApiClientFactory } from './client-factory';
 
 // Export utility classes
 export { utils };
