@@ -15,10 +15,7 @@ export class LipsyncV2Api {
    * @param options API client options
    * @param clientFactory Optional factory for creating API clients (useful for testing)
    */
-  constructor(
-    options: CreatifyApiOptions,
-    clientFactory = apiClientFactory
-  ) {
+  constructor(options: CreatifyApiOptions, clientFactory = apiClientFactory) {
     this.client = clientFactory.createClient(options);
   }
 
@@ -28,9 +25,7 @@ export class LipsyncV2Api {
    * @returns Promise resolving to the lipsync v2 task response
    * @see https://creatify.mintlify.app/api-reference/lipsyncs_v2/post-apilipsyncs
    */
-  async createLipsyncV2(
-    params: LipsyncV2.LipsyncV2Params
-  ): Promise<LipsyncV2.LipsyncV2Response> {
+  async createLipsyncV2(params: LipsyncV2.LipsyncV2Params): Promise<LipsyncV2.LipsyncV2Response> {
     try {
       return await this.client.post<LipsyncV2.LipsyncV2Response>('/api/lipsyncs_v2/', params);
     } catch (error) {
@@ -54,10 +49,11 @@ export class LipsyncV2Api {
       return {
         id,
         status: 'error',
-        error_message: error instanceof Error ? error.message : 'An error occurred with the API request',
+        error_message:
+          error instanceof Error ? error.message : 'An error occurred with the API request',
         success: false,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       } as LipsyncV2.LipsyncV2ResultResponse;
     }
   }
@@ -69,7 +65,8 @@ export class LipsyncV2Api {
    */
   async getLipsyncsV2(): Promise<LipsyncV2.LipsyncV2ResultResponse[]> {
     try {
-      const results = await this.client.get<LipsyncV2.LipsyncV2ResultResponse[]>('/api/lipsyncs_v2/');
+      const results =
+        await this.client.get<LipsyncV2.LipsyncV2ResultResponse[]>('/api/lipsyncs_v2/');
       return Array.isArray(results) ? results : [];
     } catch (error) {
       console.error('Error fetching lipsync v2 tasks:', error);
@@ -83,9 +80,7 @@ export class LipsyncV2Api {
    * @returns Promise resolving to the lipsync v2 task response
    * @see https://creatify.mintlify.app/api-reference/lipsyncs_v2/post-apilipsyncs-preview
    */
-  async generateLipsyncV2Preview(
-    id: string
-  ): Promise<LipsyncV2.LipsyncV2Response> {
+  async generateLipsyncV2Preview(id: string): Promise<LipsyncV2.LipsyncV2Response> {
     return this.client.post<LipsyncV2.LipsyncV2Response>(`/api/lipsyncs_v2/${id}/preview/`, {});
   }
 
@@ -95,9 +90,7 @@ export class LipsyncV2Api {
    * @returns Promise resolving to the lipsync v2 task response
    * @see https://creatify.mintlify.app/api-reference/lipsyncs_v2/post-apilipsyncs-render
    */
-  async renderLipsyncV2(
-    id: string
-  ): Promise<LipsyncV2.LipsyncV2Response> {
+  async renderLipsyncV2(id: string): Promise<LipsyncV2.LipsyncV2Response> {
     return this.client.post<LipsyncV2.LipsyncV2Response>(`/api/lipsyncs_v2/${id}/render/`, {});
   }
 
@@ -121,11 +114,7 @@ export class LipsyncV2Api {
       let attempts = 0;
       let result = await this.getLipsyncV2(response.id);
 
-      while (
-        attempts < maxAttempts &&
-        result.status !== 'done' &&
-        result.status !== 'error'
-      ) {
+      while (attempts < maxAttempts && result.status !== 'done' && result.status !== 'error') {
         // Wait for the specified interval
         await new Promise(resolve => setTimeout(resolve, pollInterval));
 
@@ -136,7 +125,9 @@ export class LipsyncV2Api {
 
       // Check if we reached max attempts without completion
       if (attempts >= maxAttempts && result.status !== 'done' && result.status !== 'error') {
-        const error = new Error(`Lipsync v2 task ${response.id} did not complete within the timeout period`);
+        const error = new Error(
+          `Lipsync v2 task ${response.id} did not complete within the timeout period`
+        );
         // Create a result with error status
         return {
           id: response.id,
@@ -144,7 +135,7 @@ export class LipsyncV2Api {
           error_message: error instanceof Error ? error.message : 'Unknown error',
           success: false,
           created_at: result.created_at || new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         };
       }
 
@@ -158,7 +149,7 @@ export class LipsyncV2Api {
         error_message: error instanceof Error ? error.message : 'Unknown error',
         success: false,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
     }
   }

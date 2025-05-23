@@ -1,5 +1,3 @@
-
-
 import { Creatify } from '../index';
 import { CreatifyApiOptions } from '../types';
 import { ICreatifyApiClientFactory } from '../types/api-client';
@@ -12,7 +10,7 @@ import {
   AiScriptsApi,
   MusicsApi,
   WorkspaceApi,
-  LipsyncV2Api
+  LipsyncV2Api,
 } from '../api';
 
 /**
@@ -41,7 +39,7 @@ export interface BatchProcessingOptions {
 const DEFAULT_BATCH_OPTIONS: Required<BatchProcessingOptions> = {
   concurrency: 3,
   continueOnError: false,
-  taskStartDelay: 500
+  taskStartDelay: 500,
 };
 
 /**
@@ -82,9 +80,10 @@ export class BatchProcessorWithFactory {
     clientFactory: ICreatifyApiClientFactory = apiClientFactory
   ) {
     // Handle different constructor argument formats
-    const options: CreatifyApiOptions = typeof apiIdOrOptions === 'string'
-      ? { apiId: apiIdOrOptions, apiKey: apiKey as string }
-      : apiIdOrOptions;
+    const options: CreatifyApiOptions =
+      typeof apiIdOrOptions === 'string'
+        ? { apiId: apiIdOrOptions, apiKey: apiKey as string }
+        : apiIdOrOptions;
 
     this.api = new Creatify(options);
 
@@ -112,13 +111,13 @@ export class BatchProcessorWithFactory {
     // Merge options with defaults
     const opts: Required<BatchProcessingOptions> = {
       ...DEFAULT_BATCH_OPTIONS,
-      ...options
+      ...options,
     };
 
     const result: BatchResult<T> = {
       successes: [],
       errors: [],
-      allSuccessful: true
+      allSuccessful: true,
     };
 
     // Keep track of active tasks
@@ -214,7 +213,7 @@ export class BatchProcessorWithFactory {
           text: task.text,
           creator: task.avatarId,
           voice_id: task.voiceId,
-          aspect_ratio: task.aspectRatio as any
+          aspect_ratio: task.aspectRatio as any,
         });
       };
     });
@@ -236,7 +235,7 @@ export class BatchProcessorWithFactory {
       return async () => {
         return this.api.textToSpeech.createAndWaitForTextToSpeech({
           script: task.script,
-          accent: task.accent
+          accent: task.accent,
         });
       };
     });
@@ -258,7 +257,7 @@ export class BatchProcessorWithFactory {
       return async () => {
         return this.api.aiEditing.createAndWaitForAiEditing({
           video_url: task.videoUrl,
-          editing_style: task.editingStyle as any
+          editing_style: task.editingStyle as any,
         });
       };
     });
@@ -294,7 +293,13 @@ export class BatchProcessorWithFactory {
    * @returns Promise resolving to the batch result
    */
   async processAiShortsBatch(
-    aiShortsTasks: Array<{ prompt: string; aspectRatio: string; targetPlatform?: string; targetAudience?: string; language?: string }>,
+    aiShortsTasks: Array<{
+      prompt: string;
+      aspectRatio: string;
+      targetPlatform?: string;
+      targetAudience?: string;
+      language?: string;
+    }>,
     options: BatchProcessingOptions = {}
   ) {
     const tasks = aiShortsTasks.map(task => {
@@ -304,7 +309,7 @@ export class BatchProcessorWithFactory {
           aspect_ratio: task.aspectRatio as any,
           target_platform: task.targetPlatform,
           target_audience: task.targetAudience,
-          language: task.language
+          language: task.language,
         });
       };
     });
@@ -319,7 +324,13 @@ export class BatchProcessorWithFactory {
    * @returns Promise resolving to the batch result
    */
   async processAiScriptsBatch(
-    aiScriptsTasks: Array<{ prompt: string; targetPlatform?: string; targetAudience?: string; language?: string; scriptLength?: number }>,
+    aiScriptsTasks: Array<{
+      prompt: string;
+      targetPlatform?: string;
+      targetAudience?: string;
+      language?: string;
+      scriptLength?: number;
+    }>,
     options: BatchProcessingOptions = {}
   ) {
     const tasks = aiScriptsTasks.map(task => {
@@ -329,7 +340,7 @@ export class BatchProcessorWithFactory {
           target_platform: task.targetPlatform,
           target_audience: task.targetAudience,
           language: task.language,
-          script_length: task.scriptLength
+          script_length: task.scriptLength,
         });
       };
     });
@@ -351,7 +362,7 @@ export class BatchProcessorWithFactory {
       return async () => {
         return this.api.lipsyncV2.createAndWaitForLipsyncV2({
           video_inputs: task.videoInputs,
-          aspect_ratio: task.aspectRatio as any
+          aspect_ratio: task.aspectRatio as any,
         });
       };
     });

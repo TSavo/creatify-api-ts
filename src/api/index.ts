@@ -21,5 +21,5 @@ export {
   AiScriptsApi,
   MusicsApi,
   WorkspaceApi,
-  LipsyncV2Api
+  LipsyncV2Api,
 };

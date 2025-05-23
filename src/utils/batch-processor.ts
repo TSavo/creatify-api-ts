@@ -28,7 +28,7 @@ export interface BatchProcessingOptions {
 const DEFAULT_BATCH_OPTIONS: Required<BatchProcessingOptions> = {
   concurrency: 3,
   continueOnError: false,
-  taskStartDelay: 500
+  taskStartDelay: 500,
 };
 
 /**
@@ -43,7 +43,7 @@ export interface BatchResult<T> {
   /**
    * Array of errors, with the index of the task that failed
    */
-  errors: Array<{ index: number; error: any }>;
+  errors: Array<{ index: number; error: Error | unknown }>;
 
   /**
    * Whether all tasks were successful
@@ -69,9 +69,10 @@ export class BatchProcessor {
     clientFactory = apiClientFactory
   ) {
     // Handle different constructor argument formats
-    const options: CreatifyApiOptions = typeof apiIdOrOptions === 'string'
-      ? { apiId: apiIdOrOptions, apiKey: apiKey! }
-      : apiIdOrOptions;
+    const options: CreatifyApiOptions =
+      typeof apiIdOrOptions === 'string'
+        ? { apiId: apiIdOrOptions, apiKey: apiKey! }
+        : apiIdOrOptions;
 
     this.api = new Creatify(options);
   }
@@ -89,13 +90,13 @@ export class BatchProcessor {
     // Merge options with defaults
     const opts: Required<BatchProcessingOptions> = {
       ...DEFAULT_BATCH_OPTIONS,
-      ...options
+      ...options,
     };
 
     const result: BatchResult<T> = {
       successes: [],
       errors: [],
-      allSuccessful: true
+      allSuccessful: true,
     };
 
     // Keep track of active tasks
@@ -191,7 +192,7 @@ export class BatchProcessor {
           text: task.text,
           creator: task.avatarId,
           voice_id: task.voiceId,
-          aspect_ratio: task.aspectRatio as any
+          aspect_ratio: task.aspectRatio,
         });
       };
     });
@@ -213,7 +214,7 @@ export class BatchProcessor {
       return async () => {
         return this.api.textToSpeech.createAndWaitForTextToSpeech({
           script: task.script,
-          accent: task.accent
+          accent: task.accent,
         });
       };
     });
@@ -235,7 +236,7 @@ export class BatchProcessor {
       return async () => {
         return this.api.aiEditing.createAndWaitForAiEditing({
           video_url: task.videoUrl,
-          editing_style: task.editingStyle as any
+          editing_style: task.editingStyle,
         });
       };
     });
@@ -250,17 +251,23 @@ export class BatchProcessor {
    * @returns Promise resolving to the batch result
    */
   async processAiShortsBatch(
-    aiShortsTasks: Array<{ prompt: string; aspectRatio: string; targetPlatform?: string; targetAudience?: string; language?: string }>,
+    aiShortsTasks: Array<{
+      prompt: string;
+      aspectRatio: string;
+      targetPlatform?: string;
+      targetAudience?: string;
+      language?: string;
+    }>,
     options: BatchProcessingOptions = {}
   ) {
     const tasks = aiShortsTasks.map(task => {
       return async () => {
         return this.api.aiShorts.createAndWaitForAiShorts({
           prompt: task.prompt,
-          aspect_ratio: task.aspectRatio as any,
+          aspect_ratio: task.aspectRatio,
           target_platform: task.targetPlatform,
           target_audience: task.targetAudience,
-          language: task.language
+          language: task.language,
         });
       };
     });
@@ -275,7 +282,13 @@ export class BatchProcessor {
    * @returns Promise resolving to the batch result
    */
   async processAiScriptsBatch(
-    aiScriptsTasks: Array<{ prompt: string; targetPlatform?: string; targetAudience?: string; language?: string; scriptLength?: number }>,
+    aiScriptsTasks: Array<{
+      prompt: string;
+      targetPlatform?: string;
+      targetAudience?: string;
+      language?: string;
+      scriptLength?: number;
+    }>,
     options: BatchProcessingOptions = {}
   ) {
     const tasks = aiScriptsTasks.map(task => {
@@ -285,7 +298,7 @@ export class BatchProcessor {
           target_platform: task.targetPlatform,
           target_audience: task.targetAudience,
           language: task.language,
-          script_length: task.scriptLength
+          script_length: task.scriptLength,
         });
       };
     });
@@ -300,14 +313,14 @@ export class BatchProcessor {
    * @returns Promise resolving to the batch result
    */
   async processLipsyncV2Batch(
-    lipsyncV2Tasks: Array<{ videoInputs: any[]; aspectRatio: string }>,
+    lipsyncV2Tasks: Array<{ videoInputs: Record<string, unknown>[]; aspectRatio: string }>,
     options: BatchProcessingOptions = {}
   ) {
     const tasks = lipsyncV2Tasks.map(task => {
       return async () => {
         return this.api.lipsyncV2.createAndWaitForLipsyncV2({
           video_inputs: task.videoInputs,
-          aspect_ratio: task.aspectRatio as any
+          aspect_ratio: task.aspectRatio,
         });
       };
     });

@@ -6,24 +6,22 @@ import { TextToSpeech, CreatifyApiOptions } from '../types';
  */
 export class AudioProcessor {
   private api: TextToSpeechApi;
-  
+
   /**
    * Create a new AudioProcessor
    * @param apiIdOrOptions API ID or full options object
    * @param apiKey API key (only required if apiIdOrOptions is a string)
    */
-  constructor(
-    apiIdOrOptions: string | CreatifyApiOptions,
-    apiKey?: string
-  ) {
+  constructor(apiIdOrOptions: string | CreatifyApiOptions, apiKey?: string) {
     // Handle different constructor argument formats
-    const options: CreatifyApiOptions = typeof apiIdOrOptions === 'string'
-      ? { apiId: apiIdOrOptions, apiKey: apiKey! }
-      : apiIdOrOptions;
-      
+    const options: CreatifyApiOptions =
+      typeof apiIdOrOptions === 'string'
+        ? { apiId: apiIdOrOptions, apiKey: apiKey! }
+        : apiIdOrOptions;
+
     this.api = new TextToSpeechApi(options);
   }
-  
+
   /**
    * Generate audio from text
    * @param script Text to convert to speech
@@ -38,16 +36,16 @@ export class AudioProcessor {
   ): Promise<TextToSpeech.TextToSpeechResultResponse | TextToSpeech.TextToSpeechResponse> {
     const params: TextToSpeech.TextToSpeechParams = {
       script,
-      accent: accentId
+      accent: accentId,
     };
-    
+
     if (waitForCompletion) {
       return this.api.createAndWaitForTextToSpeech(params);
     } else {
       return this.api.createTextToSpeech(params);
     }
   }
-  
+
   /**
    * Check the status of an audio generation task
    * @param id ID of the text-to-speech task
@@ -56,7 +54,7 @@ export class AudioProcessor {
   async checkAudioStatus(id: string): Promise<TextToSpeech.TextToSpeechResultResponse> {
     return this.api.getTextToSpeech(id);
   }
-  
+
   /**
    * Poll for audio generation completion
    * @param id ID of the text-to-speech task
@@ -71,28 +69,24 @@ export class AudioProcessor {
   ): Promise<TextToSpeech.TextToSpeechResultResponse> {
     let attempts = 0;
     let result = await this.api.getTextToSpeech(id);
-    
-    while (
-      attempts < maxAttempts &&
-      result.status !== 'done' &&
-      result.status !== 'error'
-    ) {
+
+    while (attempts < maxAttempts && result.status !== 'done' && result.status !== 'error') {
       // Wait for the specified interval
       await new Promise(resolve => setTimeout(resolve, pollInterval));
-      
+
       // Check the status again
       result = await this.api.getTextToSpeech(id);
       attempts++;
     }
-    
+
     // Check if we reached max attempts without completion
     if (attempts >= maxAttempts && result.status !== 'done' && result.status !== 'error') {
       throw new Error(`Audio generation task ${id} did not complete within the timeout period`);
     }
-    
+
     return result;
   }
-  
+
   /**
    * List all audio generation tasks
    * @returns Promise resolving to an array of tasks

@@ -15,10 +15,7 @@ export class CustomTemplatesApi {
    * @param options API client options
    * @param clientFactory Optional factory for creating API clients (useful for testing)
    */
-  constructor(
-    options: CreatifyApiOptions,
-    clientFactory = apiClientFactory
-  ) {
+  constructor(options: CreatifyApiOptions, clientFactory = apiClientFactory) {
     this.client = clientFactory.createClient(options);
   }
   /**
@@ -30,7 +27,10 @@ export class CustomTemplatesApi {
   async createCustomTemplate(
     params: CustomTemplates.CustomTemplateParams
   ): Promise<CustomTemplates.CustomTemplateResponse> {
-    return this.client.post<CustomTemplates.CustomTemplateResponse>('/api/custom_templates/', params);
+    return this.client.post<CustomTemplates.CustomTemplateResponse>(
+      '/api/custom_templates/',
+      params
+    );
   }
 
   /**
@@ -40,7 +40,9 @@ export class CustomTemplatesApi {
    * @see https://creatify.mintlify.app/api-reference/custom-templates
    */
   async getCustomTemplate(id: string): Promise<CustomTemplates.CustomTemplateResultResponse> {
-    return this.client.get<CustomTemplates.CustomTemplateResultResponse>(`/api/custom_templates/${id}/`);
+    return this.client.get<CustomTemplates.CustomTemplateResultResponse>(
+      `/api/custom_templates/${id}/`
+    );
   }
 
   /**
@@ -49,7 +51,9 @@ export class CustomTemplatesApi {
    * @see https://creatify.mintlify.app/api-reference/custom-templates
    */
   async getCustomTemplateList(): Promise<CustomTemplates.CustomTemplateResultResponse[]> {
-    return this.client.get<CustomTemplates.CustomTemplateResultResponse[]>('/api/custom_templates/');
+    return this.client.get<CustomTemplates.CustomTemplateResultResponse[]>(
+      '/api/custom_templates/'
+    );
   }
 
   /**
@@ -66,29 +70,27 @@ export class CustomTemplatesApi {
   ): Promise<CustomTemplates.CustomTemplateResultResponse> {
     // Create the custom template task
     const response = await this.createCustomTemplate(params);
-    
+
     // Poll for completion
     let attempts = 0;
     let result = await this.getCustomTemplate(response.id);
-    
-    while (
-      attempts < maxAttempts &&
-      result.status !== 'done' &&
-      result.status !== 'error'
-    ) {
+
+    while (attempts < maxAttempts && result.status !== 'done' && result.status !== 'error') {
       // Wait for the specified interval
       await new Promise(resolve => setTimeout(resolve, pollInterval));
-      
+
       // Check the status again
       result = await this.getCustomTemplate(response.id);
       attempts++;
     }
-    
+
     // Check if we reached max attempts without completion
     if (attempts >= maxAttempts && result.status !== 'done' && result.status !== 'error') {
-      throw new Error(`Custom template task ${response.id} did not complete within the timeout period`);
+      throw new Error(
+        `Custom template task ${response.id} did not complete within the timeout period`
+      );
     }
-    
+
     return result;
   }
 }

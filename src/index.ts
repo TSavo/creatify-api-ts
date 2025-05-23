@@ -11,7 +11,7 @@ import {
   AiScriptsApi,
   MusicsApi,
   WorkspaceApi,
-  LipsyncV2Api
+  LipsyncV2Api,
 } from './api';
 import * as Types from './types';
 import * as utils from './utils';
@@ -116,7 +116,7 @@ export {
   AiScriptsApi,
   MusicsApi,
   WorkspaceApi,
-  LipsyncV2Api
+  LipsyncV2Api,
 };
 
 // Export client factory

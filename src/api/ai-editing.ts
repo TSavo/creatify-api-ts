@@ -15,10 +15,7 @@ export class AiEditingApi {
    * @param options API client options
    * @param clientFactory Optional factory for creating API clients (useful for testing)
    */
-  constructor(
-    options: CreatifyApiOptions,
-    clientFactory = apiClientFactory
-  ) {
+  constructor(options: CreatifyApiOptions, clientFactory = apiClientFactory) {
     this.client = clientFactory.createClient(options);
   }
   /**
@@ -27,9 +24,7 @@ export class AiEditingApi {
    * @returns Promise resolving to the AI editing task response
    * @see https://creatify.mintlify.app/api-reference/ai-editing
    */
-  async createAiEditing(
-    params: AiEditing.AiEditingParams
-  ): Promise<AiEditing.AiEditingResponse> {
+  async createAiEditing(params: AiEditing.AiEditingParams): Promise<AiEditing.AiEditingResponse> {
     return this.client.post<AiEditing.AiEditingResponse>('/api/ai_editing/', params);
   }
 
@@ -66,29 +61,25 @@ export class AiEditingApi {
   ): Promise<AiEditing.AiEditingResultResponse> {
     // Create the AI editing task
     const response = await this.createAiEditing(params);
-    
+
     // Poll for completion
     let attempts = 0;
     let result = await this.getAiEditing(response.id);
-    
-    while (
-      attempts < maxAttempts &&
-      result.status !== 'done' &&
-      result.status !== 'error'
-    ) {
+
+    while (attempts < maxAttempts && result.status !== 'done' && result.status !== 'error') {
       // Wait for the specified interval
       await new Promise(resolve => setTimeout(resolve, pollInterval));
-      
+
       // Check the status again
       result = await this.getAiEditing(response.id);
       attempts++;
     }
-    
+
     // Check if we reached max attempts without completion
     if (attempts >= maxAttempts && result.status !== 'done' && result.status !== 'error') {
       throw new Error(`AI editing task ${response.id} did not complete within the timeout period`);
     }
-    
+
     return result;
   }
 }

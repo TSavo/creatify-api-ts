@@ -7,40 +7,40 @@ const mockGetAvatars = vi.fn().mockResolvedValue([
   {
     id: 'test-avatar-id-1',
     avatar_id: 'test-avatar-id-1',
-    name: 'John'
+    name: 'John',
   },
   {
     id: 'test-avatar-id-2',
     avatar_id: 'test-avatar-id-2',
-    name: 'Emma'
-  }
+    name: 'Emma',
+  },
 ]);
 
 const mockGetVoices = vi.fn().mockResolvedValue([
   {
     voice_id: 'test-voice-id-1',
-    name: 'English Male'
+    name: 'English Male',
   },
   {
     voice_id: 'test-voice-id-2',
-    name: 'English Female'
-  }
+    name: 'English Female',
+  },
 ]);
 
 const mockCreateLipsync = vi.fn().mockResolvedValue({
   id: 'test-lipsync-id',
-  status: 'pending'
+  status: 'pending',
 });
 
 const mockGetLipsync = vi.fn().mockResolvedValue({
   id: 'test-lipsync-id',
   status: 'done',
-  output: 'https://example.com/video.mp4'
+  output: 'https://example.com/video.mp4',
 });
 
 const mockCreateMultiAvatarLipsync = vi.fn().mockResolvedValue({
   id: 'test-multi-lipsync-id',
-  status: 'pending'
+  status: 'pending',
 });
 
 // Mock the AvatarApi class directly
@@ -52,9 +52,9 @@ vi.mock('../../src/api/avatar', () => {
         getVoices: mockGetVoices,
         createLipsync: mockCreateLipsync,
         getLipsync: mockGetLipsync,
-        createMultiAvatarLipsync: mockCreateMultiAvatarLipsync
+        createMultiAvatarLipsync: mockCreateMultiAvatarLipsync,
       };
-    })
+    }),
   };
 });
 
@@ -82,7 +82,7 @@ describe('VideoCreator Direct Mock Test', () => {
       getVoices: mockGetVoices,
       createLipsync: mockCreateLipsync,
       getLipsync: mockGetLipsync,
-      createMultiAvatarLipsync: mockCreateMultiAvatarLipsync
+      createMultiAvatarLipsync: mockCreateMultiAvatarLipsync,
     };
   });
 
@@ -95,7 +95,7 @@ describe('VideoCreator Direct Mock Test', () => {
     it('should initialize with API credentials as an options object', () => {
       const creator = new VideoCreator({
         apiId: 'test-api-id',
-        apiKey: 'test-api-key'
+        apiKey: 'test-api-key',
       });
       expect(creator).toBeDefined();
     });
@@ -111,7 +111,7 @@ describe('VideoCreator Direct Mock Test', () => {
         avatarId: 'test-avatar-id-1',
         voiceId: 'test-voice-id-1',
         script: 'Hello world',
-        aspectRatio: '16:9'
+        aspectRatio: '16:9',
       });
 
       // Fast forward time to complete the task
@@ -125,14 +125,14 @@ describe('VideoCreator Direct Mock Test', () => {
         text: 'Hello world',
         creator: 'test-avatar-id-1',
         voice_id: 'test-voice-id-1',
-        aspect_ratio: '16:9'
+        aspect_ratio: '16:9',
       });
 
       // Verify the result
       expect(result).toEqual({
         id: 'test-lipsync-id',
         status: 'done',
-        url: 'https://example.com/video.mp4'
+        url: 'https://example.com/video.mp4',
       });
 
       // Restore real timers
@@ -147,7 +147,7 @@ describe('VideoCreator Direct Mock Test', () => {
       const resultPromise = videoCreator.createVideo({
         avatarName: 'John',
         voiceName: 'English Male',
-        script: 'Hello world'
+        script: 'Hello world',
       });
 
       // Fast forward time to complete the task
@@ -161,17 +161,19 @@ describe('VideoCreator Direct Mock Test', () => {
       expect(mockAvatarApi.getVoices).toHaveBeenCalled();
 
       // Verify the createLipsync was called with the correct IDs
-      expect(mockAvatarApi.createLipsync).toHaveBeenCalledWith(expect.objectContaining({
-        text: 'Hello world',
-        creator: 'test-avatar-id-1',
-        voice_id: 'test-voice-id-1'
-      }));
+      expect(mockAvatarApi.createLipsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'Hello world',
+          creator: 'test-avatar-id-1',
+          voice_id: 'test-voice-id-1',
+        })
+      );
 
       // Verify the result
       expect(result).toEqual({
         id: 'test-lipsync-id',
         status: 'done',
-        url: 'https://example.com/video.mp4'
+        url: 'https://example.com/video.mp4',
       });
 
       // Restore timers
@@ -183,11 +185,13 @@ describe('VideoCreator Direct Mock Test', () => {
       mockAvatarApi.getAvatars.mockResolvedValueOnce([]);
 
       // Attempt to create a video with a non-existent avatar name
-      await expect(videoCreator.createVideo({
-        avatarName: 'NonExistentAvatar',
-        script: 'Hello! This is a test video.',
-        aspectRatio: '16:9'
-      })).rejects.toThrow('Avatar with name "NonExistentAvatar" not found');
+      await expect(
+        videoCreator.createVideo({
+          avatarName: 'NonExistentAvatar',
+          script: 'Hello! This is a test video.',
+          aspectRatio: '16:9',
+        })
+      ).rejects.toThrow('Avatar with name "NonExistentAvatar" not found');
     });
 
     it('should throw an error if voice name is not found', async () => {
@@ -195,12 +199,14 @@ describe('VideoCreator Direct Mock Test', () => {
       mockAvatarApi.getVoices.mockResolvedValueOnce([]);
 
       // Attempt to create a video with existing avatar but non-existent voice
-      await expect(videoCreator.createVideo({
-        avatarName: 'John',
-        voiceName: 'NonExistentVoice',
-        script: 'Hello! This is a test video.',
-        aspectRatio: '16:9'
-      })).rejects.toThrow('Voice with name "NonExistentVoice" not found');
+      await expect(
+        videoCreator.createVideo({
+          avatarName: 'John',
+          voiceName: 'NonExistentVoice',
+          script: 'Hello! This is a test video.',
+          aspectRatio: '16:9',
+        })
+      ).rejects.toThrow('Voice with name "NonExistentVoice" not found');
     });
 
     it('should handle API errors', async () => {
@@ -208,11 +214,13 @@ describe('VideoCreator Direct Mock Test', () => {
       mockCreateLipsync.mockRejectedValueOnce(new Error('API error'));
 
       // Attempt to create a video that will fail due to API error
-      await expect(videoCreator.createVideo({
-        avatarId: 'test-avatar-id-1',
-        script: 'Hello! This is a test video.',
-        aspectRatio: '16:9'
-      })).rejects.toThrow('API error');
+      await expect(
+        videoCreator.createVideo({
+          avatarId: 'test-avatar-id-1',
+          script: 'Hello! This is a test video.',
+          aspectRatio: '16:9',
+        })
+      ).rejects.toThrow('API error');
     });
   });
 
@@ -227,14 +235,14 @@ describe('VideoCreator Direct Mock Test', () => {
           {
             avatarId: 'test-avatar-id-1',
             voiceId: 'test-voice-id-1',
-            text: 'Hello'
+            text: 'Hello',
           },
           {
             avatarId: 'test-avatar-id-2',
             voiceId: 'test-voice-id-2',
-            text: 'Hi there'
-          }
-        ]
+            text: 'Hi there',
+          },
+        ],
       });
 
       // Fast forward time
@@ -250,7 +258,7 @@ describe('VideoCreator Direct Mock Test', () => {
       expect(mockAvatarApi.createMultiAvatarLipsync).toHaveBeenCalledWith(
         expect.objectContaining({
           video_inputs: expect.any(Array),
-          aspect_ratio: expect.any(String)
+          aspect_ratio: expect.any(String),
         })
       );
 
@@ -258,7 +266,7 @@ describe('VideoCreator Direct Mock Test', () => {
       expect(result).toEqual({
         id: 'test-multi-lipsync-id',
         status: 'done',
-        url: 'https://example.com/video.mp4'
+        url: 'https://example.com/video.mp4',
       });
 
       // Restore timers
@@ -275,16 +283,16 @@ describe('VideoCreator Direct Mock Test', () => {
           {
             avatarName: 'John',
             voiceName: 'English Male',
-            text: 'Hello! How are you?'
+            text: 'Hello! How are you?',
           },
           {
             avatarName: 'Emma',
             voiceName: 'English Female',
-            text: 'I\'m doing great, thanks for asking!'
-          }
+            text: "I'm doing great, thanks for asking!",
+          },
         ],
         backgroundUrl: 'https://example.com/background.jpg',
-        aspectRatio: '16:9'
+        aspectRatio: '16:9',
       });
 
       // Fast forward time
@@ -304,7 +312,7 @@ describe('VideoCreator Direct Mock Test', () => {
       expect(result).toEqual({
         id: 'test-multi-lipsync-id',
         status: 'done',
-        url: 'https://example.com/video.mp4'
+        url: 'https://example.com/video.mp4',
       });
 
       // Restore timers

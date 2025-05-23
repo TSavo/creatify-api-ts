@@ -1,8 +1,5 @@
 import { AiEditingApi } from '../../src/api/ai-editing';
-import {
-  mockAiEditingCreationResponse,
-  mockAiEditingResults
-} from '../mocks/api-responses';
+import { mockAiEditingCreationResponse, mockAiEditingResults } from '../mocks/api-responses';
 import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -12,10 +9,13 @@ describe('AiEditingApi', () => {
 
   beforeEach(() => {
     // Create a new instance of the AiEditingApi with the mock factory
-    aiEditingApi = new AiEditingApi({
-      apiId: 'test-api-id',
-      apiKey: 'test-api-key'
-    }, mockApiClientFactory);
+    aiEditingApi = new AiEditingApi(
+      {
+        apiId: 'test-api-id',
+        apiKey: 'test-api-key',
+      },
+      mockApiClientFactory
+    );
 
     // Get the mock client that was created
     mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;
@@ -31,7 +31,7 @@ describe('AiEditingApi', () => {
 
       const params = {
         video_url: 'https://example.com/video.mp4',
-        editing_style: 'film' as any
+        editing_style: 'film' as any,
       };
 
       const result = await aiEditingApi.createAiEditing(params);
@@ -69,12 +69,11 @@ describe('AiEditingApi', () => {
     it('should create an AI editing task and wait for completion', async () => {
       // Mock the post and get methods to return the expected responses in sequence
       mockClient.post.mockResolvedValueOnce(mockAiEditingCreationResponse);
-      mockClient.get
-        .mockResolvedValueOnce(mockAiEditingResults.done); // Return done immediately to avoid timeout
+      mockClient.get.mockResolvedValueOnce(mockAiEditingResults.done); // Return done immediately to avoid timeout
 
       const params = {
         video_url: 'https://example.com/video.mp4',
-        editing_style: 'film' as any
+        editing_style: 'film' as any,
       };
 
       // Start the async process with a short polling interval
@@ -95,7 +94,7 @@ describe('AiEditingApi', () => {
 
       const params = {
         video_url: 'https://example.com/video.mp4',
-        editing_style: 'film' as any
+        editing_style: 'film' as any,
       };
 
       // Start the async process with a short polling interval
@@ -112,7 +111,7 @@ describe('AiEditingApi', () => {
 
       const params = {
         video_url: 'https://example.com/video.mp4',
-        editing_style: 'film' as any
+        editing_style: 'film' as any,
       };
 
       // Start the async process with only 2 max attempts and a short polling interval

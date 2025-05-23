@@ -15,10 +15,7 @@ export class AiScriptsApi {
    * @param options API client options
    * @param clientFactory Optional factory for creating API clients (useful for testing)
    */
-  constructor(
-    options: CreatifyApiOptions,
-    clientFactory = apiClientFactory
-  ) {
+  constructor(options: CreatifyApiOptions, clientFactory = apiClientFactory) {
     this.client = clientFactory.createClient(options);
   }
 
@@ -28,9 +25,7 @@ export class AiScriptsApi {
    * @returns Promise resolving to the AI Script task response
    * @see https://creatify.mintlify.app/api-reference/ai-scripts/post-ai-scripts
    */
-  async createAiScript(
-    params: AiScripts.AiScriptsParams
-  ): Promise<AiScripts.AiScriptsResponse> {
+  async createAiScript(params: AiScripts.AiScriptsParams): Promise<AiScripts.AiScriptsResponse> {
     return this.client.post<AiScripts.AiScriptsResponse>('/api/ai_scripts/', params);
   }
 
@@ -49,10 +44,11 @@ export class AiScriptsApi {
       return {
         id,
         status: 'error',
-        error_message: error instanceof Error ? error.message : 'An error occurred with the API request',
+        error_message:
+          error instanceof Error ? error.message : 'An error occurred with the API request',
         success: false,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       } as AiScripts.AiScriptsResultResponse;
     }
   }
@@ -64,7 +60,8 @@ export class AiScriptsApi {
    */
   async getAiScriptsList(): Promise<AiScripts.AiScriptsResultResponse[]> {
     try {
-      const results = await this.client.get<AiScripts.AiScriptsResultResponse[]>('/api/ai_scripts/');
+      const results =
+        await this.client.get<AiScripts.AiScriptsResultResponse[]>('/api/ai_scripts/');
       return Array.isArray(results) ? results : [];
     } catch (error) {
       console.error('Error fetching AI Script tasks:', error);
@@ -92,11 +89,7 @@ export class AiScriptsApi {
       let attempts = 0;
       let result = await this.getAiScript(response.id);
 
-      while (
-        attempts < maxAttempts &&
-        result.status !== 'done' &&
-        result.status !== 'error'
-      ) {
+      while (attempts < maxAttempts && result.status !== 'done' && result.status !== 'error') {
         // Wait for the specified interval
         await new Promise(resolve => setTimeout(resolve, pollInterval));
 
@@ -107,7 +100,9 @@ export class AiScriptsApi {
 
       // Check if we reached max attempts without completion
       if (attempts >= maxAttempts && result.status !== 'done' && result.status !== 'error') {
-        const error = new Error(`AI Script task ${response.id} did not complete within the timeout period`);
+        const error = new Error(
+          `AI Script task ${response.id} did not complete within the timeout period`
+        );
         // Create a result with error status
         return {
           id: response.id,
@@ -115,7 +110,7 @@ export class AiScriptsApi {
           error_message: error.message,
           success: false,
           created_at: result.created_at || new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         };
       }
 
@@ -129,7 +124,7 @@ export class AiScriptsApi {
         error_message: error instanceof Error ? error.message : 'Unknown error',
         success: false,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
     }
   }

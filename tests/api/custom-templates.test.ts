@@ -1,7 +1,7 @@
 import { CustomTemplatesApi } from '../../src/api/custom-templates';
 import {
   mockCustomTemplateResponse,
-  mockCustomTemplateResultResponse
+  mockCustomTemplateResultResponse,
 } from '../mocks/api-responses';
 import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -12,10 +12,13 @@ describe('CustomTemplatesApi', () => {
 
   beforeEach(() => {
     // Create a new instance of the CustomTemplatesApi with the mock factory
-    customTemplatesApi = new CustomTemplatesApi({
-      apiId: 'test-api-id',
-      apiKey: 'test-api-key'
-    }, mockApiClientFactory);
+    customTemplatesApi = new CustomTemplatesApi(
+      {
+        apiId: 'test-api-id',
+        apiKey: 'test-api-key',
+      },
+      mockApiClientFactory
+    );
 
     // Get the mock client that was created
     mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;
@@ -33,8 +36,8 @@ describe('CustomTemplatesApi', () => {
         visual_style: 'modern-professional',
         data: {
           name: 'John Doe',
-          company: 'Acme Inc.'
-        }
+          company: 'Acme Inc.',
+        },
       };
 
       const result = await customTemplatesApi.createCustomTemplate(params);
@@ -60,7 +63,7 @@ describe('CustomTemplatesApi', () => {
     it('should fetch all custom template tasks', async () => {
       const mockTemplateList = [
         mockCustomTemplateResultResponse,
-        {...mockCustomTemplateResultResponse, status: 'processing'}
+        { ...mockCustomTemplateResultResponse, status: 'processing' },
       ];
       mockClient.get.mockResolvedValueOnce(mockTemplateList);
 
@@ -75,8 +78,7 @@ describe('CustomTemplatesApi', () => {
     it('should create a custom template task and wait for completion', async () => {
       // Mock the post and get methods to return the expected responses in sequence
       mockClient.post.mockResolvedValueOnce(mockCustomTemplateResponse);
-      mockClient.get
-        .mockResolvedValueOnce(mockCustomTemplateResultResponse); // Return done immediately to avoid timeout
+      mockClient.get.mockResolvedValueOnce(mockCustomTemplateResultResponse); // Return done immediately to avoid timeout
 
       // Mock timers
       vi.useFakeTimers();
@@ -85,8 +87,8 @@ describe('CustomTemplatesApi', () => {
         visual_style: 'modern-professional',
         data: {
           name: 'John Doe',
-          company: 'Acme Inc.'
-        }
+          company: 'Acme Inc.',
+        },
       };
 
       // Start the async process with a short polling interval
@@ -118,15 +120,15 @@ describe('CustomTemplatesApi', () => {
         ...mockCustomTemplateResultResponse,
         status: 'error',
         success: false,
-        error_message: 'Something went wrong'
+        error_message: 'Something went wrong',
       });
 
       const params = {
         visual_style: 'modern-professional',
         data: {
           name: 'John Doe',
-          company: 'Acme Inc.'
-        }
+          company: 'Acme Inc.',
+        },
       };
 
       // Start the async process with a short polling interval
@@ -137,21 +139,21 @@ describe('CustomTemplatesApi', () => {
         ...mockCustomTemplateResultResponse,
         status: 'error',
         success: false,
-        error_message: 'Something went wrong'
+        error_message: 'Something went wrong',
       });
     }, 10000); // Increase timeout
 
     it('should throw an error if max attempts is reached', async () => {
       // Mock the post and get methods to always return pending status
       mockClient.post.mockResolvedValueOnce(mockCustomTemplateResponse);
-      mockClient.get.mockResolvedValue({...mockCustomTemplateResultResponse, status: 'pending'});
+      mockClient.get.mockResolvedValue({ ...mockCustomTemplateResultResponse, status: 'pending' });
 
       const params = {
         visual_style: 'modern-professional',
         data: {
           name: 'John Doe',
-          company: 'Acme Inc.'
-        }
+          company: 'Acme Inc.',
+        },
       };
 
       // Start the async process with only 2 max attempts and a short polling interval

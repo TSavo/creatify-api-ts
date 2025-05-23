@@ -25,20 +25,20 @@ export const mockAvatarInfo = {
   is_active: true,
   process_status: 'done',
   failed_reason: '',
-  type: 'standard'
+  type: 'standard',
 };
 
 export const mockVoiceInfo = {
   voice_id: 'voice-123',
   name: 'English Male',
   language: 'en',
-  gender: 'male'
+  gender: 'male',
 };
 
 export const mockLipsyncResponse = {
   id: 'lipsync-123',
   status: 'pending',
-  success: true
+  success: true,
 };
 
 export const mockLipsyncResultResponse = {
@@ -47,7 +47,7 @@ export const mockLipsyncResultResponse = {
   output: 'https://example.com/video.mp4',
   created_at: '2023-01-01T12:00:00Z',
   updated_at: '2023-01-01T12:30:00Z',
-  success: true
+  success: true,
 };
 
 export const mockLipsyncErrorResponse = {
@@ -56,7 +56,7 @@ export const mockLipsyncErrorResponse = {
   error_message: 'Failed to process video',
   created_at: '2023-01-01T12:00:00Z',
   updated_at: '2023-01-01T12:30:00Z',
-  success: false
+  success: false,
 };
 
 // Avatar and Lipsync mock objects for avatar.test.ts
@@ -70,7 +70,7 @@ export const mockAvatars = [
     location: 'indoor',
     style: 'presenter',
     created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:00:00Z'
+    updated_at: '2023-01-01T12:00:00Z',
   },
   {
     id: 'avatar-456',
@@ -81,8 +81,8 @@ export const mockAvatars = [
     location: 'indoor',
     style: 'casual',
     created_at: '2023-01-01T12:00:00Z',
-    updated_at: '2023-01-01T12:00:00Z'
-  }
+    updated_at: '2023-01-01T12:00:00Z',
+  },
 ];
 
 export const mockVoices = [
@@ -93,7 +93,7 @@ export const mockVoices = [
     language: 'en',
     gender: 'male',
     accents: [],
-    preview_url: ''
+    preview_url: '',
   },
   {
     voice_id: 'voice-456',
@@ -102,8 +102,8 @@ export const mockVoices = [
     language: 'en',
     gender: 'female',
     accents: [],
-    preview_url: ''
-  }
+    preview_url: '',
+  },
 ];
 
 export const mockLipsyncCreationResponse = {
@@ -113,7 +113,7 @@ export const mockLipsyncCreationResponse = {
   creator: 'avatar-123',
   aspect_ratio: '16:9',
   voice_id: 'voice-123',
-  success: true
+  success: true,
 };
 
 export const mockLipsyncResults = {
@@ -126,7 +126,7 @@ export const mockLipsyncResults = {
     voice_id: 'voice-123',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:00:00Z',
-    success: true
+    success: true,
   },
   processing: {
     id: 'lipsync-123456',
@@ -137,7 +137,7 @@ export const mockLipsyncResults = {
     voice_id: 'voice-123',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:05:00Z',
-    success: true
+    success: true,
   },
   done: {
     id: 'lipsync-123456',
@@ -149,7 +149,7 @@ export const mockLipsyncResults = {
     output: 'https://example.com/video-123456.mp4',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:10:00Z',
-    success: true
+    success: true,
   },
   error: {
     id: 'lipsync-123456',
@@ -161,8 +161,8 @@ export const mockLipsyncResults = {
     error_message: 'Lipsync processing failed',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:05:00Z',
-    success: false
-  }
+    success: false,
+  },
 };
 
 export const mockTTSResponse = {
@@ -170,7 +170,7 @@ export const mockTTSResponse = {
   status: 'pending',
   script: 'Hello world',
   accent: 'voice-123',
-  success: true
+  success: true,
 };
 
 export const mockTTSResultResponse = {
@@ -181,7 +181,7 @@ export const mockTTSResultResponse = {
   output: 'https://example.com/audio.mp3',
   created_at: '2023-01-01T12:00:00Z',
   updated_at: '2023-01-01T12:30:00Z',
-  success: true
+  success: true,
 };
 
 // TextToSpeech mock objects for testing the TextToSpeechApi
@@ -190,7 +190,7 @@ export const mockTextToSpeechCreationResponse = {
   status: 'pending',
   script: 'Hello, this is a test of the text-to-speech API.',
   accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
-  success: true
+  success: true,
 };
 
 export const mockTextToSpeechResults = {
@@ -201,7 +201,7 @@ export const mockTextToSpeechResults = {
     accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:00:00Z',
-    success: true
+    success: true,
   },
   processing: {
     id: 'tts-123456',
@@ -210,7 +210,7 @@ export const mockTextToSpeechResults = {
     accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:05:00Z',
-    success: true
+    success: true,
   },
   done: {
     id: 'tts-123456',
@@ -220,7 +220,7 @@ export const mockTextToSpeechResults = {
     output: 'https://example.com/audio-123456.mp3',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:10:00Z',
-    success: true
+    success: true,
   },
   error: {
     id: 'tts-123456',
@@ -230,8 +230,8 @@ export const mockTextToSpeechResults = {
     error_message: 'Text-to-speech processing failed',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:05:00Z',
-    success: false
-  }
+    success: false,
+  },
 };
 
 // AI Editing mock objects for testing the AiEditingApi
@@ -240,7 +240,7 @@ export const mockAiEditingCreationResponse = {
   status: 'pending',
   video_url: 'https://example.com/video.mp4',
   editing_style: 'film',
-  success: true
+  success: true,
 };
 
 export const mockAiEditingResults = {
@@ -251,7 +251,7 @@ export const mockAiEditingResults = {
     editing_style: 'film',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:00:00Z',
-    success: true
+    success: true,
   },
   processing: {
     id: 'edit-123456',
@@ -260,7 +260,7 @@ export const mockAiEditingResults = {
     editing_style: 'film',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:05:00Z',
-    success: true
+    success: true,
   },
   done: {
     id: 'edit-123456',
@@ -270,7 +270,7 @@ export const mockAiEditingResults = {
     output: 'https://example.com/edited-video-123456.mp4',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:10:00Z',
-    success: true
+    success: true,
   },
   error: {
     id: 'edit-123456',
@@ -280,8 +280,8 @@ export const mockAiEditingResults = {
     error_message: 'AI editing processing failed',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:05:00Z',
-    success: false
-  }
+    success: false,
+  },
 };
 
 export const mockLinkResponse = {
@@ -295,15 +295,15 @@ export const mockLinkResponse = {
     image_urls: ['https://example.com/image.jpg'],
     video_urls: [],
     reviews: null,
-    logo_url: 'https://example.com/logo.png'
-  }
+    logo_url: 'https://example.com/logo.png',
+  },
 };
 
 export const mockVideoResponse = {
   id: 'video-123',
   status: 'pending',
   link: 'link-123',
-  media_job: 'job-123'
+  media_job: 'job-123',
 };
 
 export const mockVideoResultResponse = {
@@ -313,13 +313,13 @@ export const mockVideoResultResponse = {
   media_job: 'job-123',
   video_output: 'https://example.com/video.mp4',
   created_at: '2023-01-01T12:00:00Z',
-  updated_at: '2023-01-01T12:30:00Z'
+  updated_at: '2023-01-01T12:30:00Z',
 };
 
 export const mockAiEditingResponse = {
   id: 'edit-123',
   status: 'pending',
-  success: true
+  success: true,
 };
 
 export const mockAiEditingResultResponse = {
@@ -328,13 +328,13 @@ export const mockAiEditingResultResponse = {
   output: 'https://example.com/edited-video.mp4',
   created_at: '2023-01-01T12:00:00Z',
   updated_at: '2023-01-01T12:30:00Z',
-  success: true
+  success: true,
 };
 
 export const mockCustomTemplateResponse = {
   id: 'template-123',
   status: 'pending',
-  success: true
+  success: true,
 };
 
 export const mockCustomTemplateResultResponse = {
@@ -343,7 +343,7 @@ export const mockCustomTemplateResultResponse = {
   output: 'https://example.com/template-video.mp4',
   created_at: '2023-01-01T12:00:00Z',
   updated_at: '2023-01-01T12:30:00Z',
-  success: true
+  success: true,
 };
 
 export const mockDyoaResponse = {
@@ -360,7 +360,7 @@ export const mockDyoaResponse = {
   reviews: [],
   status: 'initializing',
   created_at: '2023-01-01T12:00:00Z',
-  updated_at: '2023-01-01T12:00:00Z'
+  updated_at: '2023-01-01T12:00:00Z',
 };
 
 // DYOA mock objects for dyoa.test.ts
@@ -378,7 +378,7 @@ export const mockDyoaCreationResponse = {
   reviews: [],
   status: 'initializing',
   created_at: '2023-01-01T12:00:00Z',
-  updated_at: '2023-01-01T12:00:00Z'
+  updated_at: '2023-01-01T12:00:00Z',
 };
 
 export const mockDyoaWithPhotos = {
@@ -395,18 +395,18 @@ export const mockDyoaWithPhotos = {
     {
       id: 'photo-1',
       image: 'https://example.com/avatar-photo-1.jpg',
-      created_at: '2023-01-01T12:30:00Z'
+      created_at: '2023-01-01T12:30:00Z',
     },
     {
       id: 'photo-2',
       image: 'https://example.com/avatar-photo-2.jpg',
-      created_at: '2023-01-01T12:35:00Z'
-    }
+      created_at: '2023-01-01T12:35:00Z',
+    },
   ],
   reviews: [],
   status: 'draft',
   created_at: '2023-01-01T12:00:00Z',
-  updated_at: '2023-01-01T12:35:00Z'
+  updated_at: '2023-01-01T12:35:00Z',
 };
 
 export const mockDyoaSubmittedForReview = {
@@ -423,13 +423,13 @@ export const mockDyoaSubmittedForReview = {
     {
       id: 'photo-1',
       image: 'https://example.com/avatar-photo-1.jpg',
-      created_at: '2023-01-01T12:30:00Z'
+      created_at: '2023-01-01T12:30:00Z',
     },
     {
       id: 'photo-2',
       image: 'https://example.com/avatar-photo-2.jpg',
-      created_at: '2023-01-01T12:35:00Z'
-    }
+      created_at: '2023-01-01T12:35:00Z',
+    },
   ],
   reviews: [
     {
@@ -439,15 +439,15 @@ export const mockDyoaSubmittedForReview = {
       photo: {
         id: 'photo-1',
         image: 'https://example.com/avatar-photo-1.jpg',
-        created_at: '2023-01-01T12:30:00Z'
+        created_at: '2023-01-01T12:30:00Z',
       },
       creator: null,
-      social_link: null
-    }
+      social_link: null,
+    },
   ],
   status: 'pending',
   created_at: '2023-01-01T12:00:00Z',
-  updated_at: '2023-01-01T13:00:00Z'
+  updated_at: '2023-01-01T13:00:00Z',
 };
 
 export const mockDyoaApproved = {
@@ -464,13 +464,13 @@ export const mockDyoaApproved = {
     {
       id: 'photo-1',
       image: 'https://example.com/avatar-photo-1.jpg',
-      created_at: '2023-01-01T12:30:00Z'
+      created_at: '2023-01-01T12:30:00Z',
     },
     {
       id: 'photo-2',
       image: 'https://example.com/avatar-photo-2.jpg',
-      created_at: '2023-01-01T12:35:00Z'
-    }
+      created_at: '2023-01-01T12:35:00Z',
+    },
   ],
   reviews: [
     {
@@ -480,22 +480,22 @@ export const mockDyoaApproved = {
       photo: {
         id: 'photo-1',
         image: 'https://example.com/avatar-photo-1.jpg',
-        created_at: '2023-01-01T12:30:00Z'
+        created_at: '2023-01-01T12:30:00Z',
       },
       creator: 'avatar-123',
-      social_link: 'https://example.com/avatar-social'
-    }
+      social_link: 'https://example.com/avatar-social',
+    },
   ],
   status: 'approved',
   created_at: '2023-01-01T12:00:00Z',
-  updated_at: '2023-01-01T14:00:00Z'
+  updated_at: '2023-01-01T14:00:00Z',
 };
 
 export const mockDyoaList = [
   mockDyoaCreationResponse,
   mockDyoaWithPhotos,
   mockDyoaSubmittedForReview,
-  mockDyoaApproved
+  mockDyoaApproved,
 ];
 
 export const mockDyoaWithPhotosResponse = {
@@ -512,13 +512,13 @@ export const mockDyoaWithPhotosResponse = {
     {
       id: 'photo-123',
       image: 'https://example.com/avatar-photo.jpg',
-      created_at: '2023-01-01T12:30:00Z'
-    }
+      created_at: '2023-01-01T12:30:00Z',
+    },
   ],
   reviews: [],
   status: 'draft',
   created_at: '2023-01-01T12:00:00Z',
-  updated_at: '2023-01-01T12:30:00Z'
+  updated_at: '2023-01-01T12:30:00Z',
 };
 
 export const mockDyoaSubmittedResponse = {
@@ -535,8 +535,8 @@ export const mockDyoaSubmittedResponse = {
     {
       id: 'photo-123',
       image: 'https://example.com/avatar-photo.jpg',
-      created_at: '2023-01-01T12:30:00Z'
-    }
+      created_at: '2023-01-01T12:30:00Z',
+    },
   ],
   reviews: [
     {
@@ -546,22 +546,22 @@ export const mockDyoaSubmittedResponse = {
       photo: {
         id: 'photo-123',
         image: 'https://example.com/avatar-photo.jpg',
-        created_at: '2023-01-01T12:30:00Z'
+        created_at: '2023-01-01T12:30:00Z',
       },
       creator: null,
-      social_link: null
-    }
+      social_link: null,
+    },
   ],
   status: 'pending',
   created_at: '2023-01-01T12:00:00Z',
-  updated_at: '2023-01-01T13:00:00Z'
+  updated_at: '2023-01-01T13:00:00Z',
 };
 
 // AI Shorts mock objects
 export const mockAiShortsResponse = {
   id: 'shorts-123',
   status: 'pending',
-  success: true
+  success: true,
 };
 
 export const mockAiShortsResultResponse = {
@@ -570,7 +570,7 @@ export const mockAiShortsResultResponse = {
   output: 'https://example.com/shorts-video.mp4',
   created_at: '2023-01-01T12:00:00Z',
   updated_at: '2023-01-01T12:30:00Z',
-  success: true
+  success: true,
 };
 
 export const mockAiShortsCreationResponse = {
@@ -578,7 +578,7 @@ export const mockAiShortsCreationResponse = {
   status: 'pending',
   prompt: 'Create a viral video about technology trends',
   aspect_ratio: '9:16',
-  success: true
+  success: true,
 };
 
 export const mockAiShortsResults = {
@@ -589,7 +589,7 @@ export const mockAiShortsResults = {
     aspect_ratio: '9:16',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:00:00Z',
-    success: true
+    success: true,
   },
   processing: {
     id: 'shorts-123456',
@@ -598,7 +598,7 @@ export const mockAiShortsResults = {
     aspect_ratio: '9:16',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:05:00Z',
-    success: true
+    success: true,
   },
   done: {
     id: 'shorts-123456',
@@ -608,7 +608,7 @@ export const mockAiShortsResults = {
     output: 'https://example.com/shorts-123456.mp4',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:10:00Z',
-    success: true
+    success: true,
   },
   error: {
     id: 'shorts-123456',
@@ -618,15 +618,15 @@ export const mockAiShortsResults = {
     error_message: 'AI Shorts processing failed',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:05:00Z',
-    success: false
-  }
+    success: false,
+  },
 };
 
 // AI Scripts mock objects
 export const mockAiScriptsResponse = {
   id: 'script-123',
   status: 'pending',
-  success: true
+  success: true,
 };
 
 export const mockAiScriptsResultResponse = {
@@ -635,14 +635,14 @@ export const mockAiScriptsResultResponse = {
   script: 'This is a sample script generated by AI...',
   created_at: '2023-01-01T12:00:00Z',
   updated_at: '2023-01-01T12:30:00Z',
-  success: true
+  success: true,
 };
 
 export const mockAiScriptsCreationResponse = {
   id: 'script-123456',
   status: 'pending',
   prompt: 'Write a script about technology trends',
-  success: true
+  success: true,
 };
 
 export const mockAiScriptsResults = {
@@ -652,7 +652,7 @@ export const mockAiScriptsResults = {
     prompt: 'Write a script about technology trends',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:00:00Z',
-    success: true
+    success: true,
   },
   processing: {
     id: 'script-123456',
@@ -660,7 +660,7 @@ export const mockAiScriptsResults = {
     prompt: 'Write a script about technology trends',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:05:00Z',
-    success: true
+    success: true,
   },
   done: {
     id: 'script-123456',
@@ -669,7 +669,7 @@ export const mockAiScriptsResults = {
     script: 'This is a sample script generated by AI...',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:10:00Z',
-    success: true
+    success: true,
   },
   error: {
     id: 'script-123456',
@@ -678,8 +678,8 @@ export const mockAiScriptsResults = {
     error_message: 'AI Scripts processing failed',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:05:00Z',
-    success: false
-  }
+    success: false,
+  },
 };
 
 // Musics mock objects
@@ -687,7 +687,7 @@ export const mockMusicCategories = [
   { name: 'Ambient' },
   { name: 'Electronic' },
   { name: 'Pop' },
-  { name: 'Rock' }
+  { name: 'Rock' },
 ];
 
 export const mockMusicTracks = [
@@ -696,27 +696,27 @@ export const mockMusicTracks = [
     name: 'Ambient Melody',
     url: 'https://example.com/music/ambient-melody.mp3',
     category: 'Ambient',
-    duration: 120
+    duration: 120,
   },
   {
     id: 'music-456',
     name: 'Electronic Beat',
     url: 'https://example.com/music/electronic-beat.mp3',
     category: 'Electronic',
-    duration: 180
-  }
+    duration: 180,
+  },
 ];
 
 // Workspace mock objects
 export const mockRemainingCreditsResponse = {
-  remaining_credits: 500
+  remaining_credits: 500,
 };
 
 // Lipsync v2 mock objects
 export const mockLipsyncV2Response = {
   id: 'lipsync-v2-123',
   status: 'pending',
-  success: true
+  success: true,
 };
 
 export const mockLipsyncV2ResultResponse = {
@@ -725,13 +725,13 @@ export const mockLipsyncV2ResultResponse = {
   output: 'https://example.com/lipsync-v2-video.mp4',
   created_at: '2023-01-01T12:00:00Z',
   updated_at: '2023-01-01T12:30:00Z',
-  success: true
+  success: true,
 };
 
 export const mockLipsyncV2CreationResponse = {
   id: 'lipsync-v2-123456',
   status: 'pending',
-  success: true
+  success: true,
 };
 
 export const mockLipsyncV2Results = {
@@ -740,14 +740,14 @@ export const mockLipsyncV2Results = {
     status: 'pending',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:00:00Z',
-    success: true
+    success: true,
   },
   processing: {
     id: 'lipsync-v2-123456',
     status: 'processing',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:05:00Z',
-    success: true
+    success: true,
   },
   done: {
     id: 'lipsync-v2-123456',
@@ -755,7 +755,7 @@ export const mockLipsyncV2Results = {
     output: 'https://example.com/lipsync-v2-123456.mp4',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:10:00Z',
-    success: true
+    success: true,
   },
   error: {
     id: 'lipsync-v2-123456',
@@ -763,16 +763,16 @@ export const mockLipsyncV2Results = {
     error_message: 'Lipsync v2 processing failed',
     created_at: '2023-01-01T12:00:00Z',
     updated_at: '2023-01-01T12:05:00Z',
-    success: false
-  }
+    success: false,
+  },
 };
 
 export const mockErrorResponse = {
   status: 401,
   message: 'Invalid API credentials',
   data: {
-    detail: 'Authentication credentials were not provided.'
-  }
+    detail: 'Authentication credentials were not provided.',
+  },
 };
 
 // Setup mock fetch for Vitest
@@ -785,7 +785,7 @@ export const setupMockFetch = () => {
     Promise.resolve({
       ok: status >= 200 && status < 300,
       status,
-      json: () => jsonPromise(data)
+      json: () => jsonPromise(data),
     } as Response);
 
   return {
@@ -794,7 +794,7 @@ export const setupMockFetch = () => {
     },
     mockFetchRejectedValue: (error: any) => {
       (global.fetch as any).mockImplementation(() => Promise.reject(error));
-    }
+    },
   };
 };
 
@@ -802,7 +802,7 @@ export const setupMockFetch = () => {
 export const setupTestClient = () => {
   const client = mockApiClientFactory.createClient({
     apiId: 'test-api-id',
-    apiKey: 'test-api-key'
+    apiKey: 'test-api-key',
   });
 
   // Reset all mocks
@@ -810,7 +810,7 @@ export const setupTestClient = () => {
   mockClient?.reset();
 
   // Setup default mocks
-  mockClient?.get.mockImplementation((endpoint) => {
+  mockClient?.get.mockImplementation(endpoint => {
     if (endpoint === '/api/personas/') {
       return Promise.resolve([mockAvatarInfo]);
     }
@@ -861,7 +861,7 @@ export const setupTestClient = () => {
     return Promise.resolve({ success: true });
   });
 
-  mockClient?.post.mockImplementation((endpoint) => {
+  mockClient?.post.mockImplementation(endpoint => {
     if (endpoint === '/api/lipsyncs/') {
       return Promise.resolve(mockLipsyncResponse);
     }
@@ -936,7 +936,7 @@ export const setupTestClient = () => {
     return Promise.resolve({ success: true });
   });
 
-  mockClient?.put.mockImplementation((endpoint) => {
+  mockClient?.put.mockImplementation(endpoint => {
     if (endpoint.includes('/api/links/')) {
       return Promise.resolve(mockLinkResponse.link);
     }

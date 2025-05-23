@@ -11,7 +11,7 @@ describe('CreatifyApiClient', () => {
     // Create a client using the mock factory
     client = mockApiClientFactory.createClient({
       apiId: 'test-api-id',
-      apiKey: 'test-api-key'
+      apiKey: 'test-api-key',
     });
 
     // Get the mock client that was created

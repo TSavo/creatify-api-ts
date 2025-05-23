@@ -10,8 +10,8 @@ vi.mock('../../src/api/text-to-speech', () => {
       createTextToSpeech: vi.fn(),
       getTextToSpeech: vi.fn(),
       getTextToSpeechList: vi.fn(),
-      createAndWaitForTextToSpeech: vi.fn()
-    }))
+      createAndWaitForTextToSpeech: vi.fn(),
+    })),
   };
 });
 
@@ -39,7 +39,7 @@ describe('AudioProcessor', () => {
     it('should initialize with API credentials as an options object', () => {
       const processor = new AudioProcessor({
         apiId: 'test-api-id',
-        apiKey: 'test-api-key'
+        apiKey: 'test-api-key',
       });
       expect(processor).toBeDefined();
     });
@@ -59,7 +59,7 @@ describe('AudioProcessor', () => {
       // Verify the API was called with correct parameters
       expect(mockApi.createTextToSpeech).toHaveBeenCalledWith({
         script: 'Hello, this is a test of the audio processor.',
-        accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717'
+        accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
       });
 
       // Verify the result
@@ -80,7 +80,7 @@ describe('AudioProcessor', () => {
       // Verify the API was called with correct parameters
       expect(mockApi.createAndWaitForTextToSpeech).toHaveBeenCalledWith({
         script: 'Hello, this is a test of the audio processor.',
-        accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717'
+        accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
       });
 
       // Final result should be the completed audio
@@ -146,7 +146,9 @@ describe('AudioProcessor', () => {
       };
 
       // Expect the function to throw an error due to timeout
-      await expect(audioProcessorWaitFn()).rejects.toThrow(/did not complete within the timeout period/);
+      await expect(audioProcessorWaitFn()).rejects.toThrow(
+        /did not complete within the timeout period/
+      );
     }, 10000); // Increase timeout
   });
 

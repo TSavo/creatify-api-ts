@@ -57,12 +57,29 @@ export interface PaginationParams {
  * Common aspect ratio options for video generation
  * Note: API accepts both colon format ('16:9') and 'x' format ('16x9')
  */
-export type AspectRatio = '1:1' | '16:9' | '9:16' | '4:3' | '3:4' | '1x1' | '16x9' | '9x16' | '4x3' | '3x4';
+export type AspectRatio =
+  | '1:1'
+  | '16:9'
+  | '9:16'
+  | '4:3'
+  | '3:4'
+  | '1x1'
+  | '16x9'
+  | '9x16'
+  | '4x3'
+  | '3x4';
 
 /**
  * Common status values for tasks
  */
-export type TaskStatus = 'pending' | 'in_queue' | 'running' | 'processing' | 'failed' | 'done' | 'error';
+export type TaskStatus =
+  | 'pending'
+  | 'in_queue'
+  | 'running'
+  | 'processing'
+  | 'failed'
+  | 'done'
+  | 'error';
 
 /**
  * Avatar API types
@@ -223,7 +240,7 @@ export namespace Avatar {
      * Note: May be provided as voice_id or id depending on API version
      */
     voice_id: string;
-    
+
     /**
      * Alternative identifier field
      */
@@ -975,13 +992,7 @@ export namespace AiEditing {
   /**
    * Editing styles available for AI editing
    */
-  export type EditingStyle =
-    'film' |
-    'commercial' |
-    'music' |
-    'tutorial' |
-    'vlog' |
-    'social';
+  export type EditingStyle = 'film' | 'commercial' | 'music' | 'tutorial' | 'vlog' | 'social';
 
   /**
    * Parameters for creating an AI editing task
@@ -1575,39 +1586,29 @@ export namespace DYOA {
   /**
    * Age group options for DYOA
    */
-  export type AgeGroup =
-    'young_adult' |
-    'adult' |
-    'middle_aged' |
-    'senior';
+  export type AgeGroup = 'young_adult' | 'adult' | 'middle_aged' | 'senior';
 
   /**
    * Gender options for DYOA
    */
-  export type Gender =
-    'm' |
-    'f' |
-    'other';
+  export type Gender = 'm' | 'f' | 'other';
 
   /**
    * Status options for DYOA
    */
   export type DyoaStatus =
-    'initializing' |
-    'draft' |
-    'pending' |
-    'approved' |
-    'rejected' |
-    'done' |
-    'error';
+    | 'initializing'
+    | 'draft'
+    | 'pending'
+    | 'approved'
+    | 'rejected'
+    | 'done'
+    | 'error';
 
   /**
    * Status options for DYOA review
    */
-  export type DyoaReviewStatus =
-    'pending' |
-    'approved' |
-    'rejected';
+  export type DyoaReviewStatus = 'pending' | 'approved' | 'rejected';
 
   /**
    * Photo information for DYOA

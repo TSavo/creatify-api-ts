@@ -1,8 +1,5 @@
 import { LipsyncV2Api } from '../../src/api/lipsync-v2';
-import {
-  mockLipsyncV2CreationResponse,
-  mockLipsyncV2Results
-} from '../mocks/api-responses';
+import { mockLipsyncV2CreationResponse, mockLipsyncV2Results } from '../mocks/api-responses';
 import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -12,10 +9,13 @@ describe('LipsyncV2Api', () => {
 
   beforeEach(() => {
     // Create a new instance of the LipsyncV2Api with the mock factory
-    lipsyncV2Api = new LipsyncV2Api({
-      apiId: 'test-api-id',
-      apiKey: 'test-api-key'
-    }, mockApiClientFactory);
+    lipsyncV2Api = new LipsyncV2Api(
+      {
+        apiId: 'test-api-id',
+        apiKey: 'test-api-key',
+      },
+      mockApiClientFactory
+    );
 
     // Get the mock client that was created
     mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;
@@ -35,20 +35,20 @@ describe('LipsyncV2Api', () => {
             character: {
               type: 'avatar' as const,
               avatar_id: 'avatar-123',
-              avatar_style: 'normal'
+              avatar_style: 'normal',
             },
             voice: {
               type: 'text' as const,
               input_text: 'Hello, this is a test',
-              voice_id: 'voice-123'
+              voice_id: 'voice-123',
             },
             background: {
               type: 'image' as const,
-              url: 'https://example.com/background.jpg'
-            }
-          }
+              url: 'https://example.com/background.jpg',
+            },
+          },
         ],
-        aspect_ratio: '16:9'
+        aspect_ratio: '16:9',
       };
 
       const result = await lipsyncV2Api.createLipsyncV2(params);
@@ -67,20 +67,20 @@ describe('LipsyncV2Api', () => {
             character: {
               type: 'avatar' as const,
               avatar_id: 'avatar-123',
-              avatar_style: 'normal'
+              avatar_style: 'normal',
             },
             voice: {
               type: 'text' as const,
               input_text: 'Hello, this is a test',
-              voice_id: 'voice-123'
+              voice_id: 'voice-123',
             },
             background: {
               type: 'image' as const,
-              url: 'https://example.com/background.jpg'
-            }
-          }
+              url: 'https://example.com/background.jpg',
+            },
+          },
         ],
-        aspect_ratio: '16:9'
+        aspect_ratio: '16:9',
       };
 
       await expect(lipsyncV2Api.createLipsyncV2(params)).rejects.toThrow('API error');
@@ -140,7 +140,10 @@ describe('LipsyncV2Api', () => {
 
       const result = await lipsyncV2Api.generateLipsyncV2Preview('lipsync-v2-123456');
 
-      expect(mockClient.post).toHaveBeenCalledWith('/api/lipsyncs_v2/lipsync-v2-123456/preview/', {});
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/api/lipsyncs_v2/lipsync-v2-123456/preview/',
+        {}
+      );
       expect(result).toEqual(mockLipsyncV2CreationResponse);
     });
   });
@@ -152,7 +155,10 @@ describe('LipsyncV2Api', () => {
 
       const result = await lipsyncV2Api.renderLipsyncV2('lipsync-v2-123456');
 
-      expect(mockClient.post).toHaveBeenCalledWith('/api/lipsyncs_v2/lipsync-v2-123456/render/', {});
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/api/lipsyncs_v2/lipsync-v2-123456/render/',
+        {}
+      );
       expect(result).toEqual(mockLipsyncV2CreationResponse);
     });
   });
@@ -172,26 +178,26 @@ describe('LipsyncV2Api', () => {
             character: {
               type: 'avatar' as const,
               avatar_id: 'avatar-123',
-              avatar_style: 'normal'
+              avatar_style: 'normal',
             },
             voice: {
               type: 'text' as const,
               input_text: 'Hello, this is a test',
-              voice_id: 'voice-123'
+              voice_id: 'voice-123',
             },
             background: {
               type: 'image' as const,
-              url: 'https://example.com/background.jpg'
-            }
-          }
+              url: 'https://example.com/background.jpg',
+            },
+          },
         ],
-        aspect_ratio: '16:9'
+        aspect_ratio: '16:9',
       };
 
       const result = await lipsyncV2Api.createAndWaitForLipsyncV2(
         params,
         100, // Poll interval
-        5    // Max attempts
+        5 // Max attempts
       );
 
       expect(mockClient.post).toHaveBeenCalledWith('/api/lipsyncs_v2/', params);
@@ -212,26 +218,26 @@ describe('LipsyncV2Api', () => {
             character: {
               type: 'avatar' as const,
               avatar_id: 'avatar-123',
-              avatar_style: 'normal'
+              avatar_style: 'normal',
             },
             voice: {
               type: 'text' as const,
               input_text: 'Hello, this is a test',
-              voice_id: 'voice-123'
+              voice_id: 'voice-123',
             },
             background: {
               type: 'image' as const,
-              url: 'https://example.com/background.jpg'
-            }
-          }
+              url: 'https://example.com/background.jpg',
+            },
+          },
         ],
-        aspect_ratio: '16:9'
+        aspect_ratio: '16:9',
       };
 
       const result = await lipsyncV2Api.createAndWaitForLipsyncV2(
         params,
         100, // Poll interval
-        5    // Max attempts
+        5 // Max attempts
       );
 
       expect(mockClient.post).toHaveBeenCalledWith('/api/lipsyncs_v2/', params);
@@ -250,20 +256,20 @@ describe('LipsyncV2Api', () => {
             character: {
               type: 'avatar' as const,
               avatar_id: 'avatar-123',
-              avatar_style: 'normal'
+              avatar_style: 'normal',
             },
             voice: {
               type: 'text' as const,
               input_text: 'Hello, this is a test',
-              voice_id: 'voice-123'
+              voice_id: 'voice-123',
             },
             background: {
               type: 'image' as const,
-              url: 'https://example.com/background.jpg'
-            }
-          }
+              url: 'https://example.com/background.jpg',
+            },
+          },
         ],
-        aspect_ratio: '16:9'
+        aspect_ratio: '16:9',
       };
 
       // Mock timers
@@ -272,7 +278,7 @@ describe('LipsyncV2Api', () => {
       const promise = lipsyncV2Api.createAndWaitForLipsyncV2(
         params,
         100, // Poll interval
-        3    // Max attempts
+        3 // Max attempts
       );
 
       // Fast forward time to complete the polling

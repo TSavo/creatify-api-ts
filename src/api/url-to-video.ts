@@ -15,10 +15,7 @@ export class UrlToVideoApi {
    * @param options API client options
    * @param clientFactory Optional factory for creating API clients (useful for testing)
    */
-  constructor(
-    options: CreatifyApiOptions,
-    clientFactory = apiClientFactory
-  ) {
+  constructor(options: CreatifyApiOptions, clientFactory = apiClientFactory) {
     this.client = clientFactory.createClient(options);
   }
   /**

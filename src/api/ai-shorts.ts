@@ -15,10 +15,7 @@ export class AiShortsApi {
    * @param options API client options
    * @param clientFactory Optional factory for creating API clients (useful for testing)
    */
-  constructor(
-    options: CreatifyApiOptions,
-    clientFactory = apiClientFactory
-  ) {
+  constructor(options: CreatifyApiOptions, clientFactory = apiClientFactory) {
     this.client = clientFactory.createClient(options);
   }
 
@@ -28,9 +25,7 @@ export class AiShortsApi {
    * @returns Promise resolving to the AI Shorts task response
    * @see https://creatify.mintlify.app/api-reference/ai-shorts/post-ai-shorts
    */
-  async createAiShorts(
-    params: AiShorts.AiShortsParams
-  ): Promise<AiShorts.AiShortsResponse> {
+  async createAiShorts(params: AiShorts.AiShortsParams): Promise<AiShorts.AiShortsResponse> {
     return this.client.post<AiShorts.AiShortsResponse>('/api/ai_shorts/', params);
   }
 
@@ -49,10 +44,11 @@ export class AiShortsApi {
       return {
         id,
         status: 'error',
-        error_message: error instanceof Error ? error.message : 'An error occurred with the API request',
+        error_message:
+          error instanceof Error ? error.message : 'An error occurred with the API request',
         success: false,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       } as AiShorts.AiShortsResultResponse;
     }
   }
@@ -78,9 +74,7 @@ export class AiShortsApi {
    * @returns Promise resolving to the AI Shorts task response
    * @see https://creatify.mintlify.app/api-reference/ai-shorts/post-ai-shorts-preview
    */
-  async generateAiShortsPreview(
-    id: string
-  ): Promise<AiShorts.AiShortsResponse> {
+  async generateAiShortsPreview(id: string): Promise<AiShorts.AiShortsResponse> {
     return this.client.post<AiShorts.AiShortsResponse>(`/api/ai_shorts/${id}/preview/`, {});
   }
 
@@ -90,9 +84,7 @@ export class AiShortsApi {
    * @returns Promise resolving to the AI Shorts task response
    * @see https://creatify.mintlify.app/api-reference/ai-shorts/post-ai-shorts-render
    */
-  async renderAiShorts(
-    id: string
-  ): Promise<AiShorts.AiShortsResponse> {
+  async renderAiShorts(id: string): Promise<AiShorts.AiShortsResponse> {
     return this.client.post<AiShorts.AiShortsResponse>(`/api/ai_shorts/${id}/render/`, {});
   }
 
@@ -116,11 +108,7 @@ export class AiShortsApi {
       let attempts = 0;
       let result = await this.getAiShorts(response.id);
 
-      while (
-        attempts < maxAttempts &&
-        result.status !== 'done' &&
-        result.status !== 'error'
-      ) {
+      while (attempts < maxAttempts && result.status !== 'done' && result.status !== 'error') {
         // Wait for the specified interval
         await new Promise(resolve => setTimeout(resolve, pollInterval));
 
@@ -131,7 +119,9 @@ export class AiShortsApi {
 
       // Check if we reached max attempts without completion
       if (attempts >= maxAttempts && result.status !== 'done' && result.status !== 'error') {
-        const error = new Error(`AI Shorts task ${response.id} did not complete within the timeout period`);
+        const error = new Error(
+          `AI Shorts task ${response.id} did not complete within the timeout period`
+        );
         // Create a result with error status
         return {
           id: response.id,
@@ -139,7 +129,7 @@ export class AiShortsApi {
           error_message: error.message,
           success: false,
           created_at: result.created_at || new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         };
       }
 
@@ -153,7 +143,7 @@ export class AiShortsApi {
         error_message: error instanceof Error ? error.message : 'Unknown error',
         success: false,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
     }
   }

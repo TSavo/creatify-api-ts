@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { CreatifyApiOptions } from './types';
 import { ICreatifyApiClient } from './types/api-client';
 
@@ -31,8 +31,8 @@ export class CreatifyApiClient implements ICreatifyApiClient {
 
     // Add response interceptor for error handling
     this.client.interceptors.response.use(
-      (response) => response,
-      (error) => {
+      response => response,
+      error => {
         // Transform error object to a more user-friendly format
         if (error.response) {
           // Server responded with a status code outside of 2xx range

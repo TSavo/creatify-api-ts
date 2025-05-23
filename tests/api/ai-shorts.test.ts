@@ -1,8 +1,5 @@
 import { AiShortsApi } from '../../src/api/ai-shorts';
-import {
-  mockAiShortsCreationResponse,
-  mockAiShortsResults
-} from '../mocks/api-responses';
+import { mockAiShortsCreationResponse, mockAiShortsResults } from '../mocks/api-responses';
 import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -12,10 +9,13 @@ describe('AiShortsApi', () => {
 
   beforeEach(() => {
     // Create a new instance of the AiShortsApi with the mock factory
-    aiShortsApi = new AiShortsApi({
-      apiId: 'test-api-id',
-      apiKey: 'test-api-key'
-    }, mockApiClientFactory);
+    aiShortsApi = new AiShortsApi(
+      {
+        apiId: 'test-api-id',
+        apiKey: 'test-api-key',
+      },
+      mockApiClientFactory
+    );
 
     // Get the mock client that was created
     mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;
@@ -31,7 +31,7 @@ describe('AiShortsApi', () => {
 
       const params = {
         prompt: 'Create a viral video about technology trends',
-        aspect_ratio: '9:16'
+        aspect_ratio: '9:16',
       };
 
       const result = await aiShortsApi.createAiShorts(params);
@@ -121,13 +121,13 @@ describe('AiShortsApi', () => {
 
       const params = {
         prompt: 'Create a viral video about technology trends',
-        aspect_ratio: '9:16'
+        aspect_ratio: '9:16',
       };
 
       const result = await aiShortsApi.createAndWaitForAiShorts(
         params,
         100, // Poll interval
-        5    // Max attempts
+        5 // Max attempts
       );
 
       expect(mockClient.post).toHaveBeenCalledWith('/api/ai_shorts/', params);
@@ -144,13 +144,13 @@ describe('AiShortsApi', () => {
 
       const params = {
         prompt: 'Create a viral video about technology trends',
-        aspect_ratio: '9:16'
+        aspect_ratio: '9:16',
       };
 
       const result = await aiShortsApi.createAndWaitForAiShorts(
         params,
         100, // Poll interval
-        5    // Max attempts
+        5 // Max attempts
       );
 
       expect(mockClient.post).toHaveBeenCalledWith('/api/ai_shorts/', params);
@@ -165,7 +165,7 @@ describe('AiShortsApi', () => {
 
       const params = {
         prompt: 'Create a viral video about technology trends',
-        aspect_ratio: '9:16'
+        aspect_ratio: '9:16',
       };
 
       // Mock timers
@@ -174,7 +174,7 @@ describe('AiShortsApi', () => {
       const promise = aiShortsApi.createAndWaitForAiShorts(
         params,
         100, // Poll interval
-        3    // Max attempts
+        3 // Max attempts
       );
 
       // Fast forward time to complete the polling

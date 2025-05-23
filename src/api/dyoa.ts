@@ -15,10 +15,7 @@ export class DyoaApi {
    * @param options API client options
    * @param clientFactory Optional factory for creating API clients (useful for testing)
    */
-  constructor(
-    options: CreatifyApiOptions,
-    clientFactory = apiClientFactory
-  ) {
+  constructor(options: CreatifyApiOptions, clientFactory = apiClientFactory) {
     this.client = clientFactory.createClient(options);
   }
   /**
@@ -57,10 +54,7 @@ export class DyoaApi {
    * @returns Promise resolving to the updated DYOA details
    * @see https://creatify.mintlify.app/api-reference/introduction
    */
-  async submitDyoaForReview(
-    id: string,
-    params: DYOA.DyoaSubmitParams
-  ): Promise<DYOA.DyoaResponse> {
+  async submitDyoaForReview(id: string, params: DYOA.DyoaSubmitParams): Promise<DYOA.DyoaResponse> {
     return this.client.post<DYOA.DyoaResponse>(`/api/dyoa/${id}/submit_for_review/`, params);
   }
 
@@ -88,28 +82,28 @@ export class DyoaApi {
   ): Promise<DYOA.DyoaResponse> {
     // Create the DYOA
     const response = await this.createDyoa(params);
-    
+
     // Poll for photo generation
     let attempts = 0;
     let result = await this.getDyoa(response.id);
-    
+
     while (
       attempts < maxAttempts &&
       (result.status === 'initializing' || result.photos.length === 0)
     ) {
       // Wait for the specified interval
       await new Promise(resolve => setTimeout(resolve, pollInterval));
-      
+
       // Check the status again
       result = await this.getDyoa(response.id);
       attempts++;
     }
-    
+
     // Check if we reached max attempts without photos being generated
     if (attempts >= maxAttempts && result.photos.length === 0) {
       throw new Error(`DYOA ${response.id} photos were not generated within the timeout period`);
     }
-    
+
     return result;
   }
 
@@ -137,42 +131,39 @@ export class DyoaApi {
       photoGenPollInterval,
       photoGenMaxAttempts
     );
-    
+
     // Ensure we have photos
     if (dyoaWithPhotos.photos.length === 0) {
       throw new Error('No photos were generated for the DYOA');
     }
-    
+
     // Choose the photo (default to the first one if index is out of bounds)
     const safePhotoIndex = Math.min(photoIndex, dyoaWithPhotos.photos.length - 1);
     const chosenPhoto = dyoaWithPhotos.photos[safePhotoIndex];
-    
+
     // Submit for review
     const dyoaSubmitted = await this.submitDyoaForReview(dyoaWithPhotos.id, {
-      chosen_photo_id: chosenPhoto.id
+      chosen_photo_id: chosenPhoto.id,
     });
-    
+
     // Poll for review completion
     let attempts = 0;
     let result = await this.getDyoa(dyoaSubmitted.id);
-    
-    while (
-      attempts < reviewMaxAttempts &&
-      result.status === 'pending'
-    ) {
+
+    while (attempts < reviewMaxAttempts && result.status === 'pending') {
       // Wait for the specified interval
       await new Promise(resolve => setTimeout(resolve, reviewPollInterval));
-      
+
       // Check the status again
       result = await this.getDyoa(dyoaSubmitted.id);
       attempts++;
     }
-    
+
     // Check if we reached max attempts without review completion
     if (attempts >= reviewMaxAttempts && result.status === 'pending') {
       throw new Error(`DYOA ${dyoaSubmitted.id} review did not complete within the timeout period`);
     }
-    
+
     return result;
   }
 }

@@ -4,7 +4,8 @@ import { CreatifyApiOptions } from './index';
  * Interface for Creatify API HTTP client
  * This abstraction allows for easier mocking in tests without exposing axios implementation details
  */
-export interface ICreatifyApiClient {  /**
+export interface ICreatifyApiClient {
+  /**
    * Make a GET request to the API
    * @param endpoint API endpoint to call
    * @param params Query parameters

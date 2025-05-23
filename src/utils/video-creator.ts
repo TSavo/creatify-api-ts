@@ -1,7 +1,7 @@
 import { Creatify } from '../index';
 import { AvatarApi } from '../api';
 import { CreatifyApiOptions } from '../types';
-import { apiClientFactory, CreatifyApiClientFactory } from '../client-factory';
+import { apiClientFactory } from '../client-factory';
 import { ICreatifyApiClientFactory } from '../types/api-client';
 
 /**
@@ -26,9 +26,10 @@ export class VideoCreator {
     apiKey?: string,
     clientFactory: ICreatifyApiClientFactory = apiClientFactory
   ) {
-    const options: CreatifyApiOptions = typeof apiIdOrOptions === 'string'
-      ? { apiId: apiIdOrOptions, apiKey: apiKey || '' }
-      : apiIdOrOptions;
+    const options: CreatifyApiOptions =
+      typeof apiIdOrOptions === 'string'
+        ? { apiId: apiIdOrOptions, apiKey: apiKey || '' }
+        : apiIdOrOptions;
 
     this.creatify = new Creatify(options);
     // Create a separate AvatarApi that uses the provided clientFactory
@@ -39,14 +40,11 @@ export class VideoCreator {
    * Preload avatars and voices for faster video creation
    */
   async preload() {
-    await Promise.all([
-      this.loadAvatars(),
-      this.loadVoices()
-    ]);
-    
+    await Promise.all([this.loadAvatars(), this.loadVoices()]);
+
     return {
       avatars: Object.keys(this.avatarCache).length,
-      voices: Object.keys(this.voiceCache).length
+      voices: Object.keys(this.voiceCache).length,
     };
   }
 
@@ -55,13 +53,13 @@ export class VideoCreator {
    */
   async loadAvatars() {
     if (this.avatarsLoaded) return Object.values(this.avatarCache);
-    
+
     const avatars = await this.avatarApi.getAvatars();
-    
+
     for (const avatar of avatars) {
       this.avatarCache[avatar.id] = avatar;
     }
-    
+
     this.avatarsLoaded = true;
     return avatars;
   }
@@ -71,13 +69,13 @@ export class VideoCreator {
    */
   async loadVoices() {
     if (this.voicesLoaded) return Object.values(this.voiceCache);
-    
+
     const voices = await this.avatarApi.getVoices();
-    
+
     for (const voice of voices) {
       this.voiceCache[voice.voice_id] = voice;
     }
-    
+
     this.voicesLoaded = true;
     return voices;
   }
@@ -90,10 +88,10 @@ export class VideoCreator {
     if (!this.avatarsLoaded) {
       await this.loadAvatars();
     }
-    
+
     const normalizedName = name.toLowerCase();
-    
-    return Object.values(this.avatarCache).find(avatar => 
+
+    return Object.values(this.avatarCache).find(avatar =>
       avatar.name?.toLowerCase().includes(normalizedName)
     );
   }
@@ -106,10 +104,10 @@ export class VideoCreator {
     if (!this.voicesLoaded) {
       await this.loadVoices();
     }
-    
+
     const normalizedName = name.toLowerCase();
-    
-    return Object.values(this.voiceCache).find(voice => 
+
+    return Object.values(this.voiceCache).find(voice =>
       voice.name?.toLowerCase().includes(normalizedName)
     );
   }
@@ -133,8 +131,8 @@ export class VideoCreator {
       // Default values
       const pollInterval = options.pollInterval || 5000;
       const maxPollingAttempts = options.maxPollingAttempts || 30;
-      const aspectRatio = options.aspectRatio || "16:9";
-      
+      const aspectRatio = options.aspectRatio || '16:9';
+
       // Resolve avatar ID
       let avatarId = options.avatarId;
       if (!avatarId && options.avatarName) {
@@ -144,7 +142,7 @@ export class VideoCreator {
         }
         avatarId = avatar.avatar_id;
       }
-      
+
       if (!avatarId) {
         // If no avatar specified, use the first available one
         const avatars = await this.loadAvatars();
@@ -153,7 +151,7 @@ export class VideoCreator {
         }
         avatarId = avatars[0].avatar_id;
       }
-      
+
       // Resolve voice ID
       let voiceId = options.voiceId;
       if (!voiceId && options.voiceName) {
@@ -163,53 +161,55 @@ export class VideoCreator {
         }
         voiceId = voice.voice_id;
       }
-      
+
       // Create the lipsync video
       const lipsyncResponse = await this.avatarApi.createLipsync({
         text: options.script,
         creator: avatarId || '',
         aspect_ratio: aspectRatio as any,
-        voice_id: voiceId
+        voice_id: voiceId,
       });
-      
+
       // Ensure we have a valid response ID
       if (!lipsyncResponse || !lipsyncResponse.id) {
         throw new Error('Failed to create lipsync video: Invalid response from API');
       }
-      
+
       // Poll for completion
       let lipsyncResult = await this.avatarApi.getLipsync(lipsyncResponse.id);
       let attempts = 0;
-      
+
       while (
-        lipsyncResult.status !== 'done' && 
-        lipsyncResult.status !== 'error' && 
+        lipsyncResult.status !== 'done' &&
+        lipsyncResult.status !== 'error' &&
         attempts < maxPollingAttempts
       ) {
         // Wait between checks
         await new Promise(resolve => setTimeout(resolve, pollInterval));
-        
+
         // Check status again
         lipsyncResult = await this.avatarApi.getLipsync(lipsyncResponse.id);
         attempts++;
       }
-      
+
       // Check final result
       if (lipsyncResult.status === 'done' && lipsyncResult.output) {
         return {
           id: lipsyncResponse.id,
           status: 'done',
-          url: lipsyncResult.output
+          url: lipsyncResult.output,
         };
       } else {
         throw new Error(
-          lipsyncResult.error_message || 
-          `Video generation failed or timed out. Status: ${lipsyncResult.status}`
+          lipsyncResult.error_message ||
+            `Video generation failed or timed out. Status: ${lipsyncResult.status}`
         );
       }
     } catch (error: any) {
       // Ensure the error is properly thrown with the original message
-      throw error instanceof Error ? error : new Error(error?.message || 'An error occurred with the API request');
+      throw error instanceof Error
+        ? error
+        : new Error(error?.message || 'An error occurred with the API request');
     }
   }
 
@@ -225,7 +225,7 @@ export class VideoCreator {
       voiceName?: string;
       voiceId?: string;
       text: string;
-    }>,
+    }>;
     backgroundUrl?: string;
     aspectRatio?: string;
     pollInterval?: number;
@@ -236,12 +236,12 @@ export class VideoCreator {
       // Default values
       const pollInterval = options.pollInterval || 5000;
       const maxPollingAttempts = options.maxPollingAttempts || 30;
-      const aspectRatio = options.aspectRatio || "16:9";
-      const backgroundUrl = options.backgroundUrl || "https://video.creatify.ai/bg.jpg";
-      
+      const aspectRatio = options.aspectRatio || '16:9';
+      const backgroundUrl = options.backgroundUrl || 'https://video.creatify.ai/bg.jpg';
+
       // Prepare video inputs
       const videoInputs = [];
-      
+
       for (const conversation of conversations) {
         // Resolve avatar ID
         let avatarId = conversation.avatarId;
@@ -252,7 +252,7 @@ export class VideoCreator {
           }
           avatarId = avatar.avatar_id;
         }
-        
+
         if (!avatarId) {
           // If no avatar specified, use the first available one
           const avatars = await this.loadAvatars();
@@ -261,7 +261,7 @@ export class VideoCreator {
           }
           avatarId = avatars[0].avatar_id;
         }
-        
+
         // Resolve voice ID
         let voiceId = conversation.voiceId;
         if (!voiceId && conversation.voiceName) {
@@ -271,74 +271,75 @@ export class VideoCreator {
           }
           voiceId = voice.voice_id;
         }
-        
+
         videoInputs.push({
           character: {
-            type: "avatar" as const,
+            type: 'avatar' as const,
             avatar_id: avatarId || '',
-            avatar_style: "normal",
-            offset: { x: -0.23, y: 0.35 }
+            avatar_style: 'normal',
+            offset: { x: -0.23, y: 0.35 },
           },
           voice: {
-            type: "text" as const,
+            type: 'text' as const,
             input_text: conversation.text,
-            voice_id: voiceId || ''
+            voice_id: voiceId || '',
           },
           background: {
-            type: "image" as const,
-            url: backgroundUrl
+            type: 'image' as const,
+            url: backgroundUrl,
           },
           caption_setting: {
-            style: "normal-black",
-            offset: { x: 0, y: 0.45 }
-          }
+            style: 'normal-black',
+            offset: { x: 0, y: 0.45 },
+          },
         });
       }
-      
+
       // Create the multi-avatar lipsync video
       const multiAvatarResponse = await this.avatarApi.createMultiAvatarLipsync({
         video_inputs: videoInputs,
-        aspect_ratio: aspectRatio as any
+        aspect_ratio: aspectRatio as any,
       });
-      
+
       // Ensure we have a valid response ID
       if (!multiAvatarResponse || !multiAvatarResponse.id) {
         throw new Error('Failed to create multi-avatar lipsync video: Invalid response from API');
       }
-      
+
       // Poll for completion
       let result = await this.avatarApi.getLipsync(multiAvatarResponse.id);
       let attempts = 0;
-      
+
       while (
-        result.status !== 'done' && 
-        result.status !== 'error' && 
+        result.status !== 'done' &&
+        result.status !== 'error' &&
         attempts < maxPollingAttempts
       ) {
         // Wait between checks
         await new Promise(resolve => setTimeout(resolve, pollInterval));
-        
+
         // Check status again
         result = await this.avatarApi.getLipsync(multiAvatarResponse.id);
         attempts++;
       }
-      
+
       // Check final result
       if (result.status === 'done' && result.output) {
         return {
           id: multiAvatarResponse.id,
           status: 'done',
-          url: result.output
+          url: result.output,
         };
       } else {
         throw new Error(
-          result.error_message || 
-          `Video generation failed or timed out. Status: ${result.status}`
+          result.error_message || `Video generation failed or timed out. Status: ${result.status}`
         );
       }
     } catch (error: any) {
       // Ensure the error is properly thrown with the original message
-      throw error instanceof Error ? error : new Error(error?.message || 'An error occurred with the API request');
+      throw error instanceof Error
+        ? error
+        : new Error(error?.message || 'An error occurred with the API request');
     }
   }
 }

@@ -1,8 +1,5 @@
 import { MusicsApi } from '../../src/api/musics';
-import {
-  mockMusicCategories,
-  mockMusicTracks
-} from '../mocks/api-responses';
+import { mockMusicCategories, mockMusicTracks } from '../mocks/api-responses';
 import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
 import { describe, it, expect, beforeEach } from 'vitest';
 
@@ -12,10 +9,13 @@ describe('MusicsApi', () => {
 
   beforeEach(() => {
     // Create a new instance of the MusicsApi with the mock factory
-    musicsApi = new MusicsApi({
-      apiId: 'test-api-id',
-      apiKey: 'test-api-key'
-    }, mockApiClientFactory);
+    musicsApi = new MusicsApi(
+      {
+        apiId: 'test-api-id',
+        apiKey: 'test-api-key',
+      },
+      mockApiClientFactory
+    );
 
     // Get the mock client that was created
     mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;

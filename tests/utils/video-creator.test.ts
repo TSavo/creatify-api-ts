@@ -8,15 +8,15 @@ const mockGetAvatars = vi.fn().mockResolvedValue([
     id: '7350375b-9a98-51b8-934d-14d46a645dc2',
     name: 'John',
     gender: 'm',
-    age_range: 'adult'
+    age_range: 'adult',
   },
   {
     avatar_id: '18fccce8-86e7-5f31-abc8-18915cb872be',
     id: '18fccce8-86e7-5f31-abc8-18915cb872be',
     name: 'Emma',
     gender: 'f',
-    age_range: 'adult'
-  }
+    age_range: 'adult',
+  },
 ]);
 
 const mockGetVoices = vi.fn().mockResolvedValue([
@@ -24,30 +24,30 @@ const mockGetVoices = vi.fn().mockResolvedValue([
     voice_id: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
     name: 'English Male',
     language: 'en',
-    gender: 'male'
+    gender: 'male',
   },
   {
     voice_id: '360ab221-d951-413b-ba1a-7037dc67da16',
     name: 'English Female',
     language: 'en',
-    gender: 'female'
-  }
+    gender: 'female',
+  },
 ]);
 
 const mockCreateLipsync = vi.fn().mockResolvedValue({
   id: 'lipsync-123456',
-  status: 'pending'
+  status: 'pending',
 });
 
 const mockGetLipsync = vi.fn().mockResolvedValue({
   id: 'lipsync-123456',
   status: 'done',
-  output: 'https://example.com/videos/lipsync-123456.mp4'
+  output: 'https://example.com/videos/lipsync-123456.mp4',
 });
 
 const mockCreateMultiAvatarLipsync = vi.fn().mockResolvedValue({
   id: 'lipsync-123456',
-  status: 'pending'
+  status: 'pending',
 });
 
 // Set up the mock for AvatarApi
@@ -58,8 +58,8 @@ vi.mock('../../src/api/avatar', () => {
       getVoices: mockGetVoices,
       createLipsync: mockCreateLipsync,
       getLipsync: mockGetLipsync,
-      createMultiAvatarLipsync: mockCreateMultiAvatarLipsync
-    }))
+      createMultiAvatarLipsync: mockCreateMultiAvatarLipsync,
+    })),
   };
 });
 
@@ -87,7 +87,7 @@ describe('VideoCreator', () => {
       getVoices: mockGetVoices,
       createLipsync: mockCreateLipsync,
       getLipsync: mockGetLipsync,
-      createMultiAvatarLipsync: mockCreateMultiAvatarLipsync
+      createMultiAvatarLipsync: mockCreateMultiAvatarLipsync,
     };
   });
 
@@ -100,7 +100,7 @@ describe('VideoCreator', () => {
     it('should initialize with API credentials as an options object', () => {
       const creator = new VideoCreator({
         apiId: 'test-api-id',
-        apiKey: 'test-api-key'
+        apiKey: 'test-api-key',
       });
       expect(creator).toBeDefined();
     });
@@ -116,7 +116,7 @@ describe('VideoCreator', () => {
         avatarId: '7350375b-9a98-51b8-934d-14d46a645dc2',
         voiceId: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
         script: 'Hello! This is a test video created with the Creatify API.',
-        aspectRatio: '16:9'
+        aspectRatio: '16:9',
       });
 
       // Advance the timer to simulate waiting for the video to complete
@@ -130,14 +130,14 @@ describe('VideoCreator', () => {
         text: 'Hello! This is a test video created with the Creatify API.',
         creator: '7350375b-9a98-51b8-934d-14d46a645dc2',
         voice_id: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
-        aspect_ratio: '16:9'
+        aspect_ratio: '16:9',
       });
 
       // Verify the result structure
       expect(result).toEqual({
         id: 'lipsync-123456',
         status: 'done',
-        url: 'https://example.com/videos/lipsync-123456.mp4'
+        url: 'https://example.com/videos/lipsync-123456.mp4',
       });
 
       // Restore real timers
@@ -153,7 +153,7 @@ describe('VideoCreator', () => {
         avatarName: 'John',
         voiceName: 'English Male',
         script: 'Hello! This is a test video.',
-        aspectRatio: '16:9'
+        aspectRatio: '16:9',
       });
 
       // Fast forward the timer
@@ -171,14 +171,14 @@ describe('VideoCreator', () => {
         text: 'Hello! This is a test video.',
         creator: '7350375b-9a98-51b8-934d-14d46a645dc2',
         voice_id: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
-        aspect_ratio: '16:9'
+        aspect_ratio: '16:9',
       });
 
       // Verify the result structure
       expect(result).toEqual({
         id: 'lipsync-123456',
         status: 'done',
-        url: 'https://example.com/videos/lipsync-123456.mp4'
+        url: 'https://example.com/videos/lipsync-123456.mp4',
       });
 
       // Restore real timers
@@ -190,11 +190,13 @@ describe('VideoCreator', () => {
       mockAvatarApi.getAvatars.mockResolvedValueOnce([]);
 
       // Attempt to create a video with a non-existent avatar name
-      await expect(videoCreator.createVideo({
-        avatarName: 'NonExistentAvatar',
-        script: 'Hello! This is a test video.',
-        aspectRatio: '16:9'
-      })).rejects.toThrow('Avatar with name "NonExistentAvatar" not found');
+      await expect(
+        videoCreator.createVideo({
+          avatarName: 'NonExistentAvatar',
+          script: 'Hello! This is a test video.',
+          aspectRatio: '16:9',
+        })
+      ).rejects.toThrow('Avatar with name "NonExistentAvatar" not found');
     });
 
     it('should throw an error if voice name is not found', async () => {
@@ -202,12 +204,14 @@ describe('VideoCreator', () => {
       mockAvatarApi.getVoices.mockResolvedValueOnce([]);
 
       // Attempt to create a video with existing avatar but non-existent voice
-      await expect(videoCreator.createVideo({
-        avatarName: 'John',
-        voiceName: 'NonExistentVoice',
-        script: 'Hello! This is a test video.',
-        aspectRatio: '16:9'
-      })).rejects.toThrow('Voice with name "NonExistentVoice" not found');
+      await expect(
+        videoCreator.createVideo({
+          avatarName: 'John',
+          voiceName: 'NonExistentVoice',
+          script: 'Hello! This is a test video.',
+          aspectRatio: '16:9',
+        })
+      ).rejects.toThrow('Voice with name "NonExistentVoice" not found');
     });
 
     it('should handle API errors', async () => {
@@ -215,11 +219,13 @@ describe('VideoCreator', () => {
       mockCreateLipsync.mockRejectedValueOnce(new Error('API error'));
 
       // Attempt to create a video that will fail due to API error
-      await expect(videoCreator.createVideo({
-        avatarId: '7350375b-9a98-51b8-934d-14d46a645dc2',
-        script: 'Hello! This is a test video.',
-        aspectRatio: '16:9'
-      })).rejects.toThrow('API error');
+      await expect(
+        videoCreator.createVideo({
+          avatarId: '7350375b-9a98-51b8-934d-14d46a645dc2',
+          script: 'Hello! This is a test video.',
+          aspectRatio: '16:9',
+        })
+      ).rejects.toThrow('API error');
     });
   });
 
@@ -234,16 +240,16 @@ describe('VideoCreator', () => {
           {
             avatarId: '7350375b-9a98-51b8-934d-14d46a645dc2',
             voiceId: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
-            text: 'Hello from the first avatar!'
+            text: 'Hello from the first avatar!',
           },
           {
             avatarId: '18fccce8-86e7-5f31-abc8-18915cb872be',
             voiceId: '360ab221-d951-413b-ba1a-7037dc67da16',
-            text: 'And hello from the second avatar!'
-          }
+            text: 'And hello from the second avatar!',
+          },
         ],
         backgroundUrl: 'https://example.com/background.jpg',
-        aspectRatio: '16:9'
+        aspectRatio: '16:9',
       });
 
       // Fast forward the timer
@@ -259,7 +265,7 @@ describe('VideoCreator', () => {
       expect(mockAvatarApi.createMultiAvatarLipsync).toHaveBeenCalledWith(
         expect.objectContaining({
           video_inputs: expect.any(Array),
-          aspect_ratio: '16:9'
+          aspect_ratio: '16:9',
         })
       );
 
@@ -267,7 +273,7 @@ describe('VideoCreator', () => {
       expect(result).toEqual({
         id: 'lipsync-123456',
         status: 'done',
-        url: 'https://example.com/videos/lipsync-123456.mp4'
+        url: 'https://example.com/videos/lipsync-123456.mp4',
       });
 
       // Restore real timers
@@ -284,16 +290,16 @@ describe('VideoCreator', () => {
           {
             avatarName: 'John',
             voiceName: 'English Male',
-            text: 'Hello! How are you today?'
+            text: 'Hello! How are you today?',
           },
           {
             avatarName: 'Emma',
             voiceName: 'English Female',
-            text: 'I\'m doing great, thanks for asking!'
-          }
+            text: "I'm doing great, thanks for asking!",
+          },
         ],
         backgroundUrl: 'https://example.com/background.jpg',
-        aspectRatio: '16:9'
+        aspectRatio: '16:9',
       });
 
       // Fast forward the timer
@@ -313,7 +319,7 @@ describe('VideoCreator', () => {
       expect(result).toEqual({
         id: 'lipsync-123456',
         status: 'done',
-        url: 'https://example.com/videos/lipsync-123456.mp4'
+        url: 'https://example.com/videos/lipsync-123456.mp4',
       });
 
       // Restore real timers

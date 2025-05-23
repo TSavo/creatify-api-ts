@@ -15,10 +15,7 @@ export class TextToSpeechApi {
    * @param options API client options
    * @param clientFactory Optional factory for creating API clients (useful for testing)
    */
-  constructor(
-    options: CreatifyApiOptions,
-    clientFactory = apiClientFactory
-  ) {
+  constructor(options: CreatifyApiOptions, clientFactory = apiClientFactory) {
     this.client = clientFactory.createClient(options);
   }
   /**
@@ -50,8 +47,14 @@ export class TextToSpeechApi {
    * @returns Promise resolving to an array of text-to-speech tasks
    * @see https://creatify.mintlify.app/api-reference/text-to-speech/get-text-to-speech
    */
-  async getTextToSpeechList(page?: number, limit?: number): Promise<TextToSpeech.TextToSpeechResultResponse[]> {
-    return this.client.get<TextToSpeech.TextToSpeechResultResponse[]>('/api/text_to_speech/', { page, limit });
+  async getTextToSpeechList(
+    page?: number,
+    limit?: number
+  ): Promise<TextToSpeech.TextToSpeechResultResponse[]> {
+    return this.client.get<TextToSpeech.TextToSpeechResultResponse[]>('/api/text_to_speech/', {
+      page,
+      limit,
+    });
   }
 
   /**
@@ -92,11 +95,7 @@ export class TextToSpeechApi {
     let attempts = 0;
     let result = await this.getTextToSpeech(response.id);
 
-    while (
-      attempts < maxAttempts &&
-      result.status !== 'done' &&
-      result.status !== 'error'
-    ) {
+    while (attempts < maxAttempts && result.status !== 'done' && result.status !== 'error') {
       // Wait for the specified interval
       await new Promise(resolve => setTimeout(resolve, pollInterval));
 
@@ -107,7 +106,9 @@ export class TextToSpeechApi {
 
     // Check if we reached max attempts without completion
     if (attempts >= maxAttempts && result.status !== 'done' && result.status !== 'error') {
-      throw new Error(`Text-to-speech task ${response.id} did not complete within the timeout period`);
+      throw new Error(
+        `Text-to-speech task ${response.id} did not complete within the timeout period`
+      );
     }
 
     return result;

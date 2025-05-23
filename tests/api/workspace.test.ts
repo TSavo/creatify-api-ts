@@ -1,7 +1,5 @@
 import { WorkspaceApi } from '../../src/api/workspace';
-import {
-  mockRemainingCreditsResponse
-} from '../mocks/api-responses';
+import { mockRemainingCreditsResponse } from '../mocks/api-responses';
 import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
 import { describe, it, expect, beforeEach } from 'vitest';
 
@@ -11,10 +9,13 @@ describe('WorkspaceApi', () => {
 
   beforeEach(() => {
     // Create a new instance of the WorkspaceApi with the mock factory
-    workspaceApi = new WorkspaceApi({
-      apiId: 'test-api-id',
-      apiKey: 'test-api-key'
-    }, mockApiClientFactory);
+    workspaceApi = new WorkspaceApi(
+      {
+        apiId: 'test-api-id',
+        apiKey: 'test-api-key',
+      },
+      mockApiClientFactory
+    );
 
     // Get the mock client that was created
     mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;

@@ -4,7 +4,7 @@ import {
   mockDyoaWithPhotos,
   mockDyoaSubmittedForReview,
   mockDyoaApproved,
-  mockDyoaList
+  mockDyoaList,
 } from '../mocks/api-responses';
 import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -15,10 +15,13 @@ describe('DyoaApi', () => {
 
   beforeEach(() => {
     // Create a new instance of the DyoaApi with the mock factory
-    dyoaApi = new DyoaApi({
-      apiId: 'test-api-id',
-      apiKey: 'test-api-key'
-    }, mockApiClientFactory);
+    dyoaApi = new DyoaApi(
+      {
+        apiId: 'test-api-id',
+        apiKey: 'test-api-key',
+      },
+      mockApiClientFactory
+    );
 
     // Get the mock client that was created
     mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;
@@ -37,8 +40,9 @@ describe('DyoaApi', () => {
         age_group: 'adult' as any,
         gender: 'f' as any,
         more_details: 'Mid-length brown hair with subtle highlights, green eyes, warm smile',
-        outfit_description: 'Professional blazer in navy blue, simple white blouse, minimal jewelry',
-        background_description: 'Modern tech office environment, clean desk with laptop'
+        outfit_description:
+          'Professional blazer in navy blue, simple white blouse, minimal jewelry',
+        background_description: 'Modern tech office environment, clean desk with laptop',
       };
 
       const result = await dyoaApi.createDyoa(params);
@@ -77,12 +81,15 @@ describe('DyoaApi', () => {
       mockClient.post.mockResolvedValueOnce(mockDyoaSubmittedForReview);
 
       const params = {
-        chosen_photo_id: 'photo-1'
+        chosen_photo_id: 'photo-1',
       };
 
       const result = await dyoaApi.submitDyoaForReview('dyoa-123456', params);
 
-      expect(mockClient.post).toHaveBeenCalledWith('/api/dyoa/dyoa-123456/submit_for_review/', params);
+      expect(mockClient.post).toHaveBeenCalledWith(
+        '/api/dyoa/dyoa-123456/submit_for_review/',
+        params
+      );
       expect(result).toEqual(mockDyoaSubmittedForReview);
     });
   });
@@ -102,16 +109,16 @@ describe('DyoaApi', () => {
     it('should create a DYOA and wait for photos to be generated', async () => {
       // Mock the post and get methods to return the expected responses in sequence
       mockClient.post.mockResolvedValueOnce(mockDyoaCreationResponse);
-      mockClient.get
-        .mockResolvedValueOnce(mockDyoaWithPhotos); // Return photos immediately to avoid timeout
+      mockClient.get.mockResolvedValueOnce(mockDyoaWithPhotos); // Return photos immediately to avoid timeout
 
       const params = {
         name: 'Tech Expert Avatar',
         age_group: 'adult' as any,
         gender: 'f' as any,
         more_details: 'Mid-length brown hair with subtle highlights, green eyes, warm smile',
-        outfit_description: 'Professional blazer in navy blue, simple white blouse, minimal jewelry',
-        background_description: 'Modern tech office environment, clean desk with laptop'
+        outfit_description:
+          'Professional blazer in navy blue, simple white blouse, minimal jewelry',
+        background_description: 'Modern tech office environment, clean desk with laptop',
       };
 
       // Start the async process with a short polling interval
@@ -128,15 +135,16 @@ describe('DyoaApi', () => {
     it('should throw an error if max attempts is reached without photos', async () => {
       // Mock the post and get methods to always return DYOA without photos
       mockClient.post.mockResolvedValueOnce(mockDyoaCreationResponse);
-      mockClient.get.mockResolvedValue({...mockDyoaCreationResponse, status: 'initializing'});
+      mockClient.get.mockResolvedValue({ ...mockDyoaCreationResponse, status: 'initializing' });
 
       const params = {
         name: 'Tech Expert Avatar',
         age_group: 'adult' as any,
         gender: 'f' as any,
         more_details: 'Mid-length brown hair with subtle highlights, green eyes, warm smile',
-        outfit_description: 'Professional blazer in navy blue, simple white blouse, minimal jewelry',
-        background_description: 'Modern tech office environment, clean desk with laptop'
+        outfit_description:
+          'Professional blazer in navy blue, simple white blouse, minimal jewelry',
+        background_description: 'Modern tech office environment, clean desk with laptop',
       };
 
       // Create a function that will throw the expected error
@@ -146,7 +154,9 @@ describe('DyoaApi', () => {
       };
 
       // Expect the function to throw an error due to timeout
-      await expect(dyoaPhotosWaitFn()).rejects.toThrow(/photos were not generated within the timeout period/);
+      await expect(dyoaPhotosWaitFn()).rejects.toThrow(
+        /photos were not generated within the timeout period/
+      );
     }, 10000); // Increase timeout
   });
 
@@ -166,8 +176,9 @@ describe('DyoaApi', () => {
         age_group: 'adult' as any,
         gender: 'f' as any,
         more_details: 'Mid-length brown hair with subtle highlights, green eyes, warm smile',
-        outfit_description: 'Professional blazer in navy blue, simple white blouse, minimal jewelry',
-        background_description: 'Modern tech office environment, clean desk with laptop'
+        outfit_description:
+          'Professional blazer in navy blue, simple white blouse, minimal jewelry',
+        background_description: 'Modern tech office environment, clean desk with laptop',
       };
 
       // Start the async process with short polling intervals
@@ -175,9 +186,9 @@ describe('DyoaApi', () => {
         params,
         0, // Use first photo
         100, // Photo gen poll interval
-        3,   // Photo gen max attempts
+        3, // Photo gen max attempts
         100, // Review poll interval
-        3    // Review max attempts
+        3 // Review max attempts
       );
 
       // Verify the method calls
@@ -194,7 +205,7 @@ describe('DyoaApi', () => {
       mockClient.get.mockResolvedValueOnce({
         ...mockDyoaCreationResponse,
         status: 'draft',
-        photos: []
+        photos: [],
       });
 
       const params = {
@@ -202,21 +213,15 @@ describe('DyoaApi', () => {
         age_group: 'adult' as any,
         gender: 'f' as any,
         more_details: 'Mid-length brown hair with subtle highlights, green eyes, warm smile',
-        outfit_description: 'Professional blazer in navy blue, simple white blouse, minimal jewelry',
-        background_description: 'Modern tech office environment, clean desk with laptop'
+        outfit_description:
+          'Professional blazer in navy blue, simple white blouse, minimal jewelry',
+        background_description: 'Modern tech office environment, clean desk with laptop',
       };
 
       // Create a function that will throw the expected error
       const dyoaNoPhotosWaitFn = async () => {
         // Use short polling intervals to make the test run faster
-        return await dyoaApi.createSubmitAndWaitForDyoa(
-          params,
-          0,
-          100,
-          1,
-          100,
-          1
-        );
+        return await dyoaApi.createSubmitAndWaitForDyoa(params, 0, 100, 1, 100, 1);
       };
 
       // Expect the function to throw an error due to no photos
@@ -238,8 +243,9 @@ describe('DyoaApi', () => {
         age_group: 'adult' as any,
         gender: 'f' as any,
         more_details: 'Mid-length brown hair with subtle highlights, green eyes, warm smile',
-        outfit_description: 'Professional blazer in navy blue, simple white blouse, minimal jewelry',
-        background_description: 'Modern tech office environment, clean desk with laptop'
+        outfit_description:
+          'Professional blazer in navy blue, simple white blouse, minimal jewelry',
+        background_description: 'Modern tech office environment, clean desk with laptop',
       };
 
       // Create a function that will throw the expected error
@@ -256,7 +262,9 @@ describe('DyoaApi', () => {
       };
 
       // Expect the function to throw an error due to review timeout
-      await expect(dyoaReviewTimeoutFn()).rejects.toThrow(/review did not complete within the timeout period/);
+      await expect(dyoaReviewTimeoutFn()).rejects.toThrow(
+        /review did not complete within the timeout period/
+      );
     }, 10000); // Increase timeout
   });
 });

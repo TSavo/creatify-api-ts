@@ -15,10 +15,7 @@ export class AvatarApi {
    * @param options API client options
    * @param clientFactory Optional factory for creating API clients (useful for testing)
    */
-  constructor(
-    options: CreatifyApiOptions,
-    clientFactory = apiClientFactory
-  ) {
+  constructor(options: CreatifyApiOptions, clientFactory = apiClientFactory) {
     this.client = clientFactory.createClient(options);
   }
   /**
@@ -27,10 +24,10 @@ export class AvatarApi {
    * @see https://creatify.mintlify.app/api-reference/personas/get-apipersonas
    */
   async getAvatars(filters?: {
-    age_range?: 'child' | 'teen' | 'adult' | 'senior',
-    gender?: 'm' | 'f' | 'nb',
-    location?: 'outdoor' | 'fantasy' | 'indoor' | 'other',
-    style?: 'selfie' | 'presenter' | 'other'
+    age_range?: 'child' | 'teen' | 'adult' | 'senior';
+    gender?: 'm' | 'f' | 'nb';
+    location?: 'outdoor' | 'fantasy' | 'indoor' | 'other';
+    style?: 'selfie' | 'presenter' | 'other';
   }): Promise<Avatar.AvatarInfo[]> {
     try {
       const avatars = await this.client.get<Avatar.AvatarInfo[]>('/api/personas/', filters);
@@ -45,7 +42,7 @@ export class AvatarApi {
         ...avatar,
         avatar_id: avatar.id,
         // Force the name property to be 'Avatar ID' if it's missing, empty or undefined
-        name: (avatar.name && avatar.name.trim()) ? avatar.name : `Avatar ${avatar.id}`
+        name: avatar.name && avatar.name.trim() ? avatar.name : `Avatar ${avatar.id}`,
       }));
     } catch (error) {
       console.error('Error fetching avatars:', error);
@@ -65,10 +62,10 @@ export class AvatarApi {
     page: number = 1,
     limit: number = 20,
     filters?: {
-      age_range?: 'child' | 'teen' | 'adult' | 'senior',
-      gender?: 'm' | 'f' | 'nb',
-      location?: 'outdoor' | 'fantasy' | 'indoor' | 'other',
-      style?: 'selfie' | 'presenter' | 'other'
+      age_range?: 'child' | 'teen' | 'adult' | 'senior';
+      gender?: 'm' | 'f' | 'nb';
+      location?: 'outdoor' | 'fantasy' | 'indoor' | 'other';
+      style?: 'selfie' | 'presenter' | 'other';
     }
   ): Promise<{
     count: number;
@@ -79,7 +76,7 @@ export class AvatarApi {
     return this.client.get('/api/personas-paginated/', {
       page,
       limit,
-      ...filters
+      ...filters,
     });
   }
 
@@ -108,13 +105,14 @@ export class AvatarApi {
           language: voice.language || '',
           gender: voice.gender || '',
           accents: voice.accents || [],
-          
+
           // Extract preview URL from the first accent if not directly available
-          preview_url: voice.preview_url || 
-                      (voice.accents && voice.accents.length > 0 && voice.accents[0].preview_url) || 
-                      ''
+          preview_url:
+            voice.preview_url ||
+            (voice.accents && voice.accents.length > 0 && voice.accents[0].preview_url) ||
+            '',
         };
-        
+
         return normalizedVoice;
       });
     } catch (error) {
@@ -153,7 +151,8 @@ export class AvatarApi {
       return {
         id,
         status: 'error',
-        error_message: error instanceof Error ? error.message : 'An error occurred with the API request'
+        error_message:
+          error instanceof Error ? error.message : 'An error occurred with the API request',
       } as Avatar.LipsyncResultResponse;
     }
   }
@@ -209,11 +208,7 @@ export class AvatarApi {
     let attempts = 0;
     let result = await this.getLipsync(response.id);
 
-    while (
-      attempts < maxAttempts &&
-      result.status !== 'done' &&
-      result.status !== 'error'
-    ) {
+    while (attempts < maxAttempts && result.status !== 'done' && result.status !== 'error') {
       // Wait for the specified interval
       await new Promise(resolve => setTimeout(resolve, pollInterval));
 

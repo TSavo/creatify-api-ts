@@ -4,23 +4,24 @@ import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-c
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Helper function to mock fetch responses
-const mockFetchPromise = (data: any) => Promise.resolve({
-  ok: true,
-  json: () => Promise.resolve(data),
-  status: 200,
-  statusText: 'OK',
-  headers: new Headers(),
-  redirected: false,
-  type: 'basic' as ResponseType,
-  url: '',
-  clone: () => mockFetchPromise(data) as unknown as Response,
-  body: null,
-  bodyUsed: false,
-  arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-  blob: () => Promise.resolve(new Blob()),
-  formData: () => Promise.resolve(new FormData()),
-  text: () => Promise.resolve('')
-} as Response);
+const mockFetchPromise = (data: any) =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve(data),
+    status: 200,
+    statusText: 'OK',
+    headers: new Headers(),
+    redirected: false,
+    type: 'basic' as ResponseType,
+    url: '',
+    clone: () => mockFetchPromise(data) as unknown as Response,
+    body: null,
+    bodyUsed: false,
+    arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+    blob: () => Promise.resolve(new Blob()),
+    formData: () => Promise.resolve(new FormData()),
+    text: () => Promise.resolve(''),
+  } as Response);
 
 describe('BatchProcessor', () => {
   let batchProcessor: BatchProcessorWithFactory;
@@ -31,7 +32,7 @@ describe('BatchProcessor', () => {
     batchProcessor = new BatchProcessorWithFactory(
       {
         apiId: 'test-api-id',
-        apiKey: 'test-api-key'
+        apiKey: 'test-api-key',
       },
       mockApiClientFactory
     );
@@ -47,7 +48,11 @@ describe('BatchProcessor', () => {
 
   describe('constructor', () => {
     it('should initialize with API credentials as separate parameters', () => {
-      const processor = new BatchProcessorWithFactory('test-api-id', 'test-api-key', mockApiClientFactory);
+      const processor = new BatchProcessorWithFactory(
+        'test-api-id',
+        'test-api-key',
+        mockApiClientFactory
+      );
       expect(processor).toBeDefined();
     });
 
@@ -55,7 +60,7 @@ describe('BatchProcessor', () => {
       const processor = new BatchProcessorWithFactory(
         {
           apiId: 'test-api-id',
-          apiKey: 'test-api-key'
+          apiKey: 'test-api-key',
         },
         mockApiClientFactory
       );
@@ -117,10 +122,7 @@ describe('BatchProcessor', () => {
       });
 
       // Process batch with concurrency limit of 2
-      const result = await batchProcessor.processBatch(
-        [task1, task2, task3],
-        { concurrency: 2 }
-      );
+      const result = await batchProcessor.processBatch([task1, task2, task3], { concurrency: 2 });
 
       // Verify all tasks were executed
       expect(task1).toHaveBeenCalled();
@@ -172,10 +174,10 @@ describe('BatchProcessor', () => {
       try {
         // We need to wrap this in a try/catch because the implementation might throw
         // depending on how it's implemented
-        const result = await batchProcessor.processBatch(
-          [task1, task2, task3],
-          { continueOnError: false, concurrency: 1 }
-        );
+        const result = await batchProcessor.processBatch([task1, task2, task3], {
+          continueOnError: false,
+          concurrency: 1,
+        });
 
         // If we get here, the implementation doesn't throw but returns errors in the result
         // Verify only tasks before the error were executed
@@ -218,13 +220,10 @@ describe('BatchProcessor', () => {
       const task3 = createTimedTask('result3');
 
       // Process batch with a delay between tasks
-      const result = await batchProcessor.processBatch(
-        [task1, task2, task3],
-        {
-          taskStartDelay: 50, // Use a small delay for faster test execution
-          concurrency: 1      // Use concurrency 1 to ensure sequential execution
-        }
-      );
+      const result = await batchProcessor.processBatch([task1, task2, task3], {
+        taskStartDelay: 50, // Use a small delay for faster test execution
+        concurrency: 1, // Use concurrency 1 to ensure sequential execution
+      });
 
       // Verify all tasks were executed
       expect(task1).toHaveBeenCalled();
@@ -254,9 +253,9 @@ describe('BatchProcessor', () => {
       Object.defineProperty(batchProcessor, 'api', {
         get: () => ({
           avatar: {
-            createAndWaitForLipsync: mockCreateLipsync
-          }
-        })
+            createAndWaitForLipsync: mockCreateLipsync,
+          },
+        }),
       });
 
       // Create avatar tasks
@@ -265,14 +264,14 @@ describe('BatchProcessor', () => {
           text: 'Hello from the first avatar!',
           avatarId: '7350375b-9a98-51b8-934d-14d46a645dc2',
           voiceId: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
-          aspectRatio: '16:9'
+          aspectRatio: '16:9',
         },
         {
           text: 'Hello from the second avatar!',
           avatarId: '18fccce8-86e7-5f31-abc8-18915cb872be',
           voiceId: '360ab221-d951-413b-ba1a-7037dc67da16',
-          aspectRatio: '16:9'
-        }
+          aspectRatio: '16:9',
+        },
       ];
 
       // Process avatar batch
@@ -288,13 +287,13 @@ describe('BatchProcessor', () => {
         text: avatarTasks[0].text,
         creator: avatarTasks[0].avatarId,
         voice_id: avatarTasks[0].voiceId,
-        aspect_ratio: avatarTasks[0].aspectRatio
+        aspect_ratio: avatarTasks[0].aspectRatio,
       });
       expect(mockCreateLipsync).toHaveBeenCalledWith({
         text: avatarTasks[1].text,
         creator: avatarTasks[1].avatarId,
         voice_id: avatarTasks[1].voiceId,
-        aspect_ratio: avatarTasks[1].aspectRatio
+        aspect_ratio: avatarTasks[1].aspectRatio,
       });
 
       // Verify result structure
@@ -312,12 +311,12 @@ describe('BatchProcessor', () => {
       const processBatchSpy = vi.spyOn(batchProcessor, 'processBatch');
 
       // Create a mock for the createAndWaitForTextToSpeech method
-      const mockCreateAndWaitForTTS = vi.fn().mockImplementation((params) => {
+      const mockCreateAndWaitForTTS = vi.fn().mockImplementation(params => {
         return Promise.resolve({
           id: 'tts-123456',
           status: 'done',
           output: 'https://example.com/audio.mp3',
-          ...params
+          ...params,
         });
       });
 
@@ -325,21 +324,21 @@ describe('BatchProcessor', () => {
       Object.defineProperty(batchProcessor, 'api', {
         get: () => ({
           textToSpeech: {
-            createAndWaitForTextToSpeech: mockCreateAndWaitForTTS
-          }
-        })
+            createAndWaitForTextToSpeech: mockCreateAndWaitForTTS,
+          },
+        }),
       });
 
       // Create TTS tasks
       const ttsTasks = [
         {
           script: 'This is the first audio sample.',
-          accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717'
+          accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
         },
         {
           script: 'This is the second audio sample.',
-          accent: '360ab221-d951-413b-ba1a-7037dc67da16'
-        }
+          accent: '360ab221-d951-413b-ba1a-7037dc67da16',
+        },
       ];
 
       // Process TTS batch
@@ -371,12 +370,12 @@ describe('BatchProcessor', () => {
       const processBatchSpy = vi.spyOn(batchProcessor, 'processBatch');
 
       // Create a mock for the createAndWaitForAiEditing method
-      const mockCreateAndWaitForAiEditing = vi.fn().mockImplementation((params) => {
+      const mockCreateAndWaitForAiEditing = vi.fn().mockImplementation(params => {
         return Promise.resolve({
           id: 'ai-edit-123456',
           status: 'done',
           output: 'https://example.com/edited-video.mp4',
-          ...params
+          ...params,
         });
       });
 
@@ -384,21 +383,21 @@ describe('BatchProcessor', () => {
       Object.defineProperty(batchProcessor, 'api', {
         get: () => ({
           aiEditing: {
-            createAndWaitForAiEditing: mockCreateAndWaitForAiEditing
-          }
-        })
+            createAndWaitForAiEditing: mockCreateAndWaitForAiEditing,
+          },
+        }),
       });
 
       // Create AI editing tasks
       const aiEditingTasks = [
         {
           videoUrl: 'https://example.com/video1.mp4',
-          editingStyle: 'film'
+          editingStyle: 'film',
         },
         {
           videoUrl: 'https://example.com/video2.mp4',
-          editingStyle: 'commercial'
-        }
+          editingStyle: 'commercial',
+        },
       ];
 
       // Process AI editing batch
@@ -414,11 +413,11 @@ describe('BatchProcessor', () => {
       // The API might convert camelCase to snake_case, so check for both possibilities
       const expectedParams1 = {
         videoUrl: 'https://example.com/video1.mp4',
-        editingStyle: 'film'
+        editingStyle: 'film',
       };
       const expectedParams2 = {
         videoUrl: 'https://example.com/video2.mp4',
-        editingStyle: 'commercial'
+        editingStyle: 'commercial',
       };
 
       // Check if either format was used
@@ -428,20 +427,20 @@ describe('BatchProcessor', () => {
       // Verify the parameters match regardless of casing
       expect(
         firstCallArg.videoUrl === expectedParams1.videoUrl ||
-        firstCallArg.video_url === expectedParams1.videoUrl
+          firstCallArg.video_url === expectedParams1.videoUrl
       ).toBe(true);
       expect(
         firstCallArg.editingStyle === expectedParams1.editingStyle ||
-        firstCallArg.editing_style === expectedParams1.editingStyle
+          firstCallArg.editing_style === expectedParams1.editingStyle
       ).toBe(true);
 
       expect(
         secondCallArg.videoUrl === expectedParams2.videoUrl ||
-        secondCallArg.video_url === expectedParams2.videoUrl
+          secondCallArg.video_url === expectedParams2.videoUrl
       ).toBe(true);
       expect(
         secondCallArg.editingStyle === expectedParams2.editingStyle ||
-        secondCallArg.editing_style === expectedParams2.editingStyle
+          secondCallArg.editing_style === expectedParams2.editingStyle
       ).toBe(true);
 
       // Verify result structure
@@ -462,12 +461,12 @@ describe('BatchProcessor', () => {
       const processBatchSpy = vi.spyOn(batchProcessor, 'processBatch');
 
       // Create a mock for the createAndWaitForAiShorts method
-      const mockCreateAndWaitForAiShorts = vi.fn().mockImplementation((params) => {
+      const mockCreateAndWaitForAiShorts = vi.fn().mockImplementation(params => {
         return Promise.resolve({
           id: 'ai-shorts-123456',
           status: 'done',
           output: 'https://example.com/shorts-video.mp4',
-          ...params
+          ...params,
         });
       });
 
@@ -475,9 +474,9 @@ describe('BatchProcessor', () => {
       Object.defineProperty(batchProcessor, 'api', {
         get: () => ({
           aiShorts: {
-            createAndWaitForAiShorts: mockCreateAndWaitForAiShorts
-          }
-        })
+            createAndWaitForAiShorts: mockCreateAndWaitForAiShorts,
+          },
+        }),
       });
 
       // Create AI shorts tasks
@@ -487,15 +486,15 @@ describe('BatchProcessor', () => {
           aspectRatio: '9:16',
           targetPlatform: 'TikTok',
           targetAudience: 'Gen Z',
-          language: 'en'
+          language: 'en',
         },
         {
           prompt: 'Create a viral video about fashion',
           aspectRatio: '16:9',
           targetPlatform: 'YouTube',
           targetAudience: 'Millennials',
-          language: 'en'
-        }
+          language: 'en',
+        },
       ];
 
       // Process AI shorts batch
@@ -514,7 +513,7 @@ describe('BatchProcessor', () => {
         aspect_ratio: aiShortsTasks[0].aspectRatio,
         target_platform: aiShortsTasks[0].targetPlatform,
         target_audience: aiShortsTasks[0].targetAudience,
-        language: aiShortsTasks[0].language
+        language: aiShortsTasks[0].language,
       });
 
       // Verify the second call parameters
@@ -523,7 +522,7 @@ describe('BatchProcessor', () => {
         aspect_ratio: aiShortsTasks[1].aspectRatio,
         target_platform: aiShortsTasks[1].targetPlatform,
         target_audience: aiShortsTasks[1].targetAudience,
-        language: aiShortsTasks[1].language
+        language: aiShortsTasks[1].language,
       });
 
       // Verify result structure
@@ -544,12 +543,12 @@ describe('BatchProcessor', () => {
       const processBatchSpy = vi.spyOn(batchProcessor, 'processBatch');
 
       // Create a mock for the createAndWaitForAiScript method
-      const mockCreateAndWaitForAiScript = vi.fn().mockImplementation((params) => {
+      const mockCreateAndWaitForAiScript = vi.fn().mockImplementation(params => {
         return Promise.resolve({
           id: 'ai-script-123456',
           status: 'done',
           script: 'This is a sample script generated by AI...',
-          ...params
+          ...params,
         });
       });
 
@@ -557,9 +556,9 @@ describe('BatchProcessor', () => {
       Object.defineProperty(batchProcessor, 'api', {
         get: () => ({
           aiScripts: {
-            createAndWaitForAiScript: mockCreateAndWaitForAiScript
-          }
-        })
+            createAndWaitForAiScript: mockCreateAndWaitForAiScript,
+          },
+        }),
       });
 
       // Create AI scripts tasks
@@ -569,15 +568,15 @@ describe('BatchProcessor', () => {
           targetPlatform: 'TikTok',
           targetAudience: 'Gen Z',
           language: 'en',
-          scriptLength: 60
+          scriptLength: 60,
         },
         {
           prompt: 'Write a script about fashion',
           targetPlatform: 'YouTube',
           targetAudience: 'Millennials',
           language: 'en',
-          scriptLength: 120
-        }
+          scriptLength: 120,
+        },
       ];
 
       // Process AI scripts batch
@@ -596,7 +595,7 @@ describe('BatchProcessor', () => {
         target_platform: aiScriptsTasks[0].targetPlatform,
         target_audience: aiScriptsTasks[0].targetAudience,
         language: aiScriptsTasks[0].language,
-        script_length: aiScriptsTasks[0].scriptLength
+        script_length: aiScriptsTasks[0].scriptLength,
       });
 
       // Verify the second call parameters
@@ -605,7 +604,7 @@ describe('BatchProcessor', () => {
         target_platform: aiScriptsTasks[1].targetPlatform,
         target_audience: aiScriptsTasks[1].targetAudience,
         language: aiScriptsTasks[1].language,
-        script_length: aiScriptsTasks[1].scriptLength
+        script_length: aiScriptsTasks[1].scriptLength,
       });
 
       // Verify result structure
@@ -626,12 +625,12 @@ describe('BatchProcessor', () => {
       const processBatchSpy = vi.spyOn(batchProcessor, 'processBatch');
 
       // Create a mock for the createAndWaitForLipsyncV2 method
-      const mockCreateAndWaitForLipsyncV2 = vi.fn().mockImplementation((params) => {
+      const mockCreateAndWaitForLipsyncV2 = vi.fn().mockImplementation(params => {
         return Promise.resolve({
           id: 'lipsync-v2-123456',
           status: 'done',
           output: 'https://example.com/lipsync-v2-video.mp4',
-          ...params
+          ...params,
         });
       });
 
@@ -639,9 +638,9 @@ describe('BatchProcessor', () => {
       Object.defineProperty(batchProcessor, 'api', {
         get: () => ({
           lipsyncV2: {
-            createAndWaitForLipsyncV2: mockCreateAndWaitForLipsyncV2
-          }
-        })
+            createAndWaitForLipsyncV2: mockCreateAndWaitForLipsyncV2,
+          },
+        }),
       });
 
       // Create lipsync v2 tasks
@@ -652,20 +651,20 @@ describe('BatchProcessor', () => {
               character: {
                 type: 'avatar',
                 avatar_id: 'avatar-123',
-                avatar_style: 'normal'
+                avatar_style: 'normal',
               },
               voice: {
                 type: 'text',
                 input_text: 'Hello, this is a test',
-                voice_id: 'voice-123'
+                voice_id: 'voice-123',
               },
               background: {
                 type: 'image',
-                url: 'https://example.com/background.jpg'
-              }
-            }
+                url: 'https://example.com/background.jpg',
+              },
+            },
           ],
-          aspectRatio: '16:9'
+          aspectRatio: '16:9',
         },
         {
           videoInputs: [
@@ -673,21 +672,21 @@ describe('BatchProcessor', () => {
               character: {
                 type: 'avatar',
                 avatar_id: 'avatar-456',
-                avatar_style: 'normal'
+                avatar_style: 'normal',
               },
               voice: {
                 type: 'text',
                 input_text: 'This is another test',
-                voice_id: 'voice-456'
+                voice_id: 'voice-456',
               },
               background: {
                 type: 'image',
-                url: 'https://example.com/background2.jpg'
-              }
-            }
+                url: 'https://example.com/background2.jpg',
+              },
+            },
           ],
-          aspectRatio: '9:16'
-        }
+          aspectRatio: '9:16',
+        },
       ];
 
       // Process lipsync v2 batch
@@ -703,13 +702,13 @@ describe('BatchProcessor', () => {
       // Verify the first call parameters
       expect(mockCreateAndWaitForLipsyncV2.mock.calls[0][0]).toMatchObject({
         video_inputs: lipsyncV2Tasks[0].videoInputs,
-        aspect_ratio: lipsyncV2Tasks[0].aspectRatio
+        aspect_ratio: lipsyncV2Tasks[0].aspectRatio,
       });
 
       // Verify the second call parameters
       expect(mockCreateAndWaitForLipsyncV2.mock.calls[1][0]).toMatchObject({
         video_inputs: lipsyncV2Tasks[1].videoInputs,
-        aspect_ratio: lipsyncV2Tasks[1].aspectRatio
+        aspect_ratio: lipsyncV2Tasks[1].aspectRatio,
       });
 
       // Verify result structure

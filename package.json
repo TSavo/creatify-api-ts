@@ -20,8 +20,11 @@
     "test:watch": "vitest",
     "prepublishOnly": "npm run build",
     "prepare": "npm run build",
-    "lint": "tsc --noEmit",
-    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\""
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "check": "npm run type-check && npm run lint && npm run format"
   },
   "publishConfig": {
     "access": "public",
@@ -59,10 +62,16 @@
     "node": ">=14.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.27.0",
     "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
     "prettier": "^3.5.3",
     "tsup": "^8.0.0",
     "typescript": "^5.3.2",
+    "typescript-eslint": "^8.32.1",
     "vitest": "^1.0.0"
   },
   "dependencies": {

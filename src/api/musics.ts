@@ -15,10 +15,7 @@ export class MusicsApi {
    * @param options API client options
    * @param clientFactory Optional factory for creating API clients (useful for testing)
    */
-  constructor(
-    options: CreatifyApiOptions,
-    clientFactory = apiClientFactory
-  ) {
+  constructor(options: CreatifyApiOptions, clientFactory = apiClientFactory) {
     this.client = clientFactory.createClient(options);
   }
 
@@ -30,12 +27,12 @@ export class MusicsApi {
   async getMusicCategories(): Promise<Musics.MusicCategory[]> {
     try {
       const categories = await this.client.get<Musics.MusicCategory[]>('/api/music_categories/');
-      
+
       // Ensure categories is an array
       if (!Array.isArray(categories)) {
         return [];
       }
-      
+
       return categories;
     } catch (error) {
       console.error('Error fetching music categories:', error);
@@ -53,12 +50,12 @@ export class MusicsApi {
     try {
       const params = category ? { category } : undefined;
       const tracks = await this.client.get<Musics.MusicTrack[]>('/api/musics/', params);
-      
+
       // Ensure tracks is an array
       if (!Array.isArray(tracks)) {
         return [];
       }
-      
+
       return tracks;
     } catch (error) {
       console.error('Error fetching music tracks:', error);

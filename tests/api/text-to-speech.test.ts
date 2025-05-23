@@ -1,8 +1,5 @@
 import { TextToSpeechApi } from '../../src/api/text-to-speech';
-import {
-  mockTextToSpeechCreationResponse,
-  mockTextToSpeechResults
-} from '../mocks/api-responses';
+import { mockTextToSpeechCreationResponse, mockTextToSpeechResults } from '../mocks/api-responses';
 import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -12,10 +9,13 @@ describe('TextToSpeechApi', () => {
 
   beforeEach(() => {
     // Create a new instance of the TextToSpeechApi with the mock factory
-    ttsApi = new TextToSpeechApi({
-      apiId: 'test-api-id',
-      apiKey: 'test-api-key'
-    }, mockApiClientFactory);
+    ttsApi = new TextToSpeechApi(
+      {
+        apiId: 'test-api-id',
+        apiKey: 'test-api-key',
+      },
+      mockApiClientFactory
+    );
 
     // Get the mock client that was created
     mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;
@@ -31,7 +31,7 @@ describe('TextToSpeechApi', () => {
 
       const params = {
         script: 'Hello, this is a test of the text-to-speech API.',
-        accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717'
+        accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
       };
 
       const result = await ttsApi.createTextToSpeech(params);
@@ -60,7 +60,10 @@ describe('TextToSpeechApi', () => {
 
       const result = await ttsApi.getTextToSpeechList();
 
-      expect(mockClient.get).toHaveBeenCalledWith('/api/text_to_speech/', { page: undefined, limit: undefined });
+      expect(mockClient.get).toHaveBeenCalledWith('/api/text_to_speech/', {
+        page: undefined,
+        limit: undefined,
+      });
       expect(result).toEqual(mockTtsList);
     });
 
@@ -81,14 +84,17 @@ describe('TextToSpeechApi', () => {
         count: 2,
         next: null,
         previous: null,
-        results: [mockTextToSpeechResults.done, mockTextToSpeechResults.processing]
+        results: [mockTextToSpeechResults.done, mockTextToSpeechResults.processing],
       };
 
       mockClient.get.mockResolvedValueOnce(mockPaginatedResponse);
 
       const result = await ttsApi.getTextToSpeechPaginated();
 
-      expect(mockClient.get).toHaveBeenCalledWith('/api/text_to_speech/paginated/', { page: 1, limit: 20 });
+      expect(mockClient.get).toHaveBeenCalledWith('/api/text_to_speech/paginated/', {
+        page: 1,
+        limit: 20,
+      });
       expect(result).toEqual(mockPaginatedResponse);
     });
   });
@@ -97,15 +103,14 @@ describe('TextToSpeechApi', () => {
     it('should create a text-to-speech task and wait for completion', async () => {
       // Mock the post and get methods to return the expected responses in sequence
       mockClient.post.mockResolvedValueOnce(mockTextToSpeechCreationResponse);
-      mockClient.get
-        .mockResolvedValueOnce(mockTextToSpeechResults.done); // Return done immediately to avoid timeout
+      mockClient.get.mockResolvedValueOnce(mockTextToSpeechResults.done); // Return done immediately to avoid timeout
 
       // Mock timers
       vi.useFakeTimers();
 
       const params = {
         script: 'Hello, this is a test of the text-to-speech API.',
-        accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717'
+        accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
       };
 
       // Start the async process with a short polling interval
@@ -137,7 +142,7 @@ describe('TextToSpeechApi', () => {
 
       const params = {
         script: 'Hello, this is a test of the text-to-speech API.',
-        accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717'
+        accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
       };
 
       // Start the async process with a short polling interval
@@ -154,7 +159,7 @@ describe('TextToSpeechApi', () => {
 
       const params = {
         script: 'Hello, this is a test of the text-to-speech API.',
-        accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717'
+        accent: '6f8ca7a8-87b9-4f5d-905d-cc4598e79717',
       };
 
       // Start the async process with only 2 max attempts and a short polling interval

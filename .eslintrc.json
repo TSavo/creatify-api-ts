@@ -1,0 +1,24 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "env": {
+    "node": true,
+    "browser": true,
+    "es6": true
+  },
+  "rules": {
+    "@typescript-eslint/explicit-function-return-type": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-namespace": "error",
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "prefer-const": "error"
+  },
+  "ignorePatterns": ["dist/**", "node_modules/**", "coverage/**", "*.js", "*.mjs", "*.d.ts", "*.d.mts", "examples/**", "tests/**", "eslint.config.js"]
+}

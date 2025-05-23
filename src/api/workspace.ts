@@ -15,10 +15,7 @@ export class WorkspaceApi {
    * @param options API client options
    * @param clientFactory Optional factory for creating API clients (useful for testing)
    */
-  constructor(
-    options: CreatifyApiOptions,
-    clientFactory = apiClientFactory
-  ) {
+  constructor(options: CreatifyApiOptions, clientFactory = apiClientFactory) {
     this.client = clientFactory.createClient(options);
   }
 
@@ -34,7 +31,7 @@ export class WorkspaceApi {
       console.error('Error fetching remaining credits:', error);
       // Return a default response to prevent crashes
       return {
-        remaining_credits: 0
+        remaining_credits: 0,
       };
     }
   }

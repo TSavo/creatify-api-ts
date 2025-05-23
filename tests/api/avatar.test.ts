@@ -4,7 +4,7 @@ import {
   mockAvatars,
   mockVoices,
   mockLipsyncCreationResponse,
-  mockLipsyncResults
+  mockLipsyncResults,
 } from '../mocks/api-responses';
 import { MockCreatifyApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
 
@@ -21,7 +21,7 @@ describe('AvatarApi', () => {
     avatarApi = new AvatarApi(
       {
         apiId: 'test-api-id',
-        apiKey: 'test-api-key'
+        apiKey: 'test-api-key',
       },
       mockClientFactory
     );
@@ -41,12 +41,14 @@ describe('AvatarApi', () => {
       expect(mockClient.get).toHaveBeenCalledWith('/api/personas/', undefined);
 
       // Verify the result contains transformed data with avatar_id property
-      expect(result).toEqual(expect.arrayContaining([
-        expect.objectContaining({
-          avatar_id: expect.any(String),
-          name: expect.any(String)
-        })
-      ]));
+      expect(result).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            avatar_id: expect.any(String),
+            name: expect.any(String),
+          }),
+        ])
+      );
     });
   });
 
@@ -65,7 +67,6 @@ describe('AvatarApi', () => {
     });
   });
 
-
   describe('createLipsync', () => {
     it('should create a lipsync video', async () => {
       // Mock the response
@@ -75,7 +76,7 @@ describe('AvatarApi', () => {
         text: 'Hello world!',
         creator: mockAvatars[0].avatar_id,
         aspect_ratio: '16:9' as any,
-        voice_id: mockVoices[0].voice_id
+        voice_id: mockVoices[0].voice_id,
       };
 
       const result = await avatarApi.createLipsync(params);
@@ -131,36 +132,36 @@ describe('AvatarApi', () => {
             character: {
               type: 'avatar' as const,
               avatar_id: mockAvatars[0].avatar_id,
-              avatar_style: 'normal'
+              avatar_style: 'normal',
             },
             voice: {
               type: 'text' as const,
               input_text: 'Hello from the first avatar!',
-              voice_id: mockVoices[0].voice_id
+              voice_id: mockVoices[0].voice_id,
             },
             background: {
               type: 'image' as const,
-              url: 'https://example.com/background.jpg'
-            }
+              url: 'https://example.com/background.jpg',
+            },
           },
           {
             character: {
               type: 'avatar' as const,
               avatar_id: mockAvatars[1].avatar_id,
-              avatar_style: 'casual'
+              avatar_style: 'casual',
             },
             voice: {
               type: 'text' as const,
               input_text: 'And hello from the second avatar!',
-              voice_id: mockVoices[1].voice_id
+              voice_id: mockVoices[1].voice_id,
             },
             background: {
               type: 'image' as const,
-              url: 'https://example.com/background.jpg'
-            }
-          }
+              url: 'https://example.com/background.jpg',
+            },
+          },
         ],
-        aspect_ratio: '16:9' as any
+        aspect_ratio: '16:9' as any,
       };
 
       const result = await avatarApi.createMultiAvatarLipsync(params);
@@ -177,12 +178,11 @@ describe('AvatarApi', () => {
     it('should create a lipsync and wait for completion', async () => {
       // Mock the responses in sequence
       mockClient.post.mockResolvedValueOnce(mockLipsyncCreationResponse);
-      mockClient.get
-        .mockResolvedValueOnce(mockLipsyncResults.done); // Return done immediately to avoid timeout
+      mockClient.get.mockResolvedValueOnce(mockLipsyncResults.done); // Return done immediately to avoid timeout
 
       const params = {
         text: 'Hello world!',
-        creator: mockAvatars[0].avatar_id
+        creator: mockAvatars[0].avatar_id,
       };
 
       // Start the async process with a short polling interval
@@ -203,7 +203,7 @@ describe('AvatarApi', () => {
 
       const params = {
         text: 'Hello world!',
-        creator: mockAvatars[0].avatar_id
+        creator: mockAvatars[0].avatar_id,
       };
 
       // Start the async process with only 2 max attempts and a short polling interval

@@ -1,8 +1,5 @@
 import { AiScriptsApi } from '../../src/api/ai-scripts';
-import {
-  mockAiScriptsCreationResponse,
-  mockAiScriptsResults
-} from '../mocks/api-responses';
+import { mockAiScriptsCreationResponse, mockAiScriptsResults } from '../mocks/api-responses';
 import { mockApiClientFactory, MockCreatifyApiClient } from '../mocks/mock-api-client';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -12,10 +9,13 @@ describe('AiScriptsApi', () => {
 
   beforeEach(() => {
     // Create a new instance of the AiScriptsApi with the mock factory
-    aiScriptsApi = new AiScriptsApi({
-      apiId: 'test-api-id',
-      apiKey: 'test-api-key'
-    }, mockApiClientFactory);
+    aiScriptsApi = new AiScriptsApi(
+      {
+        apiId: 'test-api-id',
+        apiKey: 'test-api-key',
+      },
+      mockApiClientFactory
+    );
 
     // Get the mock client that was created
     mockClient = mockApiClientFactory.getLastCreatedClient() as MockCreatifyApiClient;
@@ -30,7 +30,7 @@ describe('AiScriptsApi', () => {
       mockClient.post.mockResolvedValueOnce(mockAiScriptsCreationResponse);
 
       const params = {
-        prompt: 'Write a script about technology trends'
+        prompt: 'Write a script about technology trends',
       };
 
       const result = await aiScriptsApi.createAiScript(params);
@@ -95,13 +95,13 @@ describe('AiScriptsApi', () => {
         .mockResolvedValueOnce(mockAiScriptsResults.done);
 
       const params = {
-        prompt: 'Write a script about technology trends'
+        prompt: 'Write a script about technology trends',
       };
 
       const result = await aiScriptsApi.createAndWaitForAiScript(
         params,
         100, // Poll interval
-        5    // Max attempts
+        5 // Max attempts
       );
 
       expect(mockClient.post).toHaveBeenCalledWith('/api/ai_scripts/', params);
@@ -117,13 +117,13 @@ describe('AiScriptsApi', () => {
         .mockResolvedValueOnce(mockAiScriptsResults.error);
 
       const params = {
-        prompt: 'Write a script about technology trends'
+        prompt: 'Write a script about technology trends',
       };
 
       const result = await aiScriptsApi.createAndWaitForAiScript(
         params,
         100, // Poll interval
-        5    // Max attempts
+        5 // Max attempts
       );
 
       expect(mockClient.post).toHaveBeenCalledWith('/api/ai_scripts/', params);
@@ -137,7 +137,7 @@ describe('AiScriptsApi', () => {
       mockClient.get.mockResolvedValue(mockAiScriptsResults.pending);
 
       const params = {
-        prompt: 'Write a script about technology trends'
+        prompt: 'Write a script about technology trends',
       };
 
       // Mock timers
@@ -146,7 +146,7 @@ describe('AiScriptsApi', () => {
       const promise = aiScriptsApi.createAndWaitForAiScript(
         params,
         100, // Poll interval
-        3    // Max attempts
+        3 // Max attempts
       );
 
       // Fast forward time to complete the polling
