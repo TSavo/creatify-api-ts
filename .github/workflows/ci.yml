@@ -27,17 +27,25 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      packages: write
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '18.x'
         registry-url: 'https://registry.npmjs.org'
     - run: npm ci
-    - run: npm run build
-    - run: npm publish
+    - name: Release
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: npx semantic-release
