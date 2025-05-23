@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2025-05-23
+
+### Added
+- Added proper TypeScript type definitions for all API responses and parameters
+- Added Voice interface to TextToSpeech namespace
+- Added separate type files for better organization
+
+### Changed
+- Improved type safety by replacing `any` types with more specific types
+- Fixed error handling in video-creator.ts to properly handle unknown error types
+- Converted `let` variables to `const` when they were never reassigned
+- Fixed unused variables by prefixing them with an underscore
+- Updated client methods to accept generic data types
+
+### Fixed
+- Fixed TypeScript errors in batch-processor.ts
+- Fixed namespace issues in types/index.ts
+- Fixed error handling in video-creator.ts
+
 ## [0.0.1] - 2025-05-20
 
 ### Added
