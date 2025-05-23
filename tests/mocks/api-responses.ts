@@ -88,15 +88,21 @@ export const mockAvatars = [
 export const mockVoices = [
   {
     voice_id: 'voice-123',
+    id: 'voice-123',
     name: 'English Male',
     language: 'en',
-    gender: 'male'
+    gender: 'male',
+    accents: [],
+    preview_url: ''
   },
   {
     voice_id: 'voice-456',
+    id: 'voice-456',
     name: 'English Female',
     language: 'en',
-    gender: 'female'
+    gender: 'female',
+    accents: [],
+    preview_url: ''
   }
 ];
 

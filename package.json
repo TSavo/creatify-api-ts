@@ -1,6 +1,6 @@
 {
   "name": "@tsavo/creatify-api-ts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TypeScript client for the Creatify AI API",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
