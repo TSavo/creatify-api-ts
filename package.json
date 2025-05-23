@@ -1,6 +1,6 @@
 {
   "name": "@tsavo/creatify-api-ts",
-  "version": "1.0.1",
+  "version": "0.0.1",
   "description": "TypeScript client for the Creatify AI API",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -9,7 +9,9 @@
     "dist",
     "src",
     "LICENSE",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md"
   ],
   "scripts": {
     "build": "tsup",
@@ -18,10 +20,12 @@
     "test:watch": "vitest",
     "prepublishOnly": "npm run build",
     "prepare": "npm run build",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\""
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "tag": "beta"
   },
   "sideEffects": false,
   "keywords": [
@@ -56,6 +60,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "prettier": "^3.5.3",
     "tsup": "^8.0.0",
     "typescript": "^5.3.2",
     "vitest": "^1.0.0"

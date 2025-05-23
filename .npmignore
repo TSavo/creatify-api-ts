@@ -42,10 +42,10 @@ doc/
 wiki/
 *.md
 !README.md
+!CHANGELOG.md
+!CODE_OF_CONDUCT.md
 
 # Misc
-changelog.md
-CHANGELOG.md
 CONTRIBUTING.md
 .DS_Store
 *.log
