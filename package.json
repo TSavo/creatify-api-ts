@@ -45,7 +45,11 @@
   "bugs": {
     "url": "https://github.com/TSavo/creatify-api-ts/issues"
   },
-  "author": "TSavo",
+  "author": {
+    "name": "TSavo",
+    "email": "creatify-api-ts@nefariousplan.com",
+    "url": "https://github.com/TSavo"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=14.0.0"

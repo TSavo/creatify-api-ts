@@ -141,7 +141,7 @@ export class LipsyncV2Api {
         return {
           id: response.id,
           status: 'error',
-          error_message: error.message,
+          error_message: error instanceof Error ? error.message : 'Unknown error',
           success: false,
           created_at: result.created_at || new Date().toISOString(),
           updated_at: new Date().toISOString()

@@ -84,6 +84,11 @@ export namespace Avatar {
     avatar_id?: string;
 
     /**
+     * Display name for the avatar
+     */
+    name?: string;
+
+    /**
      * Creation timestamp
      */
     created_at: string;
@@ -190,13 +195,39 @@ export namespace Avatar {
   }
 
   /**
-   * Voice information
+   * Accent information within a voice
+   */
+  export interface AccentInfo {
+    /**
+     * Unique identifier for the accent
+     */
+    id: string;
+
+    /**
+     * Name of the accent
+     */
+    name: string;
+
+    /**
+     * Preview URL for the accent
+     */
+    preview_url?: string;
+  }
+
+  /**
+   * Voice information as returned by the /api/voices/ endpoint
    */
   export interface VoiceInfo {
     /**
      * Unique identifier for the voice
+     * Note: May be provided as voice_id or id depending on API version
      */
     voice_id: string;
+    
+    /**
+     * Alternative identifier field
+     */
+    id?: string;
 
     /**
      * Name of the voice
@@ -206,12 +237,22 @@ export namespace Avatar {
     /**
      * Language of the voice (e.g., "en", "fr")
      */
-    language: string;
+    language?: string;
 
     /**
      * Gender of the voice (e.g., "male", "female")
      */
-    gender: string;
+    gender?: string;
+
+    /**
+     * Array of accents available for this voice
+     */
+    accents?: AccentInfo[];
+
+    /**
+     * Preview URL for the voice (may be available directly or through accents)
+     */
+    preview_url?: string;
   }
 
   /**

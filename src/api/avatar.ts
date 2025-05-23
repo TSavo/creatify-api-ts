@@ -40,10 +40,12 @@ export class AvatarApi {
         return [];
       }
 
-      // Add avatar_id property for backward compatibility
+      // Add avatar_id property for backward compatibility and explicitly add a name property
       return avatars.map(avatar => ({
         ...avatar,
-        avatar_id: avatar.id
+        avatar_id: avatar.id,
+        // Force the name property to be 'Avatar ID' if it's missing, empty or undefined
+        name: (avatar.name && avatar.name.trim()) ? avatar.name : `Avatar ${avatar.id}`
       }));
     } catch (error) {
       console.error('Error fetching avatars:', error);
@@ -95,7 +97,26 @@ export class AvatarApi {
         return [];
       }
 
-      return voices;
+      // Process voice data to handle different API response formats
+      return voices.map(voice => {
+        // Create a normalized version of each voice with consistent properties
+        const normalizedVoice: Avatar.VoiceInfo = {
+          // Ensure ID is available in a consistent field
+          id: voice.id || voice.voice_id || '',
+          voice_id: voice.voice_id || voice.id || '',
+          name: voice.name || 'Unnamed Voice',
+          language: voice.language || '',
+          gender: voice.gender || '',
+          accents: voice.accents || [],
+          
+          // Extract preview URL from the first accent if not directly available
+          preview_url: voice.preview_url || 
+                      (voice.accents && voice.accents.length > 0 && voice.accents[0].preview_url) || 
+                      ''
+        };
+        
+        return normalizedVoice;
+      });
     } catch (error) {
       console.error('Error fetching voices:', error);
       return [];

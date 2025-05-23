@@ -1,93 +1,147 @@
 # Creatify API TypeScript Library
 
-## Current Status - May 17, 2025
+## Current Status - May 22, 2025
 
-I've completed the implementation of the LipsyncV2 integration for the Creatify web application. Here's what has been implemented:
+I'm implementing a blog-to-video marketing pipeline for the horizon-city-stories project, integrating the Creatify API for avatar video generation. The pipeline uses a state machine architecture with full bidirectional navigation. We're building on the lessons learned from the creatify-web prototype but implementing everything fresh in a more robust architecture.
 
-### Implementation Summary
+## Previous Status - May 17, 2025
 
-1. **Server-Side API Endpoint**: 
-   - Created `/api/dev/generate-video` endpoint that:
-     - Properly utilizes the creatify-api-ts library on the server side
-     - Accepts character configuration and script input
-     - Calls the Creatify LipsyncV2 API to generate videos
-     - Downloads the resulting videos to `/public/videos/` directory
-     - Returns metadata including local file path and video information
+I've enhanced the implementation of the LipsyncV2 integration for the Creatify web application and fixed the VoiceInfo type definitions to correctly handle the nested structure of the API responses. Here are the key improvements:
 
-2. **Video Generation UI**: 
-   - Built a `/video-generator` page that:
-     - Loads saved character configurations from the server
-     - Allows users to select a character and enter a script
-     - Shows a progress indicator during video generation
-     - Displays the generated video with playback controls
-     - Provides information about the video (ID, credits used, etc.)
+### Recent Improvements
 
-3. **Character Configuration System**:
-   - Implemented local storage of character configurations in `/data/character-config.json`
-   - Added API endpoints to retrieve and update the configurations
-   - Enhanced the avatar tool with the ability to save configurations
+1. **Fixed Voice API Types**:
+   - Updated `VoiceInfo` interface to handle both direct properties and nested `accents` array
+   - Added proper typing for `AccentInfo` to handle the nested structure
+   - Made fields optional where appropriate to accommodate variations in API responses
+   - Added fallbacks to ensure consistent field access regardless of API response format
 
-4. **File System Integration**:
-   - Created a `/public/videos` directory for storing generated videos
-   - Implemented file downloading and saving from Creatify API
-   - Generated unique filenames using UUID to prevent collisions
+2. **Enhanced Avatar API Implementation**:
+   - Improved `getVoices()` method to normalize the data structure
+   - Added consistent ID access using both `id` and `voice_id` fields
+   - Improved preview URL extraction from nested structures
+   - Better error handling and fallbacks for missing properties
+
+3. **Job Queue System**: 
+   - Created a simple producer-consumer pattern using a job queue
+   - Jobs are stored as files in the `data/jobs` directory
+   - Background worker processes jobs asynchronously
+   - Non-blocking API responses for long-running operations
+
+4. **Server-Side API Endpoints**: 
+   - Enhanced `/api/dev/generate-video` to immediately return a job ID
+   - Added `/api/dev/video-status/[jobId]` endpoint to check job status
+   - Server utilizes the creatify-api-ts library in a separate process
+   - Videos saved to `/public/videos/` directory when complete
+
+5. **Video Generation UI**: 
+   - Updated to support asynchronous video generation
+   - Polls job status at regular intervals
+   - Shows progress updates based on job status
+   - Displays completed video when ready
 
 ### Technical Approach
 
-1. **Security**:
-   - API credentials stored securely in environment variables
-   - All API calls handled server-side to protect credentials
-   - No exposure of sensitive information to the client
+1. **Robust API Type Definitions**:
+   - All interfaces now properly reflect actual API response structures
+   - Optional fields added where appropriate to handle variations
+   - Added support for alternative property names (id/voice_id)
+   - Improved compatibility between the library and web application
 
-2. **Video Generation Process**:
-   - User selects a character and enters a script on the client
-   - Request sent to server-side API endpoint
-   - Server uses creatify-api-ts library with API credentials
-   - Server polls until video generation completes
-   - Server downloads the video to local filesystem
-   - Local URL returned to the client for display
+2. **Better Data Normalization**:
+   - Library now handles normalizing complex nested data structures
+   - Consistent property access regardless of API response format
+   - Fallback values for missing properties
+   - Preview URL extraction from various possible locations
 
-3. **Data Flow**:
-   - Character configurations stored in server-side JSON file
-   - Videos downloaded and stored on server filesystem
-   - Public URLs served to client for video playback
+3. **Producer-Consumer Pattern for Video Generation**:
+   - Client submits job → API creates job → Worker processes job
+   - Jobs are processed one at a time in a background thread
+   - Status updates are persisted to the filesystem
+   - Client polls for completion
 
-### Key Aspects of the Implementation
+### Workflow Sequence
 
-1. **Proper Use of creatify-api-ts Library**:
-   - Imported and used directly in the server-side API endpoint
-   - Utilizing the typed interfaces provided by the library
-   - Server-side API credentials management
+```
+Client                   Server API                   Job Queue                  Video Processor             Creatify API
+  |                          |                            |                             |                         |
+  |-- Submit Request ------->|                            |                             |                         |
+  |                          |-- Create Job ------------->|                             |                         |
+  |<-- Return Job ID --------|                            |                             |                         |
+  |                          |                            |-- Start Processing -------->|                         |
+  |                          |                            |                             |-- Create Lipsync Task ->|
+  |-- Poll Status ---------->|                            |                             |                         |
+  |<-- "processing" ---------|-- Check Job Status ------->|                             |                         |
+  |                          |                            |                             |<-- Poll Status -------->|
+  |-- Poll Status ---------->|                            |                             |                         |
+  |<-- "processing" ---------|-- Check Job Status ------->|                             |                         |
+  |                          |                            |                             |<-- Complete ------------|
+  |                          |                            |                             |-- Download Video -------|
+  |                          |                            |                             |-- Save to /public/videos/
+  |                          |                            |<-- Update Job: Complete ----|                         |
+  |-- Poll Status ---------->|                            |                             |                         |
+  |<-- "complete" + URL -----|-- Check Job Status ------->|                             |                         |
+  |                          |                            |                             |                         |
+  |-- Load Video from URL ---|                            |                             |                         |
+  |                          |                            |                             |                         |
+```
 
-2. **Server-Side Processing**:
-   - All video generation and file handling done on the server
-   - No client-side API credential exposure
-   - Proper error handling and status reporting
+### Current Implementation: Blog-to-Video Pipeline
 
-3. **Clean Separation of Concerns**:
-   - Client-side UI for user interaction
-   - Server-side API for business logic and API integration
-   - File system operations isolated to the server
+1. **Architecture**:
+   - State machine with proper transition validation
+   - Bidirectional navigation allowing users to restart from any previous state
+   - State persistence across sessions with audit trail
+   - Composable state handlers for each pipeline stage
+
+2. **Pipeline Flow**:
+   - BlogSelected → ScriptGenerating → ScriptGenerated → ScriptApproved → AvatarGenerating → AvatarGenerated → AutoComposing → AutoComposed → FinalApproved → ReadyForPublishing
+
+3. **Key Integrations**:
+   - Ollama/DeepSeek-R1:7b for AI script generation with cyberpunk framing
+   - creatify-api-ts for avatar video generation using LipsyncV2 API
+   - Existing AutomaticVideoComposer for adding branding (intro/outro/overlays)
+
+### Implementation Progress
+
+1. **Completed**:
+   - Architecture design and state machine planning
+   - Analysis of creatify-web prototype patterns for reuse
+   - Understanding of creatify-api-ts integration patterns
+
+2. **In Progress**:
+   - PipelineStateMachine.ts implementation with transition validation
+   - State handlers for Script, Avatar, and Composition stages
+   - UI components that respond to state changes
+
+3. **Next Steps**:
+   - Complete state persistence and history tracking
+   - Integrate Ollama/DeepSeek for script generation
+   - Implement AvatarGeneratorStateHandler with creatify-api-ts
 
 ### Future Improvements
 
-1. **Video Management**:
-   - Add video listing and management interface
-   - Implement cleanup of old videos to save disk space
-   - Add video metadata storage
+1. **Further Type Enhancements**:
+   - Add more comprehensive documentation for complex API structures
+   - Create utility types for common response patterns
+   - Add runtime type validation for API responses
+   - Improve error handling with specific error types
 
-2. **Error Handling and Resilience**:
-   - Implement more robust error handling
-   - Add retry mechanisms for API failures
-   - Improve timeout handling for long-running operations
+2. **Scalability**:
+   - Implement a proper database for job storage instead of the filesystem
+   - Add multiple workers for parallel processing
+   - Add job priorities and queue management
 
-3. **UX Enhancements**:
-   - Add real-time progress updates from the Creatify API
-   - Implement video previews while generation is in progress
-   - Add more customization options (backgrounds, styles, etc.)
+3. **Resilience**:
+   - Add automatic retries for failed jobs
+   - Implement job cleanup for completed or stale jobs
+   - Add timeout handling for long-running operations
+
+4. **UX Enhancements**:
+   - Add real-time progress updates (WebSockets or Server-Sent Events)
+   - Allow job cancellation
+   - Add job history and management UI
 
 ### Conclusion
 
-The implementation successfully connects the avatar-voice pairing tool with the LipsyncV2 API to generate MP4 videos. The videos are saved on the filesystem under `/public/videos` and are accessible through the web interface. The system now provides a complete end-to-end workflow for creating AI avatar videos with custom scripts.
-
-Next steps would be to test the implementation thoroughly and make any necessary refinements based on user feedback.
+The enhanced implementation provides more robust type definitions that accurately reflect the actual API response structure. The VoiceInfo interface now properly handles both direct properties and the nested accents array, with proper optional fields and type definitions. The Avatar API implementation has been improved to normalize the complex data structure, ensuring consistent property access regardless of API response format.
