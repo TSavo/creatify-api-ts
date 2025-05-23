@@ -1,6 +1,20 @@
 # Creatify API TypeScript Library
 
-## Current Status - May 22, 2025
+## Current Status - May 23, 2025
+
+### Task: Create Code of Conduct
+
+I'm creating a Code of Conduct file for the creatify-api project. The CONTRIBUTING.md already references a Code of Conduct but the actual file doesn't exist yet. I'll create a comprehensive CODE_OF_CONDUCT.md that:
+
+1. Aligns with the project's open-source nature (MIT License)
+2. Promotes a welcoming and inclusive environment
+3. Sets clear expectations for behavior
+4. Provides enforcement guidelines
+5. Follows industry best practices (based on Contributor Covenant)
+
+The Code of Conduct will complement the existing CONTRIBUTING.md guidelines and help ensure a positive collaboration environment for all contributors.
+
+## Previous Status - May 22, 2025
 
 I'm implementing a blog-to-video marketing pipeline for the horizon-city-stories project, integrating the Creatify API for avatar video generation. The pipeline uses a state machine architecture with full bidirectional navigation. We're building on the lessons learned from the creatify-web prototype but implementing everything fresh in a more robust architecture.
 
