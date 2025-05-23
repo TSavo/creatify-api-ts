@@ -975,6 +975,43 @@ const creatify = new Creatify({
 - Implement content moderation for user-generated scripts and inputs
 - Review generated content before publishing to ensure it meets your standards
 
+## Contributing
+
+### Semantic Versioning and Releases
+
+This project uses [semantic-release](https://github.com/semantic-release/semantic-release) to automate version management and package publishing. This means:
+
+1. **Automatic Versioning**: The version number is automatically determined based on commit messages
+2. **Automated Release Notes**: Release notes are automatically generated from commit messages
+3. **Automated Publishing**: Packages are automatically published to npm when changes are pushed to the main branch
+
+### Commit Message Format
+
+To ensure proper versioning, please follow the [Conventional Commits](https://www.conventionalcommits.org/) format for your commit messages:
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Where `type` is one of:
+
+- **feat**: A new feature (minor version bump)
+- **fix**: A bug fix (patch version bump)
+- **docs**: Documentation changes (no version bump)
+- **style**: Code style changes (no version bump)
+- **refactor**: Code refactoring (no version bump)
+- **perf**: Performance improvements (patch version bump)
+- **test**: Adding or updating tests (no version bump)
+- **chore**: Maintenance tasks (no version bump)
+
+Add `BREAKING CHANGE:` in the commit body or footer to trigger a major version bump.
+
+See [COMMIT_CONVENTION.md](./COMMIT_CONVENTION.md) for more details.
+
 ## License
 
 MIT
