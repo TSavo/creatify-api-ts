@@ -1,5 +1,5 @@
 import { Creatify } from '../index';
-import { CreatifyApiOptions } from '../types';
+import { CreatifyApiOptions, AspectRatio, AiEditing, LipsyncV2, TextToSpeech } from '../types';
 import { ICreatifyApiClientFactory } from '../types/api-client';
 import { apiClientFactory } from '../client-factory';
 import {
@@ -54,7 +54,7 @@ export interface BatchResult<T> {
   /**
    * Array of errors, with the index of the task that failed
    */
-  errors: Array<{ index: number; error: any }>;
+  errors: Array<{ index: number; error: Error | unknown }>;
 
   /**
    * Whether all tasks were successful
@@ -139,11 +139,8 @@ export class BatchProcessorWithFactory {
       const currentIndex = taskIndex++;
       activeTasks++;
 
-      // Define the task promise first
-      let taskPromise: Promise<void>;
-
-      // Then create and assign it
-      taskPromise = (async () => {
+      // Define and create the task promise
+      const taskPromise = (async () => {
         try {
           // Add delay between task starts if specified
           if (opts.taskStartDelay > 0 && currentIndex > 0) {
@@ -213,7 +210,7 @@ export class BatchProcessorWithFactory {
           text: task.text,
           creator: task.avatarId,
           voice_id: task.voiceId,
-          aspect_ratio: task.aspectRatio as any,
+          aspect_ratio: task.aspectRatio as AspectRatio,
         });
       };
     });
@@ -257,7 +254,7 @@ export class BatchProcessorWithFactory {
       return async () => {
         return this.api.aiEditing.createAndWaitForAiEditing({
           video_url: task.videoUrl,
-          editing_style: task.editingStyle as any,
+          editing_style: task.editingStyle as AiEditing.EditingStyle,
         });
       };
     });
@@ -268,21 +265,37 @@ export class BatchProcessorWithFactory {
   /**
    * Create and wait for a lipsync task to complete
    */
-  async createAndWaitForLipsync(params: any, pollingInterval = 2000) {
+  async createAndWaitForLipsync(params: {
+    text: string;
+    creator: string;
+    voice_id?: string;
+    aspect_ratio?: AspectRatio;
+  }, pollingInterval = 2000) {
     return this.api.avatar.createAndWaitForLipsync(params, pollingInterval);
   }
 
   /**
    * Create and wait for a text-to-speech task to complete
    */
-  async createAndWaitForTextToSpeech(params: any, pollingInterval = 2000) {
-    return this.api.textToSpeech.createAndWaitForTextToSpeech(params, pollingInterval);
+  async createAndWaitForTextToSpeech(params: {
+    text: string;
+    voice_id: string;
+  } | TextToSpeech.TextToSpeechParams, pollingInterval = 2000) {
+    // Convert to the expected format if needed
+    const convertedParams = 'text' in params ? {
+      script: params.text,
+      accent: params.voice_id
+    } : params;
+    return this.api.textToSpeech.createAndWaitForTextToSpeech(convertedParams, pollingInterval);
   }
 
   /**
    * Create and wait for an AI editing task to complete
    */
-  async createAndWaitForAiEditing(params: any, pollingInterval = 2000) {
+  async createAndWaitForAiEditing(params: {
+    video_url: string;
+    editing_style: AiEditing.EditingStyle;
+  }, pollingInterval = 2000) {
     return this.api.aiEditing.createAndWaitForAiEditing(params, pollingInterval);
   }
 
@@ -306,7 +319,7 @@ export class BatchProcessorWithFactory {
       return async () => {
         return this.api.aiShorts.createAndWaitForAiShorts({
           prompt: task.prompt,
-          aspect_ratio: task.aspectRatio as any,
+          aspect_ratio: task.aspectRatio as AspectRatio,
           target_platform: task.targetPlatform,
           target_audience: task.targetAudience,
           language: task.language,
@@ -355,14 +368,14 @@ export class BatchProcessorWithFactory {
    * @returns Promise resolving to the batch result
    */
   async processLipsyncV2Batch(
-    lipsyncV2Tasks: Array<{ videoInputs: any[]; aspectRatio: string }>,
+    lipsyncV2Tasks: Array<{ videoInputs: LipsyncV2.LipsyncV2Params['video_inputs']; aspectRatio: string }>,
     options: BatchProcessingOptions = {}
   ) {
     const tasks = lipsyncV2Tasks.map(task => {
       return async () => {
         return this.api.lipsyncV2.createAndWaitForLipsyncV2({
           video_inputs: task.videoInputs,
-          aspect_ratio: task.aspectRatio as any,
+          aspect_ratio: task.aspectRatio as AspectRatio,
         });
       };
     });
@@ -373,21 +386,36 @@ export class BatchProcessorWithFactory {
   /**
    * Create and wait for an AI Shorts task to complete
    */
-  async createAndWaitForAiShorts(params: any, pollingInterval = 2000) {
+  async createAndWaitForAiShorts(params: {
+    prompt: string;
+    aspect_ratio: AspectRatio;
+    target_platform?: string;
+    target_audience?: string;
+    language?: string;
+  }, pollingInterval = 2000) {
     return this.api.aiShorts.createAndWaitForAiShorts(params, pollingInterval);
   }
 
   /**
    * Create and wait for an AI Script task to complete
    */
-  async createAndWaitForAiScript(params: any, pollingInterval = 2000) {
+  async createAndWaitForAiScript(params: {
+    prompt: string;
+    target_platform?: string;
+    target_audience?: string;
+    language?: string;
+    script_style?: string;
+  }, pollingInterval = 2000) {
     return this.api.aiScripts.createAndWaitForAiScript(params, pollingInterval);
   }
 
   /**
    * Create and wait for a Lipsync v2 task to complete
    */
-  async createAndWaitForLipsyncV2(params: any, pollingInterval = 2000) {
+  async createAndWaitForLipsyncV2(params: {
+    video_inputs: LipsyncV2.LipsyncV2Params['video_inputs'];
+    aspect_ratio: AspectRatio;
+  }, pollingInterval = 2000) {
     return this.api.lipsyncV2.createAndWaitForLipsyncV2(params, pollingInterval);
   }
 }

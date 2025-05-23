@@ -12,7 +12,7 @@ export interface ICreatifyApiClient {
    * @param config Additional request configuration
    * @returns Promise resolving to the response data
    */
-  get<T = any>(endpoint: string, params?: Record<string, any>, config?: any): Promise<T>;
+  get<T = unknown>(endpoint: string, params?: Record<string, unknown>, config?: Record<string, unknown>): Promise<T>;
 
   /**
    * Make a POST request to the API
@@ -21,7 +21,7 @@ export interface ICreatifyApiClient {
    * @param config Additional request configuration
    * @returns Promise resolving to the response data
    */
-  post<T = any>(endpoint: string, data?: Record<string, any>, config?: any): Promise<T>;
+  post<T = unknown, D = unknown>(endpoint: string, data?: D, config?: Record<string, unknown>): Promise<T>;
 
   /**
    * Make a PUT request to the API
@@ -30,7 +30,7 @@ export interface ICreatifyApiClient {
    * @param config Additional request configuration
    * @returns Promise resolving to the response data
    */
-  put<T = any>(endpoint: string, data?: Record<string, any>, config?: any): Promise<T>;
+  put<T = unknown, D = unknown>(endpoint: string, data?: D, config?: Record<string, unknown>): Promise<T>;
 
   /**
    * Make a DELETE request to the API
@@ -39,7 +39,7 @@ export interface ICreatifyApiClient {
    * @param config Additional request configuration
    * @returns Promise resolving to the response data
    */
-  delete<T = any>(endpoint: string, params?: Record<string, any>, config?: any): Promise<T>;
+  delete<T = unknown>(endpoint: string, params?: Record<string, unknown>, config?: Record<string, unknown>): Promise<T>;
 }
 
 /**

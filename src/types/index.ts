@@ -81,9 +81,7 @@ export type TaskStatus =
   | 'done'
   | 'error';
 
-/**
- * Avatar API types
- */
+/* eslint-disable @typescript-eslint/no-namespace */
 export namespace Avatar {
   /**
    * Avatar information as returned by the /api/personas/ endpoint
@@ -327,7 +325,7 @@ export namespace Avatar {
      * Custom metadata for tracking (optional)
      * This data will be returned in webhook calls
      */
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }
 
   /**
@@ -561,7 +559,12 @@ export namespace UrlToVideo {
     /**
      * Customer reviews (optional)
      */
-    reviews?: any;
+    reviews?: Array<{
+      rating: number;
+      text: string;
+      author?: string;
+      date?: string;
+    }>;
 
     /**
      * URL of the logo (optional)
@@ -607,7 +610,12 @@ export namespace UrlToVideo {
     /**
      * Reviews extracted from the URL (if any)
      */
-    reviews?: any;
+    reviews?: Array<{
+      rating: number;
+      text: string;
+      author?: string;
+      date?: string;
+    }>;
 
     /**
      * URL of the logo extracted from the URL
@@ -843,7 +851,7 @@ export namespace UrlToVideo {
     /**
      * Other parameters match the input parameters
      */
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   /**
@@ -894,6 +902,50 @@ export namespace UrlToVideo {
  * @see https://creatify.mintlify.app/api-reference/text-to-speech
  */
 export namespace TextToSpeech {
+  /**
+   * Voice information
+   */
+  export interface Voice {
+    /**
+     * Unique identifier for the voice
+     */
+    id?: string;
+
+    /**
+     * Alternative identifier field
+     */
+    voice_id?: string;
+
+    /**
+     * Display name of the voice
+     */
+    name: string;
+
+    /**
+     * Language code (e.g., 'en-US')
+     */
+    language_code?: string;
+
+    /**
+     * Language of the voice (e.g., "en", "fr")
+     */
+    language?: string;
+
+    /**
+     * Gender of the voice ('male' or 'female')
+     */
+    gender?: string;
+
+    /**
+     * Sample audio URL
+     */
+    sample_url?: string;
+
+    /**
+     * Array of accents available for this voice
+     */
+    accents?: Avatar.AccentInfo[];
+  }
   /**
    * Parameters for creating a text-to-speech task
    * @see https://creatify.mintlify.app/api-reference/text-to-speech/post-text-to-speech
@@ -1071,7 +1123,7 @@ export namespace CustomTemplates {
     /**
      * Custom data to populate the template
      */
-    data: Record<string, any>;
+    data: Record<string, unknown>;
 
     /**
      * Webhook URL to be called when the video is ready (optional)

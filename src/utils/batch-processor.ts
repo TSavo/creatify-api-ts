@@ -1,5 +1,5 @@
 import { Creatify } from '../index';
-import { CreatifyApiOptions } from '../types';
+import { CreatifyApiOptions, AspectRatio, AiEditing, LipsyncV2 } from '../types';
 import { apiClientFactory } from '../client-factory';
 
 /**
@@ -66,7 +66,7 @@ export class BatchProcessor {
   constructor(
     apiIdOrOptions: string | CreatifyApiOptions,
     apiKey?: string,
-    clientFactory = apiClientFactory
+    _clientFactory = apiClientFactory
   ) {
     // Handle different constructor argument formats
     const options: CreatifyApiOptions =
@@ -118,11 +118,8 @@ export class BatchProcessor {
       const currentIndex = taskIndex++;
       activeTasks++;
 
-      // Define the task promise first
-      let taskPromise: Promise<void>;
-
-      // Then create and assign it
-      taskPromise = (async () => {
+      // Define and create the task promise
+      const taskPromise = (async () => {
         try {
           // Add delay between task starts if specified
           if (opts.taskStartDelay > 0 && currentIndex > 0) {
@@ -192,7 +189,7 @@ export class BatchProcessor {
           text: task.text,
           creator: task.avatarId,
           voice_id: task.voiceId,
-          aspect_ratio: task.aspectRatio,
+          aspect_ratio: task.aspectRatio as AspectRatio,
         });
       };
     });
@@ -236,7 +233,7 @@ export class BatchProcessor {
       return async () => {
         return this.api.aiEditing.createAndWaitForAiEditing({
           video_url: task.videoUrl,
-          editing_style: task.editingStyle,
+          editing_style: task.editingStyle as AiEditing.EditingStyle,
         });
       };
     });
@@ -264,7 +261,7 @@ export class BatchProcessor {
       return async () => {
         return this.api.aiShorts.createAndWaitForAiShorts({
           prompt: task.prompt,
-          aspect_ratio: task.aspectRatio,
+          aspect_ratio: task.aspectRatio as AspectRatio,
           target_platform: task.targetPlatform,
           target_audience: task.targetAudience,
           language: task.language,
@@ -319,8 +316,8 @@ export class BatchProcessor {
     const tasks = lipsyncV2Tasks.map(task => {
       return async () => {
         return this.api.lipsyncV2.createAndWaitForLipsyncV2({
-          video_inputs: task.videoInputs,
-          aspect_ratio: task.aspectRatio,
+          video_inputs: task.videoInputs as LipsyncV2.LipsyncV2Params['video_inputs'],
+          aspect_ratio: task.aspectRatio as AspectRatio,
         });
       };
     });

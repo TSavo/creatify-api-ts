@@ -1,6 +1,6 @@
 import { Creatify } from '../index';
 import { AvatarApi } from '../api';
-import { CreatifyApiOptions } from '../types';
+import { CreatifyApiOptions, Avatar, TextToSpeech, AspectRatio } from '../types';
 import { apiClientFactory } from '../client-factory';
 import { ICreatifyApiClientFactory } from '../types/api-client';
 
@@ -10,8 +10,8 @@ import { ICreatifyApiClientFactory } from '../types/api-client';
 export class VideoCreator {
   private creatify: Creatify;
   private avatarApi: AvatarApi;
-  private avatarCache: Record<string, any> = {};
-  private voiceCache: Record<string, any> = {};
+  private avatarCache: Record<string, Avatar.AvatarInfo> = {};
+  private voiceCache: Record<string, TextToSpeech.Voice> = {};
   private avatarsLoaded = false;
   private voicesLoaded = false;
 
@@ -166,7 +166,7 @@ export class VideoCreator {
       const lipsyncResponse = await this.avatarApi.createLipsync({
         text: options.script,
         creator: avatarId || '',
-        aspect_ratio: aspectRatio as any,
+        aspect_ratio: aspectRatio as AspectRatio,
         voice_id: voiceId,
       });
 
@@ -205,11 +205,15 @@ export class VideoCreator {
             `Video generation failed or timed out. Status: ${lipsyncResult.status}`
         );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Ensure the error is properly thrown with the original message
-      throw error instanceof Error
-        ? error
-        : new Error(error?.message || 'An error occurred with the API request');
+      if (error instanceof Error) {
+        throw error;
+      } else if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string') {
+        throw new Error(error.message);
+      } else {
+        throw new Error('An error occurred with the API request');
+      }
     }
   }
 
@@ -298,7 +302,7 @@ export class VideoCreator {
       // Create the multi-avatar lipsync video
       const multiAvatarResponse = await this.avatarApi.createMultiAvatarLipsync({
         video_inputs: videoInputs,
-        aspect_ratio: aspectRatio as any,
+        aspect_ratio: aspectRatio as AspectRatio,
       });
 
       // Ensure we have a valid response ID
@@ -335,11 +339,15 @@ export class VideoCreator {
           result.error_message || `Video generation failed or timed out. Status: ${result.status}`
         );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Ensure the error is properly thrown with the original message
-      throw error instanceof Error
-        ? error
-        : new Error(error?.message || 'An error occurred with the API request');
+      if (error instanceof Error) {
+        throw error;
+      } else if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string') {
+        throw new Error(error.message);
+      } else {
+        throw new Error('An error occurred with the API request');
+      }
     }
   }
 }

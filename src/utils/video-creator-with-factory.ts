@@ -1,5 +1,5 @@
 import { Creatify } from '../index';
-import { CreatifyApiOptions } from '../types';
+import { CreatifyApiOptions, Avatar, TextToSpeech } from '../types';
 import { ICreatifyApiClientFactory } from '../types/api-client';
 import { apiClientFactory } from '../client-factory';
 
@@ -8,8 +8,8 @@ import { apiClientFactory } from '../client-factory';
  */
 export class VideoCreatorWithFactory {
   private creatify: Creatify;
-  private avatarCache: Record<string, any> = {};
-  private voiceCache: Record<string, any> = {};
+  private avatarCache: Record<string, Avatar.AvatarInfo> = {};
+  private voiceCache: Record<string, TextToSpeech.Voice> = {};
   private avatarsLoaded = false;
   private voicesLoaded = false;
 
@@ -22,7 +22,7 @@ export class VideoCreatorWithFactory {
   constructor(
     apiIdOrOptions: string | CreatifyApiOptions,
     apiKey?: string | ICreatifyApiClientFactory,
-    clientFactory: ICreatifyApiClientFactory = apiClientFactory
+    _clientFactory: ICreatifyApiClientFactory = apiClientFactory
   ) {
     // Handle different constructor argument formats
     const options: CreatifyApiOptions =
@@ -102,7 +102,7 @@ export class VideoCreatorWithFactory {
    * Find an avatar by name or partial name match
    * @param name Name or partial name to search for
    */
-  async findAvatarByName(name: string): Promise<any | null> {
+  async findAvatarByName(name: string): Promise<Avatar.AvatarInfo | null> {
     if (!this.avatarsLoaded) {
       await this.loadAvatars();
     }
@@ -111,26 +111,25 @@ export class VideoCreatorWithFactory {
 
     // First try exact match
     for (const avatar of Object.values(this.avatarCache)) {
-      if (avatar.name.toLowerCase() === name) {
+      if (avatar.name?.toLowerCase() === name) {
         return avatar;
       }
     }
 
     // Then try partial match
     for (const avatar of Object.values(this.avatarCache)) {
-      if (avatar.name.toLowerCase().includes(name)) {
+      if (avatar.name?.toLowerCase().includes(name)) {
         return avatar;
       }
     }
 
     return null;
   }
-
   /**
    * Find a voice by name or partial name match
    * @param name Name or partial name to search for
    */
-  async findVoiceByName(name: string): Promise<any | null> {
+  async findVoiceByName(name: string): Promise<TextToSpeech.Voice | null> {
     if (!this.voicesLoaded) {
       await this.loadVoices();
     }
@@ -180,8 +179,8 @@ export class VideoCreatorWithFactory {
     return this.createVideo(
       {
         text,
-        avatarId: avatar.id || avatar.avatar_id,
-        voiceId: voice.id || voice.voice_id,
+        avatarId: avatar.id || avatar.avatar_id || '',
+        voiceId: voice.id || voice.voice_id || '',
         aspectRatio,
       },
       pollingInterval

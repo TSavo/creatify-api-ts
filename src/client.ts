@@ -65,9 +65,9 @@ export class CreatifyApiClient implements ICreatifyApiClient {
    * @param config Additional axios config
    * @returns Promise resolving to the response data
    */
-  public async get<T = any>(
+  public async get<T = unknown>(
     endpoint: string,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
     config?: AxiosRequestConfig
   ): Promise<T> {
     const response = await this.client.get<T>(endpoint, {
@@ -84,9 +84,9 @@ export class CreatifyApiClient implements ICreatifyApiClient {
    * @param config Additional axios config
    * @returns Promise resolving to the response data
    */
-  public async post<T = any>(
+  public async post<T = unknown, D = unknown>(
     endpoint: string,
-    data?: Record<string, any>,
+    data?: D,
     config?: AxiosRequestConfig
   ): Promise<T> {
     const response = await this.client.post<T>(endpoint, data, config);
@@ -100,9 +100,9 @@ export class CreatifyApiClient implements ICreatifyApiClient {
    * @param config Additional axios config
    * @returns Promise resolving to the response data
    */
-  public async put<T = any>(
+  public async put<T = unknown, D = unknown>(
     endpoint: string,
-    data?: Record<string, any>,
+    data?: D,
     config?: AxiosRequestConfig
   ): Promise<T> {
     const response = await this.client.put<T>(endpoint, data, config);
@@ -116,9 +116,9 @@ export class CreatifyApiClient implements ICreatifyApiClient {
    * @param config Additional axios config
    * @returns Promise resolving to the response data
    */
-  public async delete<T = any>(
+  public async delete<T = unknown>(
     endpoint: string,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
     config?: AxiosRequestConfig
   ): Promise<T> {
     const response = await this.client.delete<T>(endpoint, {
