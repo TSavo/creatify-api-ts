@@ -34,11 +34,20 @@ To use the Creatify API, you need to obtain your API credentials from your Creat
 ```typescript
 import { Creatify } from '@tsavo/creatify-api-ts';
 
-// Initialize the client with your API credentials
+// Initialize the client with API credentials from environment variables (recommended)
 const creatify = new Creatify({
-  apiId: 'your-api-id',  // X-API-ID from your Creatify account
-  apiKey: 'your-api-key', // X-API-KEY from your Creatify account
+  apiId: process.env.CREATIFY_API_ID,  // Store your X-API-ID in environment variables
+  apiKey: process.env.CREATIFY_API_KEY, // Store your X-API-KEY in environment variables
 });
+
+// For local development, you can use dotenv to load environment variables from a .env file
+// npm install dotenv
+// Then at the top of your file:
+// import 'dotenv/config';
+//
+// Example .env file:
+// CREATIFY_API_ID=your-api-id
+// CREATIFY_API_KEY=your-api-key
 
 // Create an AI avatar video
 async function createVideo() {
@@ -771,6 +780,200 @@ You can check your remaining credits using the Workspace API:
 const credits = await creatify.workspace.getRemainingCredits();
 console.log(`Remaining credits: ${credits.remaining_credits}`);
 ```
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### Authentication Errors
+
+**Issue**: Receiving 401 Unauthorized errors when making API calls.
+**Solution**:
+- Verify that your API ID and API Key are correct
+- Ensure you're using the correct credentials for your environment (production vs. development)
+- Check that your Creatify subscription is active and includes API access
+
+#### Rate Limiting
+
+**Issue**: Receiving 429 Too Many Requests errors.
+**Solution**:
+- Implement exponential backoff retry logic
+- Batch requests when possible using the BatchProcessor utility
+- Consider upgrading your plan if you consistently hit rate limits
+
+#### Long-Running Tasks Timing Out
+
+**Issue**: API calls for video generation timing out before completion.
+**Solution**:
+- Use the `createAndWaitFor*` convenience methods which handle polling automatically
+- Implement webhook notifications for asynchronous processing
+- Increase timeout settings in your HTTP client
+
+#### Video Generation Failures
+
+**Issue**: Video generation tasks fail with error messages.
+**Solution**:
+- Check that avatar and voice IDs are valid
+- Ensure text input doesn't exceed maximum length limits
+- Verify that any provided URLs (for backgrounds, audio, etc.) are publicly accessible
+- Review the error details returned in the API response
+
+#### Type Errors in TypeScript
+
+**Issue**: TypeScript compiler errors when using the library.
+**Solution**:
+- Ensure you're using the latest version of the library
+- Check that your TypeScript version is compatible (v4.5+ recommended)
+- Use explicit type annotations when TypeScript cannot infer types
+
+## API Version Compatibility
+
+This client library is compatible with Creatify API v2.0 and above. The library is regularly updated to support new features and endpoints as they are added to the Creatify API.
+
+- **Creatify API v2.0-v2.5**: Fully supported
+- **Creatify API v3.0+**: Supported with ongoing updates
+
+For the most up-to-date information on API compatibility, please refer to the [Creatify API Documentation](https://creatify.mintlify.app/api-reference).
+
+## Security Best Practices
+
+When working with the Creatify API, follow these security best practices:
+
+### API Credentials
+
+- **Never hardcode API credentials** in your source code
+- Use environment variables or a secure credential store
+- Rotate API keys periodically
+- Use different API keys for development and production environments
+
+```typescript
+// DON'T do this
+const creatify = new Creatify({
+  apiId: "your-hardcoded-api-id",
+  apiKey: "your-hardcoded-api-key"
+});
+
+// DO this instead
+const creatify = new Creatify({
+  apiId: process.env.CREATIFY_API_ID,
+  apiKey: process.env.CREATIFY_API_KEY
+});
+```
+
+### Server-Side Usage
+
+- Always use this library on the server-side, never in client-side browser code
+- Implement proper access controls for your application's users
+- Consider creating a proxy API that validates requests before passing them to Creatify
+
+### Webhook Security
+
+- Use HTTPS for all webhook URLs
+- Implement webhook signature verification if available
+- Add authentication to your webhook endpoints
+
+### Content Security
+
+- Validate and sanitize all user inputs before sending to the API
+- Implement content moderation for user-generated scripts and inputs
+- Review generated content before publishing to ensure it meets your standards
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### Authentication Errors
+
+**Issue**: Receiving 401 Unauthorized errors when making API calls.
+**Solution**:
+- Verify that your API ID and API Key are correct
+- Ensure you're using the correct credentials for your environment (production vs. development)
+- Check that your Creatify subscription is active and includes API access
+
+#### Rate Limiting
+
+**Issue**: Receiving 429 Too Many Requests errors.
+**Solution**:
+- Implement exponential backoff retry logic
+- Batch requests when possible using the BatchProcessor utility
+- Consider upgrading your plan if you consistently hit rate limits
+
+#### Long-Running Tasks Timing Out
+
+**Issue**: API calls for video generation timing out before completion.
+**Solution**:
+- Use the `createAndWaitFor*` convenience methods which handle polling automatically
+- Implement webhook notifications for asynchronous processing
+- Increase timeout settings in your HTTP client
+
+#### Video Generation Failures
+
+**Issue**: Video generation tasks fail with error messages.
+**Solution**:
+- Check that avatar and voice IDs are valid
+- Ensure text input doesn't exceed maximum length limits
+- Verify that any provided URLs (for backgrounds, audio, etc.) are publicly accessible
+- Review the error details returned in the API response
+
+#### Type Errors in TypeScript
+
+**Issue**: TypeScript compiler errors when using the library.
+**Solution**:
+- Ensure you're using the latest version of the library
+- Check that your TypeScript version is compatible (v4.5+ recommended)
+- Use explicit type annotations when TypeScript cannot infer types
+
+## API Version Compatibility
+
+This client library is compatible with Creatify API v2.0 and above. The library is regularly updated to support new features and endpoints as they are added to the Creatify API.
+
+- **Creatify API v2.0-v2.5**: Fully supported
+- **Creatify API v3.0+**: Supported with ongoing updates
+
+For the most up-to-date information on API compatibility, please refer to the [Creatify API Documentation](https://creatify.mintlify.app/api-reference).
+
+## Security Best Practices
+
+When working with the Creatify API, follow these security best practices:
+
+### API Credentials
+
+- **Never hardcode API credentials** in your source code
+- Use environment variables or a secure credential store
+- Rotate API keys periodically
+- Use different API keys for development and production environments
+
+```typescript
+// DON'T do this
+const creatify = new Creatify({
+  apiId: "your-hardcoded-api-id",
+  apiKey: "your-hardcoded-api-key"
+});
+
+// DO this instead
+const creatify = new Creatify({
+  apiId: process.env.CREATIFY_API_ID,
+  apiKey: process.env.CREATIFY_API_KEY
+});
+```
+
+### Server-Side Usage
+
+- Always use this library on the server-side, never in client-side browser code
+- Implement proper access controls for your application's users
+- Consider creating a proxy API that validates requests before passing them to Creatify
+
+### Webhook Security
+
+- Use HTTPS for all webhook URLs
+- Implement webhook signature verification if available
+- Add authentication to your webhook endpoints
+
+### Content Security
+
+- Validate and sanitize all user inputs before sending to the API
+- Implement content moderation for user-generated scripts and inputs
+- Review generated content before publishing to ensure it meets your standards
 
 ## License
 
