@@ -988,6 +988,7 @@ This project uses [semantic-release](https://github.com/semantic-release/semanti
 1. **Automatic Versioning**: The version number is automatically determined based on commit messages
 2. **Automated Release Notes**: Release notes are automatically generated from commit messages
 3. **Automated Publishing**: Packages are automatically published to npm when changes are pushed to the main branch
+4. **No Manual Version Updates**: You don't need to manually update version numbers in package.json
 
 ### Commit Message Format
 
