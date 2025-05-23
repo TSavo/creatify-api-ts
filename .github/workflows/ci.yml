@@ -25,7 +25,7 @@ jobs:
     - run: npm run build
     - run: npm test
 
-    
+
   publish:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -45,6 +45,11 @@ jobs:
         node-version: '22.x'
         registry-url: 'https://registry.npmjs.org'
     - run: npm ci
+    - name: Setup .npmrc file
+      run: |
+        echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+        echo "registry=https://registry.npmjs.org/" >> .npmrc
+        echo "always-auth=true" >> .npmrc
     - name: Release
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
