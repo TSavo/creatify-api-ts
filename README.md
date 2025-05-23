@@ -669,7 +669,11 @@ const batchResult = await batchProcessor.processTextToSpeechBatch([
   { script: "This is the first audio sample.", accent: "7a258b67-e1d3-4025-8904-8429daa3a34d" },
   { script: "This is the second audio sample.", accent: "7a258b67-e1d3-4025-8904-8429daa3a34d" },
   { script: "This is the third audio sample.", accent: "7a258b67-e1d3-4025-8904-8429daa3a34d" }
-], { concurrency: 2 }); // Process 2 tasks at a time
+], {
+  concurrency: 2, // Process 2 tasks at a time
+  maxRetries: 3,  // Retry failed tasks up to 3 times with exponential backoff
+  continueOnError: true // Continue processing other tasks if one fails
+});
 
 console.log(`Processed ${batchResult.length} text-to-speech tasks`);
 batchResult.forEach((result, index) => {

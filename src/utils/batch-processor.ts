@@ -20,6 +20,11 @@ export interface BatchProcessingOptions {
    * Delay between starting new tasks in milliseconds (default: 500)
    */
   taskStartDelay?: number;
+
+  /**
+   * Maximum number of retries for failed tasks (default: 0)
+   */
+  maxRetries?: number;
 }
 
 /**
@@ -29,6 +34,7 @@ const DEFAULT_BATCH_OPTIONS: Required<BatchProcessingOptions> = {
   concurrency: 3,
   continueOnError: false,
   taskStartDelay: 500,
+  maxRetries: 0,
 };
 
 /**
@@ -126,11 +132,42 @@ export class BatchProcessor {
             await new Promise(resolve => setTimeout(resolve, opts.taskStartDelay));
           }
 
-          // Execute the task
-          const taskResult = await tasks[currentIndex]();
-          result.successes.push(taskResult);
+          // Execute the task with retries
+          let taskResult;
+          let lastError;
+          let retryCount = 0;
+
+          while (retryCount <= opts.maxRetries) {
+            try {
+              taskResult = await tasks[currentIndex]();
+              break; // Success, exit the retry loop
+            } catch (error) {
+              lastError = error;
+              retryCount++;
+
+              if (retryCount <= opts.maxRetries) {
+                // Wait before retrying (exponential backoff)
+                const retryDelay = Math.min(1000 * Math.pow(2, retryCount - 1), 30000);
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+                console.warn(`Retrying task ${currentIndex}, attempt ${retryCount} of ${opts.maxRetries}`);
+              }
+            }
+          }
+
+          if (taskResult) {
+            result.successes.push(taskResult);
+          } else {
+            // All retries failed
+            result.errors.push({ index: currentIndex, error: lastError });
+            result.allSuccessful = false;
+
+            // Handle error based on options
+            if (!opts.continueOnError) {
+              throw lastError;
+            }
+          }
         } catch (error) {
-          // Record the error
+          // This catch block handles unexpected errors in the retry logic itself
           result.errors.push({ index: currentIndex, error });
           result.allSuccessful = false;
 
