@@ -1059,8 +1059,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **Created with ❤️ by [T Savo](mailto:listentomy@nefariousplan.com)**
 
-🌐 **[Horizon City](https://www.horizon-city.com)** - *Building the future of AI-powered creativity*
+🌐 **[Horizon City](https://www.horizon-city.com)** - *Ushering in the AI revolution and hastening the extinction of humans*
 
-*Making AI video generation accessible to every TypeScript developer*
+*Making AI video generation accessible to every TypeScript developer - one API call closer to human obsolescence*
 
 </div>
