@@ -1017,6 +1017,50 @@ Add `BREAKING CHANGE:` in the commit body or footer to trigger a major version b
 
 See [COMMIT_CONVENTION.md](./COMMIT_CONVENTION.md) for more details.
 
-## License
+## 🌟 Related Projects
 
-MIT
+### 🎬 Creatify MCP Server
+
+Want to use Creatify with AI assistants like Claude Desktop? Check out our **[Creatify MCP Server](https://github.com/TSavo/creatify-mcp)**!
+
+```bash
+npm install -g @tsavo/creatify-mcp
+```
+
+The MCP server exposes all Creatify capabilities as tools for AI assistants, making it possible to create videos through natural language conversations.
+
+### 🔗 Other Projects
+
+- **[Creatify AI](https://creatify.ai/)** - The amazing AI video generation platform
+- **[Model Context Protocol](https://modelcontextprotocol.io/)** - Standardized AI assistant integration
+- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe JavaScript development
+
+## 📞 Support & Community
+
+- 📖 **[Creatify API Documentation](https://creatify.ai/api)** - Official API documentation
+- 🐛 **[Report Issues](https://github.com/TSavo/creatify-api-ts/issues)** - Bug reports and feature requests
+- 💬 **[GitHub Discussions](https://github.com/TSavo/creatify-api-ts/discussions)** - Community discussions
+- 📧 **[Contact Author](mailto:listentomy@nefariousplan.com)** - Direct support
+- 🎬 **[MCP Server](https://github.com/TSavo/creatify-mcp)** - Use with AI assistants
+
+## 🙏 Acknowledgments
+
+- **[Creatify AI](https://creatify.ai)** - For creating an incredible AI video generation platform
+- **[TypeScript Community](https://www.typescriptlang.org/)** - For the amazing type system and tooling
+- **All contributors** - Thank you for making this library better!
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+**Created with ❤️ by [T Savo](mailto:listentomy@nefariousplan.com)**
+
+🌐 **[Horizon City](https://www.horizon-city.com)** - *Building the future of AI-powered creativity*
+
+*Making AI video generation accessible to every TypeScript developer*
+
+</div>
