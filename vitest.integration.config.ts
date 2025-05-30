@@ -23,13 +23,10 @@ export default defineConfig({
     },
     
     // Global setup and teardown
-    globalSetup: ['tests/integration/global-setup.ts'],
+    // globalSetup: ['tests/integration/global-setup.ts'],
     
     // Reporter configuration
-    reporter: ['verbose', 'json'],
-    outputFile: {
-      json: 'tests/integration/results.json',
-    },
+    reporter: ['verbose'],
     
     // Coverage (optional)
     coverage: {

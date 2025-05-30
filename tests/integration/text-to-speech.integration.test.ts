@@ -11,37 +11,30 @@ import {
   generateUniqueFilename,
   TestResourceTracker,
   TEST_CONTENT,
+  shouldRunIntegrationTests,
 } from './setup';
 
-describe('Text-to-Speech API Integration Tests', () => {
+(shouldRunIntegrationTests() ? describe : describe.skip)('Text-to-Speech API Integration Tests', () => {
   let creatify: Creatify;
   let config: ReturnType<typeof getIntegrationConfig>;
   let resourceTracker: TestResourceTracker;
   let availableVoices: any[];
 
   beforeAll(async () => {
-    try {
-      config = getIntegrationConfig();
-      await ensureOutputDir(config.outputDir);
-      
-      creatify = new Creatify({
-        apiId: config.apiId,
-        apiKey: config.apiKey,
-      });
+    config = getIntegrationConfig();
+    await ensureOutputDir(config.outputDir);
 
-      // Get available voices for tests
-      console.log('Fetching available voices for TTS...');
-      availableVoices = await creatify.avatar.getVoices();
-      
-      console.log(`Found ${availableVoices.length} voices for TTS`);
-      expect(availableVoices.length).toBeGreaterThan(0);
-    } catch (error) {
-      if (error.message?.includes('environment variables')) {
-        console.log('Skipping TTS integration tests - API credentials not provided');
-        return;
-      }
-      throw error;
-    }
+    creatify = new Creatify({
+      apiId: config.apiId,
+      apiKey: config.apiKey,
+    });
+
+    // Get available voices for tests
+    console.log('Fetching available voices for TTS...');
+    availableVoices = await creatify.avatar.getVoices();
+
+    console.log(`Found ${availableVoices.length} voices for TTS`);
+    expect(availableVoices.length).toBeGreaterThan(0);
   }, 30000);
 
   beforeEach(() => {
@@ -114,7 +107,7 @@ describe('Text-to-Speech API Integration Tests', () => {
       // Validate credits were used
       expect(completedTask).toHaveProperty('credits_used');
       expect(completedTask.credits_used).toBeGreaterThan(0);
-    }, config.timeout);
+    }, 300000); // 5 minutes
 
     it('should create TTS using convenience method', async () => {
       const voiceId = availableVoices[0].voice_id;
@@ -151,7 +144,7 @@ describe('Text-to-Speech API Integration Tests', () => {
       expect(mediaInfo.hasVideo).toBe(false);
       
       console.log(`Convenience TTS: ${mediaInfo.duration}s, ${mediaInfo.format}`);
-    }, config.timeout);
+    }, 300000); // 5 minutes
 
     it('should handle different voice options', async () => {
       if (availableVoices.length < 2) {
@@ -215,7 +208,7 @@ describe('Text-to-Speech API Integration Tests', () => {
       
       console.log(`Voice 1 (${voice1.name}): ${mediaInfo1.duration}s, ${fileSize1} bytes`);
       console.log(`Voice 2 (${voice2.name}): ${mediaInfo2.duration}s, ${fileSize2} bytes`);
-    }, config.timeout);
+    }, 300000); // 5 minutes
   });
 
   describe('TTS Task Management', () => {

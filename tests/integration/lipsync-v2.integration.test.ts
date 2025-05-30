@@ -11,9 +11,10 @@ import {
   generateUniqueFilename,
   TestResourceTracker,
   TEST_CONTENT,
+  shouldRunIntegrationTests,
 } from './setup';
 
-describe('Lipsync V2 API Integration Tests', () => {
+(shouldRunIntegrationTests() ? describe : describe.skip)('Lipsync V2 API Integration Tests', () => {
   let creatify: Creatify;
   let config: ReturnType<typeof getIntegrationConfig>;
   let resourceTracker: TestResourceTracker;
@@ -21,31 +22,23 @@ describe('Lipsync V2 API Integration Tests', () => {
   let availableVoices: any[];
 
   beforeAll(async () => {
-    try {
-      config = getIntegrationConfig();
-      await ensureOutputDir(config.outputDir);
-      
-      creatify = new Creatify({
-        apiId: config.apiId,
-        apiKey: config.apiKey,
-      });
+    config = getIntegrationConfig();
+    await ensureOutputDir(config.outputDir);
 
-      // Get available avatars and voices for tests
-      console.log('Fetching available avatars and voices for Lipsync V2...');
-      availableAvatars = await creatify.avatar.getAvatars();
-      availableVoices = await creatify.avatar.getVoices();
-      
-      console.log(`Found ${availableAvatars.length} avatars and ${availableVoices.length} voices for Lipsync V2`);
-      
-      expect(availableAvatars.length).toBeGreaterThan(0);
-      expect(availableVoices.length).toBeGreaterThan(0);
-    } catch (error) {
-      if (error.message?.includes('environment variables')) {
-        console.log('Skipping Lipsync V2 integration tests - API credentials not provided');
-        return;
-      }
-      throw error;
-    }
+    creatify = new Creatify({
+      apiId: config.apiId,
+      apiKey: config.apiKey,
+    });
+
+    // Get available avatars and voices for tests
+    console.log('Fetching available avatars and voices for Lipsync V2...');
+    availableAvatars = await creatify.avatar.getAvatars();
+    availableVoices = await creatify.avatar.getVoices();
+
+    console.log(`Found ${availableAvatars.length} avatars and ${availableVoices.length} voices for Lipsync V2`);
+
+    expect(availableAvatars.length).toBeGreaterThan(0);
+    expect(availableVoices.length).toBeGreaterThan(0);
   }, 30000);
 
   beforeEach(() => {
@@ -125,7 +118,7 @@ describe('Lipsync V2 API Integration Tests', () => {
       // Validate credits were used
       expect(completedTask).toHaveProperty('credits_used');
       expect(completedTask.credits_used).toBeGreaterThan(0);
-    }, config.timeout);
+    }, 300000); // 5 minutes
 
     it('should create lipsync V2 with different quality settings', async () => {
       const avatarId = availableAvatars[0].avatar_id;
@@ -253,7 +246,7 @@ describe('Lipsync V2 API Integration Tests', () => {
       expect(mediaInfo.height).toBeGreaterThan(mediaInfo.width);
       
       console.log(`Lipsync V2 convenience method video: ${mediaInfo.duration}s, ${mediaInfo.width}x${mediaInfo.height}`);
-    }, config.timeout);
+    }, 300000); // 5 minutes
 
     it('should monitor lipsync V2 generation progress', async () => {
       const avatarId = availableAvatars[0].avatar_id;

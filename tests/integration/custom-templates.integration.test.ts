@@ -10,36 +10,29 @@ import {
   waitForTaskCompletion,
   generateUniqueFilename,
   TestResourceTracker,
+  shouldRunIntegrationTests,
 } from './setup';
 
-describe('Custom Templates API Integration Tests', () => {
+(shouldRunIntegrationTests() ? describe : describe.skip)('Custom Templates API Integration Tests', () => {
   let creatify: Creatify;
   let config: ReturnType<typeof getIntegrationConfig>;
   let resourceTracker: TestResourceTracker;
   let availableTemplates: any[];
 
   beforeAll(async () => {
-    try {
-      config = getIntegrationConfig();
-      await ensureOutputDir(config.outputDir);
-      
-      creatify = new Creatify({
-        apiId: config.apiId,
-        apiKey: config.apiKey,
-      });
+    config = getIntegrationConfig();
+    await ensureOutputDir(config.outputDir);
 
-      // Get available templates
-      console.log('Fetching available custom templates...');
-      availableTemplates = await creatify.customTemplates.getCustomTemplates();
-      
-      console.log(`Found ${availableTemplates.length} custom templates`);
-    } catch (error) {
-      if (error.message?.includes('environment variables')) {
-        console.log('Skipping Custom Templates integration tests - API credentials not provided');
-        return;
-      }
-      throw error;
-    }
+    creatify = new Creatify({
+      apiId: config.apiId,
+      apiKey: config.apiKey,
+    });
+
+    // Get available templates
+    console.log('Fetching available custom templates...');
+    availableTemplates = await creatify.customTemplates.getCustomTemplates();
+
+    console.log(`Found ${availableTemplates.length} custom templates`);
   }, 30000);
 
   beforeEach(() => {

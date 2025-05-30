@@ -88,6 +88,15 @@ export function getIntegrationConfig(): IntegrationTestConfig {
 }
 
 /**
+ * Check if integration tests should run (API credentials are provided)
+ */
+export function shouldRunIntegrationTests(): boolean {
+  const apiId = process.env.CREATIFY_API_ID;
+  const apiKey = process.env.CREATIFY_API_KEY;
+  return !!(apiId && apiKey);
+}
+
+/**
  * Ensure output directory exists
  */
 export async function ensureOutputDir(outputDir: string): Promise<void> {
