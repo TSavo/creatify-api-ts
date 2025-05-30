@@ -9,10 +9,9 @@ See the Creatify API in action with these comprehensive demo videos, created ent
 ### 📹 API Overview Demo (1 minute)
 **Perfect introduction to Creatify and the TypeScript client**
 
-<video width="800" controls>
-  <source src="https://s3.us-west-2.amazonaws.com/remotionlambda-uswest2-30tewi8y5c/renders/xxqf5mx4ei/output.mp4" type="video/mp4">
-  Your browser does not support the video tag. <a href="https://s3.us-west-2.amazonaws.com/remotionlambda-uswest2-30tewi8y5c/renders/xxqf5mx4ei/output.mp4">Download the video</a>
-</video>
+[![API Overview Demo](https://dpbavq092lwjh.cloudfront.net/amzptv/e2018ca3-18e6-4174-bc72-6e856f15cf55-1748642876/thumbnail.jpg)](https://s3.us-west-2.amazonaws.com/remotionlambda-uswest2-30tewi8y5c/renders/xxqf5mx4ei/output.mp4)
+
+**🎬 [▶️ Watch API Overview Demo (1m 6s)](https://s3.us-west-2.amazonaws.com/remotionlambda-uswest2-30tewi8y5c/renders/xxqf5mx4ei/output.mp4)**
 
 - **Duration**: 1 minute 6 seconds
 - **Content**: What Creatify is, API benefits, quick start guide
@@ -22,10 +21,9 @@ See the Creatify API in action with these comprehensive demo videos, created ent
 ### 🎯 Technical Deep Dive (7+ minutes)
 **Comprehensive developer guide covering all APIs**
 
-<video width="800" controls>
-  <source src="https://s3.us-west-2.amazonaws.com/remotionlambda-uswest2-30tewi8y5c/renders/inb4fq5hx1/output.mp4" type="video/mp4">
-  Your browser does not support the video tag. <a href="https://s3.us-west-2.amazonaws.com/remotionlambda-uswest2-30tewi8y5c/renders/inb4fq5hx1/output.mp4">Download the video</a>
-</video>
+[![Technical Deep Dive](https://dpbavq092lwjh.cloudfront.net/amzptv/e2018ca3-18e6-4174-bc72-6e856f15cf55-1748642876/thumbnail.jpg)](https://s3.us-west-2.amazonaws.com/remotionlambda-uswest2-30tewi8y5c/renders/inb4fq5hx1/output.mp4)
+
+**🎬 [▶️ Watch Technical Deep Dive (7m 42s)](https://s3.us-west-2.amazonaws.com/remotionlambda-uswest2-30tewi8y5c/renders/inb4fq5hx1/output.mp4)**
 
 - **Duration**: 7 minutes 42 seconds
 - **Content**: Complete API ecosystem, use cases, integration best practices
