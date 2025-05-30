@@ -61,13 +61,23 @@ import {
       
       // Create lipsync V2 task
       const lipsyncResponse = await creatify.lipsyncV2.createLipsyncV2({
-        text: testText,
-        creator: avatarId,
-        aspect_ratio: '16:9',
-        voice_id: voiceId,
-        name: 'Integration Test Lipsync V2',
-        quality: 'high',
-        background_music: false,
+        video_inputs: [{
+          character: {
+            type: 'avatar',
+            avatar_id: avatarId,
+            avatar_style: 'normal'
+          },
+          voice: {
+            type: 'text',
+            input_text: testText,
+            voice_id: voiceId
+          },
+          background: {
+            type: 'image',
+            url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1920&h=1080&fit=crop'
+          }
+        }],
+        aspect_ratio: '16x9'
       });
       
       resourceTracker.addTask(lipsyncResponse.id, 'lipsync-v2');
