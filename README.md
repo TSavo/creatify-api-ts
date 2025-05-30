@@ -8,6 +8,12 @@ See the Creatify API in action with these comprehensive demo videos, created ent
 
 ### 📹 API Overview Demo (1 minute)
 **Perfect introduction to Creatify and the TypeScript client**
+
+<video width="800" controls>
+  <source src="https://s3.us-west-2.amazonaws.com/remotionlambda-uswest2-30tewi8y5c/renders/xxqf5mx4ei/output.mp4" type="video/mp4">
+  Your browser does not support the video tag. <a href="https://s3.us-west-2.amazonaws.com/remotionlambda-uswest2-30tewi8y5c/renders/xxqf5mx4ei/output.mp4">Download the video</a>
+</video>
+
 - **Duration**: 1 minute 6 seconds
 - **Content**: What Creatify is, API benefits, quick start guide
 - **Use Case**: Landing pages, social media, quick demos
@@ -15,12 +21,18 @@ See the Creatify API in action with these comprehensive demo videos, created ent
 
 ### 🎯 Technical Deep Dive (7+ minutes)
 **Comprehensive developer guide covering all APIs**
+
+<video width="800" controls>
+  <source src="https://s3.us-west-2.amazonaws.com/remotionlambda-uswest2-30tewi8y5c/renders/inb4fq5hx1/output.mp4" type="video/mp4">
+  Your browser does not support the video tag. <a href="https://s3.us-west-2.amazonaws.com/remotionlambda-uswest2-30tewi8y5c/renders/inb4fq5hx1/output.mp4">Download the video</a>
+</video>
+
 - **Duration**: 7 minutes 42 seconds
 - **Content**: Complete API ecosystem, use cases, integration best practices
 - **Use Case**: Developer education, technical documentation, conference presentations
 - **Quality**: Full HD (1920x1080), broadcast-ready production
 
-**📁 [View Demo Videos →](https://github.com/TSavo/creatify-api-ts/tree/demo-videos/demo-videos)**
+**📁 [Additional Video Resources →](https://github.com/TSavo/creatify-api-ts/tree/demo-videos/demo-videos)**
 
 **Both videos demonstrate the power of AI video generation - professional content created in minutes, not weeks!**
 
