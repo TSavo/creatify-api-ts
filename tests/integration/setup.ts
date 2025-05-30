@@ -43,6 +43,15 @@ export class TestResourceTracker {
   }
 
   async cleanup(): Promise<void> {
+    // Check if we should preserve test files
+    const preserveFiles = process.env.PRESERVE_TEST_FILES === 'true';
+
+    if (preserveFiles) {
+      console.log(`Preserving ${this.createdFiles.length} test files (PRESERVE_TEST_FILES=true)`);
+      console.log('Files preserved:', this.createdFiles);
+      return;
+    }
+
     // Clean up files
     for (const filePath of this.createdFiles) {
       try {
@@ -234,6 +243,35 @@ export async function waitForTaskCompletion<T>(
 export function generateUniqueFilename(prefix: string, extension: string): string {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   return `${prefix}-${timestamp}.${extension}`;
+}
+
+/**
+ * Save metadata alongside a media file
+ */
+export async function saveMediaMetadata(
+  filePath: string,
+  mediaInfo: MediaFileInfo,
+  additionalData?: Record<string, any>
+): Promise<void> {
+  const metadataPath = filePath.replace(/\.[^.]+$/, '-metadata.json');
+
+  const metadata = {
+    file: {
+      path: filePath,
+      name: require('path').basename(filePath),
+      size: mediaInfo.size,
+      created: new Date().toISOString(),
+    },
+    media: mediaInfo,
+    test: {
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'test',
+      ...additionalData,
+    },
+  };
+
+  await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
+  console.log(`Saved metadata: ${metadataPath}`);
 }
 
 /**
