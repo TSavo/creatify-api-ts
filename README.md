@@ -2,6 +2,30 @@
 
 A comprehensive TypeScript client library for the [Creatify AI API](https://creatify.ai/api), providing easy access to AI Avatar generation, URL-to-Video conversion, Text-to-Speech, AI Editing, Custom Templates, DYOA services, and more.
 
+## 🎬 Demo Videos
+
+See the Creatify API in action with these comprehensive demo videos, created entirely using the API itself:
+
+### 📹 API Overview Demo (1 minute)
+**Perfect introduction to Creatify and the TypeScript client**
+- **Duration**: 1 minute 6 seconds
+- **Content**: What Creatify is, API benefits, quick start guide
+- **Use Case**: Landing pages, social media, quick demos
+- **Quality**: Full HD (1920x1080), professional avatar with natural speech
+
+### 🎯 Technical Deep Dive (7+ minutes)
+**Comprehensive developer guide covering all APIs**
+- **Duration**: 7 minutes 42 seconds
+- **Content**: Complete API ecosystem, use cases, integration best practices
+- **Use Case**: Developer education, technical documentation, conference presentations
+- **Quality**: Full HD (1920x1080), broadcast-ready production
+
+**📁 [View Demo Videos →](https://github.com/TSavo/creatify-api-ts/tree/demo-videos/demo-videos)**
+
+**Both videos demonstrate the power of AI video generation - professional content created in minutes, not weeks!**
+
+---
+
 ## Installation
 
 ```bash
